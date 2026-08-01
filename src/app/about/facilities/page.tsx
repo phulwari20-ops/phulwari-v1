@@ -4,11 +4,8 @@ import React from 'react';
 import { Building2, ShieldCheck, Dumbbell, Palette, PartyPopper, Baby, Sparkles,Eye } from 'lucide-react';
 import CurvedImage from '../CurvedImage';
 
-interface FacilitiesProps {
-  image?: string;
-}
-
-const Facilities: React.FC<FacilitiesProps> = ({ image = 'cricketplay.png' }) => {
+export default function FacilitiesPage() {
+  const image = 'cricketplay.webp';
   const facilities = [
     { icon: Building2, label: 'Spacious Activity Area', color: '#FF4D8D', bg: '#FFE6EF' },
     { icon: Baby, label: 'Safe Play Zone', color: '#3D8BFF', bg: '#E5EFFF' },
@@ -166,6 +163,4 @@ const Facilities: React.FC<FacilitiesProps> = ({ image = 'cricketplay.png' }) =>
       </section>
     </>
   );
-};
-
-export default Facilities;
+}

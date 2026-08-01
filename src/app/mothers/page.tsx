@@ -85,7 +85,7 @@ const programs: ProgramData[] = [
     benefitColor: '#FF4D8D',
     bestFor:
       'Mothers who want to stay active while giving their toddlers a fun, safe and engaging learning environment.',
-    image: 'mothertod.png',
+    image: 'mothertod.webp',
   },
   {
     badge: 'Phulwari Premium Circle',
@@ -116,7 +116,7 @@ const programs: ProgramData[] = [
     benefitColor: '#3D8BFF',
     bestFor:
       'Families seeking a comprehensive program that supports both child development and mother wellness.',
-    image: 'motherhappy.png',
+    image: 'motherhappy.webp',
     reverse: true,
   },
   {
@@ -148,7 +148,7 @@ const programs: ProgramData[] = [
     benefitColor: '#8B5CF6',
     bestFor:
       'Children who enjoy creative and physical activities in a structured learning environment.',
-    image: 'motherfit.png',
+    image: 'motherfit.webp',
   },
 ];
 
@@ -187,11 +187,8 @@ const developmentPillars = [
 /*  Component                                                                */
 /* -------------------------------------------------------------------------- */
 
-interface ProgramsProps {
-  imageBasePath?: string;
-}
-
-const Programs: React.FC<ProgramsProps> = ({ imageBasePath = '/' }) => {
+export default function MothersPage() {
+  const imageBasePath = '/';
   return (
     <>
       <style>{`
@@ -673,6 +670,4 @@ const Programs: React.FC<ProgramsProps> = ({ imageBasePath = '/' }) => {
       </div>
     </>
   );
-};
-
-export default Programs;
+}

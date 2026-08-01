@@ -3,11 +3,8 @@
 import React from 'react';
 import { Sparkles, Heart, Dumbbell, Users2, Smile, Award } from 'lucide-react';
 
-interface MissionProps {
-  image?: string;
-}
-
-const Mission: React.FC<MissionProps> = ({ image = 'grow.png' }) => {
+export default function MissionPage() {
+  const image = 'grow.webp';
   const values = [
     { icon: Sparkles, label: 'Confidence', color: '#FF4D8D' },
     { icon: Heart, label: 'Creativity', color: '#E8A621' },
@@ -219,6 +216,4 @@ const Mission: React.FC<MissionProps> = ({ image = 'grow.png' }) => {
       </section>
     </>
   );
-};
-
-export default Mission;
+}

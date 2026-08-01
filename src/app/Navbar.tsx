@@ -448,7 +448,7 @@ const Navbar: React.FC = () => {
         <nav className="nav-bar">
           <Link href="/" className="nav-logo">
             <Image
-              src="/phulwari_logo.png"
+              src="/phulwari_logo.webp"
               alt="Phulwari Mother & Child Activity Centre"
               width={60}
               height={30}

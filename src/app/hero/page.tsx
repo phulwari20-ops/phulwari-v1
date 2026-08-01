@@ -16,13 +16,10 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
-interface HeroProps {
-  backgroundImage?: string;
-}
-
 const PROGRAMS = ['Summer Camp', 'Birthday Parties', 'Mom Fitness Sessions', 'Daily Play Hours'];
 
-const Hero: React.FC<HeroProps> = ({ backgroundImage = 'herobg.png' }) => {
+export default function HeroPage() {
+  const backgroundImage = 'herobg.webp';
   const [programIndex, setProgramIndex] = useState(0);
 
   useEffect(() => {
@@ -541,6 +538,4 @@ const Hero: React.FC<HeroProps> = ({ backgroundImage = 'herobg.png' }) => {
       </section>
     </>
   );
-};
-
-export default Hero;
+}

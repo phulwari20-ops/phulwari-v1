@@ -159,7 +159,7 @@ export default function SummerCampPage() {
             <div className="sc-blob">
               <div className="sc-blob-ring" />
               <div className="sc-blob-shape">
-                <img src="/summercamp.png" alt="Phulwari Summer Camp" />
+                <img src="/summercamp.webp" alt="Phulwari Summer Camp" />
               </div>
               <span className="sc-blob-dot sc-blob-dot-1" />
               <span className="sc-blob-dot sc-blob-dot-2" />

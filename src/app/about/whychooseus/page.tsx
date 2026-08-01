@@ -4,11 +4,8 @@ import React from 'react';
 import { Users, Palette, Shield, GraduationCap, HeartHandshake, Sparkle } from 'lucide-react';
 import CurvedImage from '../CurvedImage';
 
-interface WhyChooseUsProps {
-  image?: string;
-}
-
-const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ image = 'motherfit.png' }) => {
+export default function WhyChooseUsPage() {
+  const image = 'motherfit.webp';
   const reasons = [
     {
       icon: Users,
@@ -209,6 +206,4 @@ const WhyChooseUs: React.FC<WhyChooseUsProps> = ({ image = 'motherfit.png' }) =>
       </section>
     </>
   );
-};
-
-export default WhyChooseUs;
+}

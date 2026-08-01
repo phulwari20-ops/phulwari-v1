@@ -22,7 +22,7 @@ const programs = [
       'Encourages Self-Expression',
     ],
     age: '3+ Years',
-    image: 'aarts.png',
+    image: 'aarts.webp',
     sectionBg: '#ffffff',
     blobRing: '#34B36B',
     dot1: '#34B36B',

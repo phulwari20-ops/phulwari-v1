@@ -91,7 +91,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    apple: '/apple-touch-icon.webp',
   },
 
   // TODO: add your Google Search Console verification code once you have it
@@ -107,40 +107,96 @@ export const viewport: Viewport = {
 };
 
 /* --------------------------------------------------------------------- */
-/*  LocalBusiness structured data — helps Google show map-pack / local   */
-/*  search results with your address, phone, and hours.                  */
+/*  SEO + AEO + GEO Multi-Schema Structured Data (JSON-LD)              */
 /* --------------------------------------------------------------------- */
-const localBusinessSchema = {
+const organizationSchema = {
   '@context': 'https://schema.org',
-  '@type': 'ChildCare',
-  name: SITE_NAME,
-  image: `${SITE_URL}/phulwari_logo.png`,
-  url: SITE_URL,
-  telephone: '+916207368839',
-  email: 'info@phulwari.co.in',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
-    addressLocality: 'Patna',
-    addressRegion: 'Bihar',
-    postalCode: '800001',
-    addressCountry: 'IN',
-  },
-  openingHoursSpecification: [
+  '@graph': [
     {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      opens: '10:30',
-      closes: '11:30',
+      '@type': ['EducationalOrganization', 'ChildCare', 'Preschool', 'LocalBusiness'],
+      '@id': `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      alternateName: 'Phulwari Patna',
+      url: SITE_URL,
+      logo: `${SITE_URL}/phulwari_logo.webp`,
+      image: `${SITE_URL}/phulwari_logo.webp`,
+      description: SITE_DESCRIPTION,
+      telephone: '+916207368839',
+      email: 'phulwari02@gmail.com',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        addressLocality: 'Patna',
+        addressRegion: 'Bihar',
+        postalCode: '800001',
+        addressCountry: 'IN',
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 25.612,
+        longitude: 85.127,
+      },
+      hasMap: 'https://maps.app.goo.gl/g7qiU1BqineG2RF56',
+      openingHoursSpecification: [
+        {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+          opens: '10:30',
+          closes: '11:30',
+        },
+        {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+          opens: '18:30',
+          closes: '21:00',
+        },
+      ],
+      priceRange: '₹₹',
+      sameAs: [
+        'https://www.facebook.com/share/1DWjMMRAjT/',
+        'https://www.instagram.com/phulwari.motherkids/',
+        'https://youtube.com/@phulwari-s1d7o',
+      ],
     },
     {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      opens: '18:30',
-      closes: '21:00',
+      '@type': 'FAQPage',
+      '@id': `${SITE_URL}/#faq`,
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'What programs are offered at Phulwari Mother & Child Activity Centre Patna?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Phulwari offers Mother & Toddler programs, Phulwari Premium Circle, Phulwari Core activities, Kids Dance & Music, Gymnastics & MMA, Roller Skating, Art & Craft, Yoga & Cricket, Mother Fitness Programs, Birthday Party Celebrations, and Summer/Winter Camps in Patna.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'What are the operating hours and timings at Phulwari Patna?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Mother & Toddler Program runs Monday to Saturday from 10:30 AM to 11:30 AM. Phulwari Premium Circle runs Monday to Sunday 5:00 PM onwards, and Phulwari Core runs Wednesday to Sunday 6:30 PM onwards.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Where is Phulwari Activity Centre located in Patna?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Phulwari is located at M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road, Patna, Bihar 800001.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'How can parents enroll their children or contact Phulwari?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Parents can call +91 6207368839, email phulwari02@gmail.com, or send a direct message via WhatsApp through the Phulwari website (phulwari.co.in).',
+          },
+        },
+      ],
     },
   ],
-  priceRange: '₹₹',
 };
 
 export default function RootLayout({
@@ -149,12 +205,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <Script
-          id="local-business-schema"
+          id="structured-data-schema"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <Navbar />
         {children}

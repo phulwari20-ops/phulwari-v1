@@ -228,7 +228,7 @@ export default function ToddlerProgramPage() {
             <div className="pd-blob">
               <div className="pd-blob-ring" style={{ borderColor: accentColor, opacity: 0.45 }} />
               <div className="pd-blob-shape">
-                <img src="/mothertod.png" alt="Mother & Toddler Program" />
+                <img src="/mothertod.webp" alt="Mother & Toddler Program" />
               </div>
               <span className="pd-blob-dot pd-blob-dot-1" style={{ backgroundColor: accentColor }} />
               <span className="pd-blob-dot pd-blob-dot-2" />

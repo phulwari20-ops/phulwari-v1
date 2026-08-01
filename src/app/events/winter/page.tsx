@@ -162,7 +162,7 @@ export default function WinterCampPage() {
             <div className="wc-blob">
               <div className="wc-blob-ring" />
               <div className="wc-blob-shape">
-                <img src="/wintercamp.png" alt="Phulwari Winter Camp" />
+                <img src="/wintercamp.webp" alt="Phulwari Winter Camp" />
               </div>
               <span className="wc-blob-dot wc-blob-dot-1" />
               <span className="wc-blob-dot wc-blob-dot-2" />

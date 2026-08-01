@@ -22,7 +22,7 @@ const programs = [
       'Encourages Active Lifestyle',
     ],
     age: '4+ Years',
-    image: 'rollerscating.png',
+    image: 'rollerscating.webp',
     sectionBg: '#ffffff',
     blobRing: '#E8A621',
     dot1: '#E8A621',

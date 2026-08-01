@@ -4,11 +4,8 @@ import React from 'react';
 import { ShieldCheck, Lightbulb, HandHeart, Smile, Trophy } from 'lucide-react';
 import CurvedImage from '../CurvedImage';
 
-interface CoreValuesProps {
-  image?: string;
-}
-
-const CoreValues: React.FC<CoreValuesProps> = ({ image = 'playground.png' }) => {
+export default function CoreValuesPage() {
+  const image = 'playground.webp';
   const values = [
     {
       icon: ShieldCheck,
@@ -205,6 +202,4 @@ const CoreValues: React.FC<CoreValuesProps> = ({ image = 'playground.png' }) => 
       </section>
     </>
   );
-};
-
-export default CoreValues;
+}

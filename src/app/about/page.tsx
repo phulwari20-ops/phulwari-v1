@@ -4,11 +4,8 @@ import React from 'react';
 import { Users, Palette, Shield, GraduationCap, Compass } from 'lucide-react';
 import CurvedImage from './CurvedImage';
 
-interface AboutUsProps {
-  image?: string;
-}
-
-const AboutUs: React.FC<AboutUsProps> = ({ image = 'childrens_cricket.png' }) => {
+export default function AboutPage() {
+  const image = 'childrens_cricket.webp';
   const highlights = [
     {
       icon: Users,
@@ -279,6 +276,4 @@ const AboutUs: React.FC<AboutUsProps> = ({ image = 'childrens_cricket.png' }) =>
       </section>
     </>
   );
-};
-
-export default AboutUs;
+}

@@ -4,31 +4,31 @@ import React, { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const slides = [
-  { src: '/galary2.png'  },
-  { src: '/galary3.png'  },
-  { src: '/galary4.png'  },
-  { src: '/galary5.png'  },
-  { src: '/galary6.png'  },
-  { src: '/galary7.png'  },
-  { src: '/galary8.png'  },
-  { src: '/galary9.png'  },
-  { src: '/galary10.png' },
-  { src: '/galary11.png' },
-  { src: '/galary12.png' },
-  { src: '/galary13.png' },
-  { src: '/galary14.png' },
-  { src: '/galary15.png' },
-  { src: '/galary16.png' },
-  { src: '/galary17.png' },
-  { src: '/galary18.png' },
-  { src: '/galary19.png' },
-  { src: '/galary20.png' },
-  { src: '/galary21.png' },
-  { src: '/galary22.png' },
-  { src: '/galary23.png' },
-  { src: '/galary24.png' },
-  { src: '/galary25.png' },
-  { src: '/galary26.png' },
+  { src: '/galary2.webp'  },
+  { src: '/galary3.webp'  },
+  { src: '/galary4.webp'  },
+  { src: '/galary5.webp'  },
+  { src: '/galary6.webp'  },
+  { src: '/galary7.webp'  },
+  { src: '/galary8.webp'  },
+  { src: '/galary9.webp'  },
+  { src: '/galary10.webp' },
+  { src: '/galary11.webp' },
+  { src: '/galary12.webp' },
+  { src: '/galary13.webp' },
+  { src: '/galary14.webp' },
+  { src: '/galary15.webp' },
+  { src: '/galary16.webp' },
+  { src: '/galary17.webp' },
+  { src: '/galary18.webp' },
+  { src: '/galary19.webp' },
+  { src: '/galary20.webp' },
+  { src: '/galary21.webp' },
+  { src: '/galary22.webp' },
+  { src: '/galary23.webp' },
+  { src: '/galary24.webp' },
+  { src: '/galary25.webp' },
+  { src: '/galary26.webp' },
 
  
 ];
@@ -279,7 +279,7 @@ export default function GalleryPage() {
 
           {/* Left side preview */}
           <div className="gl-side" onClick={goPrev} aria-hidden="true">
-            <img src={slides[prevIdx].src} alt="" draggable={false} />
+            <img src={slides[prevIdx].src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
           </div>
 
           {/* Main frame */}
@@ -289,7 +289,11 @@ export default function GalleryPage() {
                 key={current}
                 className="gl-img"
                 src={slides[current].src}
-                alt={`Photo ${current + 1}`}
+                alt={`Phulwari Mother & Child Activity Centre Patna - Photo ${current + 1}`}
+                loading={current === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                width={420}
+                height={560}
                 draggable={false}
               />
               <button className="gl-arrow gl-arrow--left" onClick={goPrev} aria-label="Previous photo">
@@ -303,7 +307,7 @@ export default function GalleryPage() {
 
           {/* Right side preview */}
           <div className="gl-side" onClick={goNext} aria-hidden="true">
-            <img src={slides[nextIdx].src} alt="" draggable={false} />
+            <img src={slides[nextIdx].src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
           </div>
 
         </div>
