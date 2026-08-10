@@ -147,6 +147,39 @@ export default function StudentDashboardPage() {
     setSelectedReceipt(paidObj)
   }
 
+  const handleDownloadReceiptFile = (receiptObj: any) => {
+    if (!receiptObj) return
+    const textContent = `==================================================
+        PHULWARI MOTHER & CHILD ACTIVITY CENTRE
+            OFFICIAL FEE PAYMENT VOUCHER
+==================================================
+
+Receipt No    : ${receiptObj.receipt_no || 'REC-2026-0000'}
+Date Paid     : ${receiptObj.paid_date || new Date().toISOString().split('T')[0]}
+--------------------------------------------------
+Student Name  : ${student?.full_name || 'Student'}
+Admission ID  : ${student?.admission_id || 'N/A'}
+Class & Sec   : ${student?.class_name || 'Nursery'} - ${student?.section_name || 'A'}
+--------------------------------------------------
+Fee Details   : ${receiptObj.title || 'Monthly Fee'}
+Payment Status: PAID (${receiptObj.payment_method || 'UPI / Online'})
+Amount Paid   : ₹${receiptObj.amount || 3500}
+--------------------------------------------------
+Status        : OFFICIAL COMPUTER GENERATED RECEIPT
+==================================================
+Kidwaipuri, Patna | Ph: +91 6207368839`
+
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `Phulwari_Receipt_${receiptObj.receipt_no || 'REC-2026'}.txt`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('phulwari_student')
     router.push('/portal/login')
@@ -608,13 +641,33 @@ export default function StudentDashboardPage() {
             </div>
 
             {/* Modal Actions */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '1.5rem', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setSelectedReceipt(null)}
                 style={{ padding: '10px 18px', background: '#F1F5F9', color: '#475569', borderRadius: '14px', border: 'none', fontWeight: 700, cursor: 'pointer' }}
               >
                 Close
               </button>
+
+              <button
+                onClick={() => handleDownloadReceiptFile(selectedReceipt)}
+                style={{
+                  padding: '10px 18px',
+                  background: '#ECFDF5',
+                  color: '#059669',
+                  border: '1px solid #A7F3D0',
+                  borderRadius: '14px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Download size={16} />
+                <span>Download Voucher File</span>
+              </button>
+
               <button
                 onClick={() => window.print()}
                 style={{
@@ -632,7 +685,7 @@ export default function StudentDashboardPage() {
                 }}
               >
                 <Printer size={16} />
-                <span>Print / Save PDF Receipt</span>
+                <span>Print Receipt</span>
               </button>
             </div>
           </div>
