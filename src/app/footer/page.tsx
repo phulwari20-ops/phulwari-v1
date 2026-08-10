@@ -51,7 +51,7 @@ const quickLinks: LinkItem[] = [
   { label: 'Winter Camp',            href: '/events/winter' },
   { label: 'Batch & Timings',        href: '/batch-galary/batch' },
   { label: 'Gallery',                href: '/batch-galary/gallery' },
-  { label: 'FAQ',                    href: '/faq' },
+  { label: 'FAQ',                    href: '/legal/faq' },
   { label: 'Contact Us',             href: '/contact' },
 ];
 
