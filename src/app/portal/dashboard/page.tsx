@@ -146,35 +146,98 @@ export default function StudentDashboardPage() {
 
   const handleDownloadReceiptFile = (receiptObj: any) => {
     if (!receiptObj) return
-    const textContent = `==================================================
-        PHULWARI MOTHER & CHILD ACTIVITY CENTRE
-            OFFICIAL FEE PAYMENT VOUCHER
-==================================================
 
-Receipt No    : ${receiptObj.receipt_no || 'REC-2026-0000'}
-Date Paid     : ${receiptObj.paid_date || new Date().toISOString().split('T')[0]}
---------------------------------------------------
-Student Name  : ${student?.full_name || 'Student'}
-Admission ID  : ${student?.admission_id || 'N/A'}
-Class & Sec   : ${student?.class_name || 'Nursery'} - ${student?.section_name || 'A'}
---------------------------------------------------
-Fee Details   : ${receiptObj.title || 'Monthly Fee'}
-Payment Status: PAID (${receiptObj.payment_method || 'UPI / Online'})
-Amount Paid   : ₹${receiptObj.amount || 3500}
---------------------------------------------------
-Status        : OFFICIAL COMPUTER GENERATED RECEIPT
-==================================================
-Kidwaipuri, Patna | Ph: +91 6207368839`
+    const htmlContent = `<!DOCTYPE html>
+<html>
+  <head>
+    <title>Phulwari_Fee_Receipt_${receiptObj.receipt_no || 'REC-2026'}</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
+      body { font-family: 'Poppins', sans-serif; margin: 0; padding: 2rem; background: #ffffff; color: #0F172A; }
+      .receipt-card { max-width: 600px; margin: 0 auto; border: 2px solid #E2E8F0; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+      .header { background: linear-gradient(135deg, #FF4D8D 0%, #E11D48 100%); color: #ffffff; padding: 2rem; text-align: center; position: relative; }
+      .header h1 { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+      .header p { margin: 4px 0 0 0; font-size: 13px; opacity: 0.9; }
+      .badge { display: inline-block; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 10px; }
+      .body { padding: 2rem; }
+      .info-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+      .info-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #F1F5F9; }
+      .info-table td.label { color: #64748B; font-weight: 600; width: 40%; }
+      .info-table td.value { font-weight: 700; color: #0F172A; }
+      .total-box { background: #ECFDF5; border: 1.5px dashed #10B981; border-radius: 16px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+      .total-title { font-size: 14px; font-weight: 800; color: #065F46; }
+      .total-amount { font-size: 24px; font-weight: 900; color: #059669; font-family: monospace; }
+      .paid-stamp { position: absolute; right: 20px; top: 20px; border: 2.5px solid #ffffff; color: #ffffff; padding: 4px 12px; border-radius: 12px; font-weight: 900; font-size: 13px; text-transform: uppercase; transform: rotate(-6deg); }
+      .footer { text-align: center; padding: 1.25rem; background: #F8FAFC; border-top: 1px solid #E2E8F0; font-size: 11px; color: #64748B; }
+      @media print {
+        body { padding: 0; }
+        .receipt-card { border: none; box-shadow: none; max-width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="receipt-card">
+      <div class="header">
+        <div class="paid-stamp">OFFICIAL PAID</div>
+        <h1>PHULWARI MOTHER & CHILD CENTRE</h1>
+        <p>Kidwaipuri, Boring Road, Patna, Bihar | Ph: +91 6207368839</p>
+        <div class="badge">Official Fee Payment Receipt Voucher</div>
+      </div>
+      <div class="body">
+        <table class="info-table">
+          <tr>
+            <td class="label">Receipt Number</td>
+            <td class="value" style="color: #E11D48; font-family: monospace;">${receiptObj.receipt_no || 'REC-2026-0891'}</td>
+          </tr>
+          <tr>
+            <td class="label">Payment Date</td>
+            <td class="value">${receiptObj.paid_date || new Date().toISOString().split('T')[0]}</td>
+          </tr>
+          <tr>
+            <td class="label">Student Name</td>
+            <td class="value">${student?.full_name || 'Student'}</td>
+          </tr>
+          <tr>
+            <td class="label">Admission ID</td>
+            <td class="value" style="font-family: monospace;">${student?.admission_id || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td class="label">Class & Section</td>
+            <td class="value">${student?.class_name || 'Nursery'} - ${student?.section_name || 'A'}</td>
+          </tr>
+          <tr>
+            <td class="label">Fee Description</td>
+            <td class="value">${receiptObj.title || 'Monthly Fee'}</td>
+          </tr>
+          <tr>
+            <td class="label">Payment Method</td>
+            <td class="value" style="color: #059669;">${receiptObj.payment_method || 'UPI / Online'}</td>
+          </tr>
+        </table>
 
-    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `Phulwari_Receipt_${receiptObj.receipt_no || 'REC-2026'}.txt`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+        <div class="total-box">
+          <div class="total-title">TOTAL AMOUNT RECEIVED</div>
+          <div class="total-amount">₹${receiptObj.amount || 3500}</div>
+        </div>
+      </div>
+      <div class="footer">
+        <p style="margin:0 0 4px 0; font-weight:700;">Thank you for choosing Phulwari Centre!</p>
+        <p style="margin:0;">This is a computer-generated official receipt voucher. No signature required.</p>
+      </div>
+    </div>
+    <script>
+      window.onload = function() {
+        window.print();
+      };
+    </script>
+  </body>
+</html>`
+
+    const printWin = window.open('', '_blank', 'width=700,height=800')
+    if (printWin) {
+      printWin.document.write(htmlContent)
+      printWin.document.close()
+    }
   }
 
   const handleLogout = () => {
