@@ -101,12 +101,14 @@ interface Package {
   accentBg: string;
   featured?: boolean;
   includes: string[];
+  price?: string;
 }
 
-const packages: Package[] = [
+const defaultPackages: Package[] = [
   {
     name: 'Basic Birthday Package',
     tagline: 'Perfect for small and cozy celebrations.',
+    price: '₹4,999 onwards',
     accentColor: '#34B36B',
     accentBg: '#E3F7EA',
     includes: [
@@ -120,6 +122,7 @@ const packages: Package[] = [
   {
     name: 'Premium Birthday Package',
     tagline: 'Designed for a more memorable and exciting experience.',
+    price: '₹9,999 onwards',
     accentColor: '#FF4D8D',
     accentBg: '#FFE6EF',
     featured: true,
@@ -135,6 +138,7 @@ const packages: Package[] = [
   {
     name: 'Customized Birthday Package',
     tagline: 'A fully customized birthday experience, tailored to you.',
+    price: 'Custom Pricing',
     accentColor: '#8B5CF6',
     accentBg: '#EFE7FE',
     includes: [
@@ -147,9 +151,30 @@ const packages: Package[] = [
   },
 ];
 
-
 export default function BirthdayPartyPage() {
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const [packagesList, setPackagesList] = useState<Package[]>(defaultPackages);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        console.log('📡 [FRONTEND SUPABASE API REQUEST]: GET https://ftnbzukwjvgxdnkrvuer.supabase.co/rest/v1/party_packages');
+        const { data, error } = await supabase.from('party_packages').select('*');
+        if (data && data.length > 0) {
+          console.log('✅ [FRONTEND SUPABASE API RESPONSE SUCCESS]: Received party packages from database', data);
+          setPackagesList(prev => prev.map(p => {
+            const dbMatch = data.find((d: any) => d.name?.toLowerCase() === p.name.toLowerCase() || d.id === p.name)
+            return dbMatch ? { ...p, price: dbMatch.price || p.price } : p
+          }));
+        }
+      } catch (err) {
+        console.error('❌ [FRONTEND SUPABASE API EXCEPTION]:', err);
+      }
+    };
+    fetchPackages();
+  }, []);
 
   return (
     <>
@@ -415,7 +440,7 @@ export default function BirthdayPartyPage() {
             <p className="bp-section-text">Choose the celebration that fits your vision.</p>
           </div>
           <div className="bp-packages">
-            {packages.map((pkg, i) => (
+            {packagesList.map((pkg, i) => (
               <div className={`bp-package-card ${pkg.featured ? 'featured' : ''}`} key={i}>
                 {pkg.featured && <span className="bp-package-featured-tag">Most Popular</span>}
                 <div className="bp-package-icon" style={{ backgroundColor: pkg.accentBg }}>
@@ -423,6 +448,9 @@ export default function BirthdayPartyPage() {
                 </div>
                 <h3 className="bp-package-name">{pkg.name}</h3>
                 <p className="bp-package-tagline">{pkg.tagline}</p>
+                <div style={{ margin: '0.6rem 0', fontWeight: 800, fontSize: '1.05rem', color: pkg.accentColor, fontFamily: "'Baloo 2', sans-serif" }}>
+                  {pkg.price || (i === 0 ? '₹4,999 onwards' : i === 1 ? '₹9,999 onwards' : 'Custom Pricing')}
+                </div>
                 <div className="bp-package-includes">
                   {pkg.includes.map((inc, j) => (
                     <div className="bp-package-includes-item" key={j}>
@@ -431,6 +459,28 @@ export default function BirthdayPartyPage() {
                     </div>
                   ))}
                 </div>
+                <a
+                  href={`https://wa.me/916207368839?text=${encodeURIComponent(`Hi Phulwari, I want to enquire about the ${pkg.name}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    width: '100%',
+                    marginTop: '1.25rem',
+                    padding: '0.75rem 1rem',
+                    backgroundColor: pkg.accentColor,
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    borderRadius: '9999px',
+                    textDecoration: 'none',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  <span>Enquire / Book Package</span>
+                </a>
               </div>
             ))}
           </div>

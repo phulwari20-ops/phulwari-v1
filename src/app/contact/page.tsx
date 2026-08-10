@@ -19,6 +19,7 @@ import {
   ClipboardList,
   Heart,
   Video,
+  Star,
 } from 'lucide-react';
 
 const PHONE_NUMBER = '+916207368839';
@@ -381,9 +382,14 @@ export default function ContactPage() {
             />
             <div className="ct-map-info">
               <div className="ct-map-address"><MapPin /><span>{ADDRESS}</span></div>
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="ct-cta-button btn-call">
-                <NavigationIcon /><span>Get Directions</span>
-              </a>
+              <div className="flex flex-wrap gap-2">
+                <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="ct-cta-button btn-call">
+                  <NavigationIcon /><span>Get Directions</span>
+                </a>
+                <a href="https://maps.app.goo.gl/vGM1Em5s5NSsbFJA8?g_st=aw" target="_blank" rel="noopener noreferrer" className="ct-cta-button btn-whatsapp">
+                  <Star style={{ fill: '#FFD166', color: '#FFD166' }} /><span>Read our Google Reviews</span>
+                </a>
+              </div>
             </div>
           </div>
         </section>

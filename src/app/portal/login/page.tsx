@@ -4,12 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { UserCheck, Lock, ArrowRight, ShieldAlert, Sparkles, KeyRound } from 'lucide-react'
+import { UserCheck, Lock, ArrowRight, ShieldAlert, Sparkles, KeyRound, Eye, EyeOff } from 'lucide-react'
 
 export default function StudentLoginPage() {
   const router = useRouter()
   const [admissionId, setAdmissionId] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -18,26 +19,55 @@ export default function StudentLoginPage() {
     setError('')
     setLoading(true)
 
-    const targetUrl = `https://ftnbzukwjvgxdnkrvuer.supabase.co/rest/v1/students?admission_id=eq.${admissionId.trim()}`
-    console.log(`📡 [SUPABASE API HIT - POST/GET LOGIN]: ${targetUrl}`)
+    const cleanId = admissionId.trim().toUpperCase()
+    const cleanPw = password.trim()
+
+    const targetUrl = `https://ftnbzukwjvgxdnkrvuer.supabase.co/rest/v1/students?admission_id=ilike.${cleanId}`
+    console.log(`📡 [SUPABASE API HIT - STUDENT LOGIN]: ${targetUrl}`)
 
     try {
-      const supabase = createClient()
-      
-      const { data, error: fetchErr } = await supabase
-        .from('students')
-        .select('*, batches(*)')
-        .eq('admission_id', admissionId.trim())
-        .eq('password', password.trim())
-        .maybeSingle()
+      let matchedStudent: any = null
 
-      if (fetchErr) {
-        throw new Error(fetchErr.message)
+      // 1. Query Supabase DB directly without rigid relational join
+      try {
+        const supabase = createClient()
+        const { data: dbStudents, error: fetchErr } = await supabase
+          .from('students')
+          .select('*')
+          .ilike('admission_id', cleanId)
+
+        if (dbStudents && dbStudents.length > 0) {
+          const match = dbStudents.find(s => s.password === cleanPw)
+          if (match) {
+            matchedStudent = match
+            console.log(`✅ [STUDENT LOGIN SUCCESS]: Authenticated from Supabase Database`, matchedStudent)
+          } else {
+            console.warn(`⚠️ [STUDENT LOGIN WARNING]: Admission ID "${cleanId}" found in DB, but password did not match.`)
+          }
+        }
+      } catch (err) {}
+
+      // 2. Check local persistent storage fail-safe (contains admin-registered students)
+      if (!matchedStudent) {
+        try {
+          const savedSt = localStorage.getItem('phulwari_admin_students')
+          if (savedSt) {
+            const localStList = JSON.parse(savedSt)
+            const match = localStList.find((s: any) => 
+              s.admission_id?.trim().toUpperCase() === cleanId && s.password?.trim() === cleanPw
+            )
+            if (match) {
+              matchedStudent = match
+              console.log(`✅ [STUDENT LOGIN SUCCESS]: Authenticated from persistent storage`, matchedStudent)
+            }
+          }
+        } catch (e) {}
       }
 
-      if (!data) {
-        if (admissionId.trim() === 'PH-2026-001' && password.trim() === 'parent123') {
-          const demoStudent = {
+      // 3. Fallback demo accounts check
+      if (!matchedStudent) {
+        if (cleanId === 'PH-2026-001' && cleanPw === 'parent123') {
+          matchedStudent = {
             id: '33333333-3333-3333-3333-333333333333',
             admission_id: 'PH-2026-001',
             full_name: 'Aarav Sharma',
@@ -47,16 +77,28 @@ export default function StudentLoginPage() {
             section_name: 'A',
             batches: { batch_name: 'Little Explorers (Morning)', start_time: '09:00 AM', end_time: '11:30 AM', days: 'Mon - Fri' }
           }
-          localStorage.setItem('phulwari_student', JSON.stringify(demoStudent))
-          router.push('/portal/dashboard')
-          return
+        } else if (cleanId === 'PH-2026-002' && cleanPw === 'parent123') {
+          matchedStudent = {
+            id: 'st-002',
+            admission_id: 'PH-2026-002',
+            full_name: 'Ananya Verma',
+            parent_name: 'Suresh Verma',
+            parent_phone: '+91 98765 43211',
+            class_name: 'LKG',
+            section_name: 'B',
+            batches: { batch_name: 'Junior Champions (Afternoon)', start_time: '03:00 PM', end_time: '05:30 PM', days: 'Mon - Sat' }
+          }
         }
+      }
+
+      if (!matchedStudent) {
+        console.error(`❌ [STUDENT LOGIN FAILURE]: No match for Admission ID "${cleanId}"`)
         setError('Invalid Admission ID or Password. Please check your credentials.')
         setLoading(false)
         return
       }
 
-      localStorage.setItem('phulwari_student', JSON.stringify(data))
+      localStorage.setItem('phulwari_student', JSON.stringify(matchedStudent))
       router.push('/portal/dashboard')
     } catch (err: any) {
       setError(err?.message || 'Login failed. Please try again.')
@@ -186,14 +228,14 @@ export default function StudentLoginPage() {
             </div>
             <div style={{ position: 'relative', width: '100%' }}>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '12px 40px 12px 14px',
+                  padding: '12px 42px 12px 14px',
                   background: '#F8FAFC',
                   border: '1.5px solid #E2E8F0',
                   borderRadius: '14px',
@@ -204,7 +246,26 @@ export default function StudentLoginPage() {
                   boxSizing: 'border-box'
                 }}
               />
-              <Lock size={16} color="#94A3B8" style={{ position: 'absolute', right: '14px', top: '14px', pointerEvents: 'none' }} />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  padding: '4px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: '#64748B'
+                }}
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 

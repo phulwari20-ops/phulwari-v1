@@ -146,6 +146,14 @@ const socialLinks = [
     hoverBg: '#cc0000',
     icon: <Video style={{ color: '#fff', width: 20, height: 20, flexShrink: 0 }} />,
   },
+  {
+    name: 'Find us on Google',
+    handle: 'Kidwaipuri, Patna',
+    url: 'https://maps.app.goo.gl/g2PRe3oV2QhhZoEk8',
+    bg: '#34A853',
+    hoverBg: '#2d9247',
+    icon: <MapPin style={{ color: '#fff', width: 20, height: 20, flexShrink: 0 }} />,
+  },
 ];
 
 const Footer: React.FC = () => {

@@ -49,6 +49,27 @@ export default function StudentDashboardPage() {
 
   const fetchDashboardData = async (studentId: string) => {
     console.log(`📡 [SUPABASE API HIT - FETCH DASHBOARD DATA]: https://ftnbzukwjvgxdnkrvuer.supabase.co/rest/v1/students?id=eq.${studentId}`)
+    
+    // 1. Fetch real-time fees and notices from persistent storage
+    let localFees: any[] = []
+    let localNotices: any[] = []
+    try {
+      const savedFees = localStorage.getItem('phulwari_admin_fees')
+      if (savedFees) {
+        const parsed = JSON.parse(savedFees)
+        localFees = parsed.filter((f: any) => 
+          f.student_id === studentId || 
+          f.students?.admission_id === student?.admission_id ||
+          f.students?.admission_id === studentId
+        )
+      }
+
+      const savedNotices = localStorage.getItem('phulwari_notices')
+      if (savedNotices) {
+        localNotices = JSON.parse(savedNotices)
+      }
+    } catch (e) {}
+
     try {
       const supabase = createClient()
 
@@ -65,13 +86,21 @@ export default function StudentDashboardPage() {
         { date: '2026-08-03', status: 'present', remarks: 'On time' }
       ])
 
-      if (feeData && feeData.length > 0) setFees(feeData)
+      // Combine DB fees and local admin fees
+      const mergedFees = [...(feeData || []), ...localFees]
+      const uniqueFees = mergedFees.filter((f, idx, self) => 
+        idx === self.findIndex(t => t.id === f.id || (t.month === f.month && t.status === f.status))
+      )
+
+      if (uniqueFees.length > 0) setFees(uniqueFees)
       else setFees([
-        { id: 'f1', title: 'Monthly Activity Fee (August 2026)', amount: 3500, due_date: '2026-08-10', status: 'paid', payment_method: 'UPI / Online', receipt_no: 'REC-2026-0891', paid_date: '2026-08-01' },
-        { id: 'f2', title: 'Annual Activity Material Charges', amount: 1500, due_date: '2026-08-15', status: 'pending', payment_method: null, receipt_no: null, paid_date: null }
+        { id: 'f1', title: 'Monthly Activity Fee (August 2026)', amount: 3500, due_date: '2026-08-10', status: 'paid', payment_method: 'UPI / Online', receipt_no: 'REC-2026-0891', paid_date: '2026-08-01', month: 'August 2026' },
+        { id: 'f2', title: 'Annual Activity Material Charges', amount: 1500, due_date: '2026-08-15', status: 'pending', payment_method: null, receipt_no: null, paid_date: null, month: 'August 2026' }
       ])
 
-      if (annData && annData.length > 0) setAnnouncements(annData)
+      // Combine DB announcements and local admin notices
+      const mergedNotices = [...(annData || []), ...localNotices]
+      if (mergedNotices.length > 0) setAnnouncements(mergedNotices)
       else setAnnouncements([
         { title: 'Welcome to New Term', content: 'We are thrilled to welcome all children and parents to the upcoming session!', category: 'Notice', date: '2026-08-01' },
         { title: 'Independence Day Celebration', content: 'Special flag hoisting & fancy dress competition on 15th August at 10:00 AM.', category: 'Event', date: '2026-08-05' }
@@ -81,6 +110,41 @@ export default function StudentDashboardPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handlePayFee = (item: any) => {
+    const receiptNo = `REC-2026-${Math.floor(1000 + Math.random() * 9000)}`
+    const paidObj = {
+      id: `fee-${Date.now()}`,
+      student_id: student.id || student.admission_id,
+      title: item.title,
+      amount: item.defaultAmount || 3500,
+      discount: 0,
+      net_amount: item.defaultAmount || 3500,
+      due_date: item.due_date,
+      status: 'paid',
+      payment_method: 'UPI / Online',
+      paid_date: new Date().toISOString().split('T')[0],
+      receipt_no: receiptNo,
+      month: item.month,
+      students: {
+        full_name: student.full_name,
+        admission_id: student.admission_id,
+        class_name: student.class_name,
+        section_name: student.section_name
+      }
+    }
+
+    const updated = [paidObj, ...fees]
+    setFees(updated)
+
+    try {
+      const existingAdminFeesStr = localStorage.getItem('phulwari_admin_fees')
+      const existingAdminFees = existingAdminFeesStr ? JSON.parse(existingAdminFeesStr) : []
+      localStorage.setItem('phulwari_admin_fees', JSON.stringify([paidObj, ...existingAdminFees]))
+    } catch (e) {}
+
+    setSelectedReceipt(paidObj)
   }
 
   const handleLogout = () => {
@@ -319,73 +383,125 @@ export default function StudentDashboardPage() {
 
         {activeTab === 'fees' && (
           <div style={{ background: '#ffffff', border: '1px solid #F1F5F9', borderRadius: '28px', padding: '2rem', boxShadow: '0 15px 40px rgba(0, 0, 0, 0.04)' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <CreditCard size={22} color="#D97706" /> Fee Collection & Receipts
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <CreditCard size={22} color="#D97706" /> Complete Monthly Fee Payment Ledger
+                </h2>
+                <p style={{ fontSize: '12px', color: '#64748B', margin: '4px 0 0 0' }}>2026-2027 Academic Session Ledger & Payment History</p>
+              </div>
+
+              <div style={{ padding: '6px 14px', background: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A', borderRadius: '20px', fontSize: '12px', fontWeight: 800 }}>
+                Monthly Fee: ₹3,500
+              </div>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {fees.map((fee, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    background: '#F8FAFC',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '20px',
-                    padding: '1.25rem',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '1rem'
-                  }}
-                >
-                  <div>
-                    <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', margin: '0 0 4px 0' }}>{fee.title}</h3>
-                    <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-                      Due Date: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#1E293B' }}>{fee.due_date}</span>
-                    </p>
-                    {fee.receipt_no && (
-                      <p style={{ fontSize: '12px', fontFamily: 'monospace', color: '#059669', fontWeight: 700, margin: '4px 0 0 0' }}>Receipt No: {fee.receipt_no}</p>
-                    )}
-                  </div>
+              {[
+                { title: 'April 2026 Monthly Activity Fee', month: 'April 2026', due_date: '2026-04-10', defaultAmount: 3500 },
+                { title: 'May 2026 Monthly Activity Fee', month: 'May 2026', due_date: '2026-05-10', defaultAmount: 3500 },
+                { title: 'June 2026 Monthly Activity Fee', month: 'June 2026', due_date: '2026-06-10', defaultAmount: 3500 },
+                { title: 'July 2026 Monthly Activity Fee', month: 'July 2026', due_date: '2026-07-10', defaultAmount: 3500 },
+                { title: 'August 2026 Monthly Activity Fee', month: 'August 2026', due_date: '2026-08-10', defaultAmount: 3500 },
+                { title: 'September 2026 Monthly Activity Fee', month: 'September 2026', due_date: '2026-09-10', defaultAmount: 3500 },
+                { title: 'October 2026 Monthly Activity Fee', month: 'October 2026', due_date: '2026-10-10', defaultAmount: 3500 },
+                { title: 'November 2026 Monthly Activity Fee', month: 'November 2026', due_date: '2026-11-10', defaultAmount: 3500 },
+                { title: 'December 2026 Monthly Activity Fee', month: 'December 2026', due_date: '2026-12-10', defaultAmount: 3500 },
+                { title: 'January 2027 Monthly Activity Fee', month: 'January 2027', due_date: '2027-01-10', defaultAmount: 3500 },
+                { title: 'February 2027 Monthly Activity Fee', month: 'February 2027', due_date: '2027-02-10', defaultAmount: 3500 },
+                { title: 'March 2027 Monthly Activity Fee', month: 'March 2027', due_date: '2027-03-10', defaultAmount: 3500 }
+              ].map((item, idx) => {
+                const recorded = fees.find(f => 
+                  f.title?.toLowerCase().includes(item.month.toLowerCase()) || 
+                  (f.month && f.month.toLowerCase() === item.month.toLowerCase())
+                )
+                const isPaid = recorded?.status === 'paid'
+                const displayFee = recorded || item
 
-                  <div style={{ textAlign: 'right', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      background: isPaid ? '#F0FDF4' : '#FFFBEB',
+                      border: isPaid ? '1.5px solid #BBF7D0' : '1.5px solid #FDE68A',
+                      borderRadius: '20px',
+                      padding: '1.25rem',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '1rem'
+                    }}
+                  >
                     <div>
-                      <p style={{ fontSize: '18px', fontWeight: 900, fontFamily: 'monospace', color: '#0F172A', margin: '0 0 4px 0' }}>₹{fee.amount}</p>
-                      <span style={
-                        fee.status === 'paid'
-                          ? { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }
-                          : { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A' }
-                      }>
-                        {fee.status}
-                      </span>
+                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', margin: '0 0 4px 0' }}>{item.title}</h3>
+                      <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+                        Due Date: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#1E293B' }}>{item.due_date}</span>
+                      </p>
+                      {isPaid && recorded?.receipt_no && (
+                        <p style={{ fontSize: '12px', fontFamily: 'monospace', color: '#059669', fontWeight: 700, margin: '4px 0 0 0' }}>Receipt No: {recorded.receipt_no}</p>
+                      )}
                     </div>
 
-                    {fee.status === 'paid' && (
-                      <button
-                        onClick={() => setSelectedReceipt(fee)}
-                        style={{
-                          padding: '10px 16px',
-                          background: '#ECFDF5',
-                          color: '#059669',
-                          border: '1px solid #A7F3D0',
-                          borderRadius: '14px',
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)'
-                        }}
-                      >
-                        <Download size={15} />
-                        <span>Download Receipt</span>
-                      </button>
-                    )}
+                    <div style={{ textAlign: 'right', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div>
+                        <p style={{ fontSize: '18px', fontWeight: 900, fontFamily: 'monospace', color: '#0F172A', margin: '0 0 4px 0' }}>₹{recorded?.amount || item.defaultAmount}</p>
+                        <span style={
+                          isPaid
+                            ? { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }
+                            : { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A' }
+                        }>
+                          {isPaid ? 'PAID' : 'PENDING'}
+                        </span>
+                      </div>
+
+                      {isPaid ? (
+                        <button
+                          onClick={() => setSelectedReceipt(recorded)}
+                          style={{
+                            padding: '10px 16px',
+                            background: '#ECFDF5',
+                            color: '#059669',
+                            border: '1px solid #A7F3D0',
+                            borderRadius: '14px',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)'
+                          }}
+                        >
+                          <Download size={15} />
+                          <span>Download Receipt</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handlePayFee(item)}
+                          style={{
+                            padding: '10px 18px',
+                            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '14px',
+                            fontSize: '13px',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 6px 16px rgba(16, 185, 129, 0.25)'
+                          }}
+                        >
+                          <CreditCard size={15} />
+                          <span>Mark Paid & Collect</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}

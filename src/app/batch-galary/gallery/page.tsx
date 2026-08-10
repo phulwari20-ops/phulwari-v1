@@ -1,45 +1,91 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { appLog } from '@/lib/logger';
 
-const slides = [
-  { src: '/galary2.webp'  },
-  { src: '/galary3.webp'  },
-  { src: '/galary4.webp'  },
-  { src: '/galary5.webp'  },
-  { src: '/galary6.webp'  },
-  { src: '/galary7.webp'  },
-  { src: '/galary8.webp'  },
-  { src: '/galary9.webp'  },
-  { src: '/galary10.webp' },
-  { src: '/galary11.webp' },
-  { src: '/galary12.webp' },
-  { src: '/galary13.webp' },
-  { src: '/galary14.webp' },
-  { src: '/galary15.webp' },
-  { src: '/galary16.webp' },
-  { src: '/galary17.webp' },
-  { src: '/galary18.webp' },
-  { src: '/galary19.webp' },
-  { src: '/galary20.webp' },
-  { src: '/galary21.webp' },
-  { src: '/galary22.webp' },
-  { src: '/galary23.webp' },
-  { src: '/galary24.webp' },
-  { src: '/galary25.webp' },
-  { src: '/galary26.webp' },
-
- 
+const defaultSlides = [
+  { src: '/galary2.webp', title: 'Activity Room' },
+  { src: '/galary3.webp', title: 'Toddler Play Area' },
+  { src: '/galary4.webp', title: 'Art & Craft Workshop' },
+  { src: '/galary5.webp', title: 'Gymnastics Class' },
+  { src: '/galary6.webp', title: 'Kids Dance & Music' },
+  { src: '/galary7.webp', title: 'Roller Skating Track' },
+  { src: '/galary8.webp', title: 'MMA & Martial Arts' },
+  { src: '/galary9.webp', title: 'Birthday Celebration Hall' },
+  { src: '/galary10.webp', title: 'Summer Camp Fun' },
+  { src: '/galary11.webp', title: 'Mother Fitness Studio' },
+  { src: '/galary12.webp', title: 'Outdoor Play Garden' },
+  { src: '/galary13.webp', title: 'Storytelling Session' },
+  { src: '/galary14.webp', title: 'Phulwari Circle Time' },
+  { src: '/galary15.webp', title: 'Clay Modeling' },
+  { src: '/galary16.webp', title: 'Music & Movement' },
+  { src: '/galary17.webp', title: 'Indoor Cricket Net' },
+  { src: '/galary18.webp', title: 'Winter Camp Creative Arts' },
+  { src: '/galary19.webp', title: 'Yoga & Mindfulness' },
+  { src: '/galary20.webp', title: 'Party Decoration Setup' },
+  { src: '/galary21.webp', title: 'Preschool Learning Corner' },
+  { src: '/galary22.webp', title: 'Obstacle Course Fun' },
+  { src: '/galary23.webp', title: 'Sensory Play Table' },
+  { src: '/galary24.webp', title: 'Mini Stage Performances' },
+  { src: '/galary25.webp', title: 'Phulwari Annual Celebration' },
+  { src: '/galary26.webp', title: 'Mother & Child Bonding' }
 ];
 
 export default function GalleryPage() {
+  const [slides, setSlides] = useState<any[]>(defaultSlides);
   const [current, setCurrent] = useState(0);
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
-  const goPrev = useCallback(() => setCurrent((i) => (i - 1 + slides.length) % slides.length), []);
-  const goNext = useCallback(() => setCurrent((i) => (i + 1) % slides.length), []);
+  useEffect(() => {
+    const fetchGallery = async () => {
+      // 1. Fetch from zero-token public API route
+      try {
+        appLog('request', 'GALLERY_API', 'GET /api/gallery (Zero Token Public Sync)');
+        const res = await fetch('/api/gallery', { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && json.data.length > 0) {
+            appLog('success', 'GALLERY_API', `Received ${json.data.length} custom gallery photos`);
+            setSlides(json.data.map((item: any) => ({ src: item.url || item.src, title: item.title || 'Phulwari Photo' })));
+            return;
+          }
+        }
+      } catch (e: any) {
+        appLog('error', 'GALLERY_API', e.message || 'Public API Error');
+      }
 
-  // Neighbours for desktop side previews
+      // 2. Direct Supabase fetch with public anon headers
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ftnbzukwjvgxdnkrvuer.supabase.co';
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_GFV9g9M3vPdFlOtFZ_dnEA_bR2Cm0HV';
+      appLog('request', 'SUPABASE_REST', `GET ${supabaseUrl}/rest/v1/gallery`);
+
+      try {
+        const res = await fetch(`${supabaseUrl}/rest/v1/gallery?select=*`, {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          },
+          cache: 'no-store'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            appLog('success', 'SUPABASE_REST', `Received ${data.length} gallery images from Supabase DB`);
+            setSlides(data.map((item: any) => ({ src: item.url || item.src, title: item.title || 'Phulwari Photo' })));
+          }
+        }
+      } catch (err: any) {
+        appLog('error', 'SUPABASE_REST', err.message || 'REST Exception');
+      }
+    };
+    fetchGallery();
+  }, []);
+
+  const goPrev = useCallback(() => setCurrent((i) => (i - 1 + slides.length) % slides.length), [slides.length]);
+  const goNext = useCallback(() => setCurrent((i) => (i + 1) % slides.length), [slides.length]);
+
   const prevIdx = (current - 1 + slides.length) % slides.length;
   const nextIdx = (current + 1) % slides.length;
 
@@ -284,22 +330,22 @@ export default function GalleryPage() {
 
           {/* Main frame */}
           <div className="gl-main">
-            <div className="gl-frame">
+            <div className="gl-frame cursor-pointer" onClick={() => setLightboxImg(slides[current]?.src)}>
               <img
                 key={current}
                 className="gl-img"
-                src={slides[current].src}
-                alt={`Phulwari Mother & Child Activity Centre Patna - Photo ${current + 1}`}
+                src={slides[current]?.src}
+                alt={slides[current]?.title || `Phulwari Photo ${current + 1}`}
                 loading={current === 0 ? 'eager' : 'lazy'}
                 decoding="async"
                 width={420}
                 height={560}
                 draggable={false}
               />
-              <button className="gl-arrow gl-arrow--left" onClick={goPrev} aria-label="Previous photo">
+              <button className="gl-arrow gl-arrow--left" onClick={(e) => { e.stopPropagation(); goPrev(); }} aria-label="Previous photo">
                 <ChevronLeft />
               </button>
-              <button className="gl-arrow gl-arrow--right" onClick={goNext} aria-label="Next photo">
+              <button className="gl-arrow gl-arrow--right" onClick={(e) => { e.stopPropagation(); goNext(); }} aria-label="Next photo">
                 <ChevronRight />
               </button>
             </div>
@@ -307,14 +353,14 @@ export default function GalleryPage() {
 
           {/* Right side preview */}
           <div className="gl-side" onClick={goNext} aria-hidden="true">
-            <img src={slides[nextIdx].src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
+            <img src={slides[nextIdx]?.src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
           </div>
 
         </div>
 
         {/* Counter + dots */}
         <div className="gl-footer">
-          <p className="gl-counter"><strong>{current + 1}</strong> / {slides.length}</p>
+          <p className="gl-counter"><strong>{current + 1}</strong> / {slides.length} — <span className="text-pink-500 font-bold">{slides[current]?.title || 'Phulwari Photo'}</span></p>
           <div className="gl-dots">
             {slides.map((_, i) => (
               <button
@@ -336,12 +382,43 @@ export default function GalleryPage() {
               onClick={() => setCurrent(i)}
               aria-label={`Photo ${i + 1}`}
             >
-              <img src={s.src} alt="" draggable={false} />
+              <img src={s.src} alt={s.title || ''} draggable={false} />
             </div>
           ))}
         </div>
 
       </div>
+
+      {/* Lightbox Fullscreen Popup Modal with Top-Right Cross X Button */}
+      {lightboxImg && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn"
+          onClick={() => setLightboxImg(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full bg-slate-900 rounded-3xl p-4 shadow-2xl border border-slate-700 space-y-3 flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setLightboxImg(null)}
+              className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 text-white rounded-full flex items-center justify-center transition cursor-pointer border border-white/30"
+              aria-label="Close Lightbox"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <img
+              src={lightboxImg}
+              alt="Phulwari Full View"
+              className="max-h-[80vh] w-auto object-contain rounded-2xl shadow-lg"
+            />
+
+            <div className="text-center text-white text-xs font-semibold pt-1">
+              <span>Phulwari Mother & Child Activity Centre — Full Photo View</span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -35,6 +35,7 @@ import {
   HelpCircle,
   Video,
   UserCheck,
+  Star,
 } from 'lucide-react';
 
 interface SubItem {
@@ -453,6 +454,7 @@ const Navbar: React.FC = () => {
               alt="Phulwari Mother & Child Activity Centre"
               width={60}
               height={30}
+              style={{ width: 'auto', height: 'auto' }}
               className="object-contain"
               priority
             />
@@ -510,6 +512,17 @@ const Navbar: React.FC = () => {
               );
             })}
           </div>
+
+          <a
+            href="https://maps.app.goo.gl/vGM1Em5s5NSsbFJA8?g_st=aw"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100/80 text-amber-900 border border-amber-300 rounded-full text-xs font-extrabold shadow-sm hover:scale-105 transition text-decoration-none"
+            title="Read 51+ Phulwari Google Reviews"
+          >
+            <Star style={{ color: '#F59E0B', fill: '#F59E0B', width: 14, height: 14 }} />
+            <span>★ 4.9 Google Reviews</span>
+          </a>
 
           <Link href="/contact" className="nav-cta">
             <Phone />
