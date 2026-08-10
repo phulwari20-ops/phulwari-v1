@@ -27,8 +27,15 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh auth session if needed
-  await supabase.auth.getUser()
+  // Refresh auth session with a timeout to prevent middleware hanging
+  try {
+    await Promise.race([
+      supabase.auth.getUser(),
+      new Promise((resolve) => setTimeout(resolve, 800))
+    ])
+  } catch (e) {
+    // Ignore error so middleware doesn't block request
+  }
 
   return supabaseResponse
 }
