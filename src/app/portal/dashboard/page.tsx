@@ -93,10 +93,7 @@ export default function StudentDashboardPage() {
       )
 
       if (uniqueFees.length > 0) setFees(uniqueFees)
-      else setFees([
-        { id: 'f1', title: 'Monthly Activity Fee (August 2026)', amount: 3500, due_date: '2026-08-10', status: 'paid', payment_method: 'UPI / Online', receipt_no: 'REC-2026-0891', paid_date: '2026-08-01', month: 'August 2026' },
-        { id: 'f2', title: 'Annual Activity Material Charges', amount: 1500, due_date: '2026-08-15', status: 'pending', payment_method: null, receipt_no: null, paid_date: null, month: 'August 2026' }
-      ])
+      else setFees([])
 
       // Combine DB announcements and local admin notices
       const mergedNotices = [...(annData || []), ...localNotices]
@@ -488,7 +485,7 @@ Kidwaipuri, Patna | Ph: +91 6207368839`
                         </span>
                       </div>
 
-                      {isPaid ? (
+                      {isPaid && (
                         <button
                           onClick={() => setSelectedReceipt(recorded)}
                           style={{
@@ -508,27 +505,6 @@ Kidwaipuri, Patna | Ph: +91 6207368839`
                         >
                           <Download size={15} />
                           <span>Download Receipt</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handlePayFee(item)}
-                          style={{
-                            padding: '10px 18px',
-                            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '14px',
-                            fontSize: '13px',
-                            fontWeight: 800,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            boxShadow: '0 6px 16px rgba(16, 185, 129, 0.25)'
-                          }}
-                        >
-                          <CreditCard size={15} />
-                          <span>Mark Paid & Collect</span>
                         </button>
                       )}
                     </div>
