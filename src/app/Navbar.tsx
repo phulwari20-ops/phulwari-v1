@@ -34,6 +34,7 @@ import {
   CalendarDays,
   HelpCircle,
   Video,
+  UserCheck,
 } from 'lucide-react';
 
 interface SubItem {
@@ -76,6 +77,7 @@ const navItems: NavItem[] = [
     accentBg: '#E3F7EA',
     icon: Activity,
     subpages: [
+      { href: '/portal/login',              label: '🎓 Parent & Student Portal (ERP)', icon: UserCheck, color: '#FF4D8D', bg: '#FFE6EF' },
       { href: '/activities/music-dance',    label: 'Music & Dance',      icon: Music,    color: '#FF4D8D', bg: '#FFE6EF' },
       { href: '/activities/gymnastics-mma', label: 'Gymnastics & MMA',   icon: Swords,   color: '#3D8BFF', bg: '#E5EFFF' },
       { href: '/activities/roller-skating', label: 'Roller Skating',     icon: Footprints,color: '#E8A621',bg: '#FFF3D9' },
@@ -84,6 +86,7 @@ const navItems: NavItem[] = [
       { href: '/activities/play-zone',      label: 'Play Zone',          icon: Gamepad2, color: '#FF8A3D', bg: '#FFEADB' },
     ],
   },
+  { label: 'Parent Portal', href: '/portal/login', accent: '#FF4D8D', accentBg: '#FFE6EF', icon: Lock },
   {
     label: 'Programs for Mothers',
     href: '/mothers',
@@ -223,8 +226,6 @@ const Navbar: React.FC = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
-
         @keyframes navPop {
           0% { transform: translateY(-14px) scale(0.97); opacity: 0; }
           100% { transform: translateY(0) scale(1); opacity: 1; }

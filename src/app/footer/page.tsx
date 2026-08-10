@@ -156,8 +156,6 @@ const Footer: React.FC = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
-
         .footer-shell {
           position:relative; width:100%; background-color:#322D45;
           padding-top:40px; overflow:hidden;
