@@ -107,6 +107,7 @@ export default function BatchPage() {
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [dynamicBatches, setDynamicBatches] = useState<any[]>([]);
+  const [batchesLoading, setBatchesLoading] = useState(true);
 
   useEffect(() => {
     const fetchBatchesFromDb = async () => {
@@ -114,24 +115,36 @@ export default function BatchPage() {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
         const { data, error } = await supabase.from('batches').select('*');
-        if (data && data.length > 0) {
+        if (!error && data && data.length > 0) {
           console.log('✅ Dynamic Batches fetched from DB:', data);
           setDynamicBatches(data);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('❌ Batch fetch error:', e);
+      } finally {
+        setBatchesLoading(false);
+      }
     };
     fetchBatchesFromDb();
   }, []);
 
+  const colors = ['#FF4D8D', '#8B5CF6', '#E8A621', '#10B981', '#3B82F6', '#F97316'];
+  const bgs    = ['#FFE6EF', '#EFE7FE', '#FFF3D9', '#ECFDF5', '#EFF6FF', '#FFF7ED'];
+
   const activeTableData = dynamicBatches.length > 0
-    ? dynamicBatches.map((b, idx) => ({
-        batch: b.batch_name,
-        age: b.age_group || '1 – 3 Years',
-        timing: b.batch_time || b.start_time || '10:30 AM – 11:30 AM',
-        days: b.days || 'Mon – Sat',
-        color: idx % 3 === 0 ? '#FF4D8D' : idx % 3 === 1 ? '#8B5CF6' : '#E8A621',
-        bg: idx % 3 === 0 ? '#FFE6EF' : idx % 3 === 1 ? '#EFE7FE' : '#FFF3D9'
-      }))
+    ? dynamicBatches.map((b, idx) => {
+        const start = b.start_time || '';
+        const end   = b.end_time   || '';
+        const timing = start && end ? `${start} – ${end}` : start || end || '—';
+        return {
+          batch: b.batch_name,
+          age: b.age_group || '—',
+          timing,
+          days: b.days || '—',
+          color: colors[idx % colors.length],
+          bg:    bgs[idx % bgs.length]
+        };
+      })
     : tableData;
 
   return (
@@ -328,33 +341,44 @@ export default function BatchPage() {
         <div className="bt-overview">
           <h2 className="bt-overview-title">Batch Overview</h2>
           <div className="bt-table-wrap">
-            <table className="bt-table">
-              <thead>
-                <tr>
-                  <th>Batch</th>
-                  <th>Age Group</th>
-                  <th>Timing</th>
-                  <th>Days</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeTableData.map((row, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <span className="bt-batch-name">
-                        <span className="bt-dot" style={{ backgroundColor: row.color }} />
-                        {row.batch}
-                      </span>
-                    </td>
-                    <td><span className="bt-age-pill" style={{ backgroundColor: row.bg, color: row.color }}>{row.age}</span></td>
-                    <td>{row.timing}</td>
-                    <td>{row.days}</td>
+            {batchesLoading ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#9B93B0', fontSize: '0.9rem', fontWeight: 700 }}>
+                ⏳ Loading latest batch schedule from database...
+              </div>
+            ) : activeTableData.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#9B93B0', fontSize: '0.9rem', fontWeight: 700 }}>
+                No batches available at the moment.
+              </div>
+            ) : (
+              <table className="bt-table">
+                <thead>
+                  <tr>
+                    <th>Batch</th>
+                    <th>Age Group</th>
+                    <th>Timing</th>
+                    <th>Days</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {activeTableData.map((row, idx) => (
+                    <tr key={idx}>
+                      <td>
+                        <span className="bt-batch-name">
+                          <span className="bt-dot" style={{ backgroundColor: row.color }} />
+                          {row.batch}
+                        </span>
+                      </td>
+                      <td><span className="bt-age-pill" style={{ backgroundColor: row.bg, color: row.color }}>{row.age}</span></td>
+                      <td>{row.timing}</td>
+                      <td>{row.days}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
+
       </div>
     </>
   );
