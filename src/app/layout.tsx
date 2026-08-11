@@ -97,11 +97,6 @@ export const metadata: Metadata = {
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.webp',
   },
-
-  // TODO: add your Google Search Console verification code once you have it
-  // verification: {
-  //   google: 'your-google-site-verification-code',
-  // },
 };
 
 export const viewport: Viewport = {
