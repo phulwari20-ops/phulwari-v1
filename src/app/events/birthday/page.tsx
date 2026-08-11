@@ -158,9 +158,8 @@ export default function BirthdayPartyPage() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const supabase = createClient();
-        console.log('📡 [FRONTEND SUPABASE API REQUEST]: GET https://ftnbzukwjvgxdnkrvuer.supabase.co/rest/v1/party_packages');
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+        console.log(`📡 [FRONTEND SUPABASE API REQUEST]: GET ${supabaseUrl}/rest/v1/party_packages`);
         const { data, error } = await supabase.from('party_packages').select('*');
         if (data && data.length > 0) {
           console.log('✅ [FRONTEND SUPABASE API RESPONSE SUCCESS]: Received party packages from database', data);

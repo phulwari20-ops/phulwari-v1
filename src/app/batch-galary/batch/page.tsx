@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Phone,
   MessageCircle,
@@ -100,13 +100,39 @@ const tableData = [
 const faqs = [
   { q: 'What is the minimum age for joining?', a: 'Mother & Toddler Program: 1–3 Years. Premium Circle & Phulwari Core: 3+ Years.' },
   { q: 'Can mothers participate in activities?', a: 'Yes. Dedicated fitness sessions are available in the Mother & Toddler Program and Phulwari Premium Circle.' },
-  { q: 'Is Playzone access included?', a: 'Yes. Playzone access is included in the Mother & Toddler Program and Phulwari Premium Circle.' },
   { q: 'Are customized activities available?', a: 'Yes. Customized activity options are available under Phulwari Premium Circle.' },
 ];
 
 export default function BatchPage() {
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [dynamicBatches, setDynamicBatches] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchBatchesFromDb = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data, error } = await supabase.from('batches').select('*');
+        if (data && data.length > 0) {
+          console.log('✅ Dynamic Batches fetched from DB:', data);
+          setDynamicBatches(data);
+        }
+      } catch (e) {}
+    };
+    fetchBatchesFromDb();
+  }, []);
+
+  const activeTableData = dynamicBatches.length > 0
+    ? dynamicBatches.map((b, idx) => ({
+        batch: b.batch_name,
+        age: b.age_group || '1 – 3 Years',
+        timing: b.batch_time || b.start_time || '10:30 AM – 11:30 AM',
+        days: b.days || 'Mon – Sat',
+        color: idx % 3 === 0 ? '#FF4D8D' : idx % 3 === 1 ? '#8B5CF6' : '#E8A621',
+        bg: idx % 3 === 0 ? '#FFE6EF' : idx % 3 === 1 ? '#EFE7FE' : '#FFF3D9'
+      }))
+    : tableData;
 
   return (
     <>
@@ -312,8 +338,8 @@ export default function BatchPage() {
                 </tr>
               </thead>
               <tbody>
-                {tableData.map((row) => (
-                  <tr key={row.batch}>
+                {activeTableData.map((row, idx) => (
+                  <tr key={idx}>
                     <td>
                       <span className="bt-batch-name">
                         <span className="bt-dot" style={{ backgroundColor: row.color }} />
@@ -329,8 +355,6 @@ export default function BatchPage() {
             </table>
           </div>
         </div>
-
-
       </div>
     </>
   );

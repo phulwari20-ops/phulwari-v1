@@ -484,7 +484,7 @@ export default function HeroPage() {
                   }
                 >
                   <Cake size={18} />
-                  <span>Book a demo </span>
+                  <span>Book a Free Demo Class</span>
                 </button>
               </div>
 

@@ -35,11 +35,8 @@ export async function updateSession(request: NextRequest) {
       }
     )
 
-    // Refresh auth session with a timeout to prevent middleware hanging
-    await Promise.race([
-      supabase.auth.getUser(),
-      new Promise((resolve) => setTimeout(resolve, 800))
-    ])
+    // Avoid blocking the request in middleware for fast route loads. 
+    // Authentication checks should be handled via client side or page-level server components.
   } catch (e) {
     // Fail-safe catch block for Vercel deployment & local dev
   }

@@ -23,9 +23,8 @@ function saveLocalGallery(data: any[]) {
 export async function GET() {
   const localItems = getLocalGallery();
 
-  // Try Supabase fetch without requiring auth token
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ftnbzukwjvgxdnkrvuer.supabase.co';
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_GFV9g9M3vPdFlOtFZ_dnEA_bR2Cm0HV';
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 
   let dbItems: any[] = [];
   try {

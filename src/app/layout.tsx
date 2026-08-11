@@ -61,12 +61,16 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: '/og-image.jpg', // Place a 1200×630 image at /public/og-image.jpg
+        url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: SITE_NAME,
       },
     ],
+  },
+
+  verification: {
+    google: 'EFluuGoXog-o6hgirGHBoC97OB1zKOcoaMuLeMXte_0',
   },
 
   twitter: {
@@ -207,6 +211,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-95W6V42HK2" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-95W6V42HK2');
+          `}
+        </Script>
         <Script
           id="structured-data-schema"
           type="application/ld+json"

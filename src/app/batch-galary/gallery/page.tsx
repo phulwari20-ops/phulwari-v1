@@ -56,9 +56,8 @@ export default function GalleryPage() {
         appLog('error', 'GALLERY_API', e.message || 'Public API Error');
       }
 
-      // 2. Direct Supabase fetch with public anon headers
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ftnbzukwjvgxdnkrvuer.supabase.co';
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_GFV9g9M3vPdFlOtFZ_dnEA_bR2Cm0HV';
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
       appLog('request', 'SUPABASE_REST', `GET ${supabaseUrl}/rest/v1/gallery`);
 
       try {

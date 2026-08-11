@@ -22,46 +22,43 @@ export default function StudentLoginPage() {
     const cleanId = admissionId.trim().toUpperCase()
     const cleanPw = password.trim()
 
-    const targetUrl = `https://ftnbzukwjvgxdnkrvuer.supabase.co/rest/v1/students?admission_id=ilike.${cleanId}`
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const targetUrl = `${supabaseUrl}/rest/v1/students?admission_id=ilike.${cleanId}`;
     console.log(`📡 [SUPABASE API HIT - STUDENT LOGIN]: ${targetUrl}`)
 
     try {
       let matchedStudent: any = null
 
-      // 1. Query Supabase DB directly without rigid relational join
+      // 1. Check local persistent storage fail-safe FIRST (instant <50ms response)
       try {
-        const supabase = createClient()
-        const { data: dbStudents, error: fetchErr } = await supabase
-          .from('students')
-          .select('*')
-          .ilike('admission_id', cleanId)
-
-        if (dbStudents && dbStudents.length > 0) {
-          const match = dbStudents.find(s => s.password === cleanPw)
+        const savedSt = localStorage.getItem('phulwari_admin_students')
+        if (savedSt) {
+          const localStList = JSON.parse(savedSt)
+          const match = localStList.find((s: any) => 
+            s.admission_id?.trim().toUpperCase() === cleanId && s.password?.trim() === cleanPw
+          )
           if (match) {
             matchedStudent = match
-            console.log(`✅ [STUDENT LOGIN SUCCESS]: Authenticated from Supabase Database`, matchedStudent)
-          } else {
-            console.warn(`⚠️ [STUDENT LOGIN WARNING]: Admission ID "${cleanId}" found in DB, but password did not match.`)
           }
         }
-      } catch (err) {}
+      } catch (e) {}
 
-      // 2. Check local persistent storage fail-safe (contains admin-registered students)
+      // 2. Query Supabase DB with a 1.5s timeout race if not found locally
       if (!matchedStudent) {
         try {
-          const savedSt = localStorage.getItem('phulwari_admin_students')
-          if (savedSt) {
-            const localStList = JSON.parse(savedSt)
-            const match = localStList.find((s: any) => 
-              s.admission_id?.trim().toUpperCase() === cleanId && s.password?.trim() === cleanPw
-            )
+          const supabase = createClient()
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500))
+          const queryPromise = supabase.from('students').select('*').ilike('admission_id', cleanId)
+          const res: any = await Promise.race([queryPromise, timeoutPromise])
+          const dbStudents = res?.data
+
+          if (dbStudents && dbStudents.length > 0) {
+            const match = dbStudents.find((s: any) => s.password === cleanPw)
             if (match) {
               matchedStudent = match
-              console.log(`✅ [STUDENT LOGIN SUCCESS]: Authenticated from persistent storage`, matchedStudent)
             }
           }
-        } catch (e) {}
+        } catch (err) {}
       }
 
       // 3. Fallback demo accounts check

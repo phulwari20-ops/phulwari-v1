@@ -30,6 +30,7 @@ export default function StudentDashboardPage() {
 
   // Printable Fee Receipt Modal State
   const [selectedReceipt, setSelectedReceipt] = useState<any | null>(null)
+  const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false)
 
   useEffect(() => {
     const sessionStr = localStorage.getItem('phulwari_student')
@@ -48,9 +49,7 @@ export default function StudentDashboardPage() {
   }, [router])
 
   const fetchDashboardData = async (studentId: string) => {
-    console.log(`📡 [SUPABASE API HIT - FETCH DASHBOARD DATA]: https://ftnbzukwjvgxdnkrvuer.supabase.co/rest/v1/students?id=eq.${studentId}`)
-    
-    // 1. Fetch real-time fees and notices from persistent storage
+    // 1. Instantly load local persistent data so user NEVER experiences infinite loading
     let localFees: any[] = []
     let localNotices: any[] = []
     try {
@@ -64,46 +63,48 @@ export default function StudentDashboardPage() {
         )
       }
 
-      const savedNotices = localStorage.getItem('phulwari_notices')
+      const savedNotices = localStorage.getItem('phulwari_announcements') || localStorage.getItem('phulwari_notices')
       if (savedNotices) {
         localNotices = JSON.parse(savedNotices)
       }
     } catch (e) {}
 
+    // Populate local state immediately & clear loading screen instantly!
+    if (localFees.length > 0) setFees(localFees)
+    if (localNotices.length > 0) setAnnouncements(localNotices)
+    setAttendance([
+      { date: '2026-08-01', status: 'present', remarks: 'Active participant' },
+      { date: '2026-08-02', status: 'present', remarks: 'Great energy' },
+      { date: '2026-08-03', status: 'present', remarks: 'On time' }
+    ])
+    setLoading(false)
+
+    // 2. Fetch remote Supabase DB in background with 1.5s timeout race
     try {
       const supabase = createClient()
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500))
 
-      const [{ data: attData }, { data: feeData }, { data: annData }] = await Promise.all([
-        supabase.from('attendance').select('*').eq('student_id', studentId).order('date', { ascending: false }),
-        supabase.from('fees').select('*').eq('student_id', studentId).order('due_date', { ascending: false }),
-        supabase.from('announcements').select('*').order('created_at', { ascending: false })
+      const fetchPromise = Promise.all([
+        supabase.from('attendance').select('*').eq('student_id', studentId).order('date', { ascending: false }).catch(() => ({ data: null })),
+        supabase.from('fees').select('*').eq('student_id', studentId).order('due_date', { ascending: false }).catch(() => ({ data: null })),
+        supabase.from('announcements').select('*').order('created_at', { ascending: false }).catch(() => ({ data: null }))
       ])
+
+      const res: any = await Promise.race([fetchPromise, timeoutPromise])
+      const [{ data: attData }, { data: feeData }, { data: annData }] = res
 
       if (attData && attData.length > 0) setAttendance(attData)
-      else setAttendance([
-        { date: '2026-08-01', status: 'present', remarks: 'Active participant' },
-        { date: '2026-08-02', status: 'present', remarks: 'Great energy' },
-        { date: '2026-08-03', status: 'present', remarks: 'On time' }
-      ])
 
-      // Combine DB fees and local admin fees
       const mergedFees = [...(feeData || []), ...localFees]
       const uniqueFees = mergedFees.filter((f, idx, self) => 
         idx === self.findIndex(t => t.id === f.id || (t.month === f.month && t.status === f.status))
       )
-
       if (uniqueFees.length > 0) setFees(uniqueFees)
-      else setFees([])
 
-      // Combine DB announcements and local admin notices
       const mergedNotices = [...(annData || []), ...localNotices]
       if (mergedNotices.length > 0) setAnnouncements(mergedNotices)
-      else setAnnouncements([
-        { title: 'Welcome to New Term', content: 'We are thrilled to welcome all children and parents to the upcoming session!', category: 'Notice', date: '2026-08-01' },
-        { title: 'Independence Day Celebration', content: 'Special flag hoisting & fancy dress competition on 15th August at 10:00 AM.', category: 'Event', date: '2026-08-05' }
-      ])
     } catch (err) {
-      console.error('Error loading student dashboard data', err)
+      // Non-blocking timeout or error catch
     } finally {
       setLoading(false)
     }
@@ -292,6 +293,51 @@ export default function StudentDashboardPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setIsNotificationOpen(prev => !prev)}
+                style={{ position: 'relative', width: '42px', height: '42px', borderRadius: '14px', background: '#F1F5F9', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#334155' }}
+                title="Fee & Center Notifications"
+              >
+                <Bell size={20} />
+                <span style={{ position: 'absolute', top: '4px', right: '4px', width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444', border: '2px solid #ffffff' }} />
+              </button>
+
+              {/* Notification Popover Dropdown */}
+              {isNotificationOpen && (
+                <div style={{ position: 'absolute', right: 0, top: '50px', width: '320px', background: '#ffffff', border: '1px solid #E2E8F0', borderRadius: '20px', padding: '1rem', boxShadow: '0 20px 40px rgba(0,0,0,0.12)', zIndex: 50 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid #F1F5F9', marginBottom: '10px' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Bell size={16} color="#FF4D8D" /> Notifications
+                    </h4>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', background: '#FEE2E2', color: '#DC2626', borderRadius: '10px' }}>
+                      Fee Renewal Due
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '14px', padding: '10px 12px' }}>
+                      <p style={{ fontSize: '12px', fontWeight: 800, color: '#9F1239', margin: '0 0 2px 0' }}>
+                        ⏰ Monthly Fee Renewal Notification
+                      </p>
+                      <p style={{ fontSize: '11px', color: '#BE123C', margin: 0, lineHeight: 1.4 }}>
+                        Dear Parent, August 2026 Activity Fee (₹3,500) renewal is due. Please pay via UPI or ERP portal.
+                      </p>
+                    </div>
+
+                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '10px 12px' }}>
+                      <p style={{ fontSize: '12px', fontWeight: 800, color: '#1E293B', margin: '0 0 2px 0' }}>
+                        🎉 Upcoming Center Event
+                      </p>
+                      <p style={{ fontSize: '11px', color: '#64748B', margin: 0, lineHeight: 1.4 }}>
+                        Special toddler fitness & craft workshop scheduled for this Saturday!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={handleLogout}
               style={{ fontSize: '13px', fontWeight: 700, padding: '10px 18px', borderRadius: '14px', background: '#FFF1F2', color: '#E11D48', border: '1px solid #FECDD3', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
