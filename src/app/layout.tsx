@@ -4,6 +4,7 @@ import Navbar from '@/app/Navbar';
 import Footer from '@/app/footer/page';
 import './globals.css';
 import FloatingButton from './FloatingButtons';
+import { ApiLogger } from '@/components/ApiLogger';
 
 /* --------------------------------------------------------------------- */
 /*  Update these once — they're reused across all the metadata below     */
@@ -206,6 +207,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <ApiLogger />
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-95W6V42HK2" strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">
           {`

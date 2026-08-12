@@ -36,7 +36,11 @@ export async function GET() {
       cache: 'no-store'
     });
     if (res.ok) {
-      dbItems = await res.json();
+      const data = await res.json();
+      dbItems = data.map((item: any) => ({
+        ...item,
+        url: item.image_url || item.url
+      }));
     }
   } catch (err) {}
 

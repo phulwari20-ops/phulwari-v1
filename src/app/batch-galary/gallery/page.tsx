@@ -34,28 +34,12 @@ const defaultSlides = [
 ];
 
 export default function GalleryPage() {
-  const [slides, setSlides] = useState<any[]>(defaultSlides);
+  const [slides, setSlides] = useState<any[]>([]);
   const [current, setCurrent] = useState(0);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGallery = async () => {
-      // 1. Fetch from zero-token public API route
-      try {
-        appLog('request', 'GALLERY_API', 'GET /api/gallery (Zero Token Public Sync)');
-        const res = await fetch('/api/gallery', { cache: 'no-store' });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.data && json.data.length > 0) {
-            appLog('success', 'GALLERY_API', `Received ${json.data.length} custom gallery photos`);
-            setSlides(json.data.map((item: any) => ({ src: item.url || item.src, title: item.title || 'Phulwari Photo' })));
-            return;
-          }
-        }
-      } catch (e: any) {
-        appLog('error', 'GALLERY_API', e.message || 'Public API Error');
-      }
-
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
       const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
       appLog('request', 'SUPABASE_REST', `GET ${supabaseUrl}/rest/v1/gallery`);
@@ -72,21 +56,33 @@ export default function GalleryPage() {
           const data = await res.json();
           if (data && data.length > 0) {
             appLog('success', 'SUPABASE_REST', `Received ${data.length} gallery images from Supabase DB`);
-            setSlides(data.map((item: any) => ({ src: item.url || item.src, title: item.title || 'Phulwari Photo' })));
+            setSlides(data.map((item: any) => ({ src: item.image_url || item.url || item.src, title: item.title || 'Phulwari Photo' })));
+          } else {
+            setSlides([]);
           }
+        } else {
+          setSlides([]);
         }
       } catch (err: any) {
         appLog('error', 'SUPABASE_REST', err.message || 'REST Exception');
+        setSlides([]);
       }
     };
     fetchGallery();
   }, []);
 
-  const goPrev = useCallback(() => setCurrent((i) => (i - 1 + slides.length) % slides.length), [slides.length]);
-  const goNext = useCallback(() => setCurrent((i) => (i + 1) % slides.length), [slides.length]);
+  const goPrev = useCallback(() => {
+    if (slides.length === 0) return;
+    setCurrent((i) => (i - 1 + slides.length) % slides.length);
+  }, [slides.length]);
+  
+  const goNext = useCallback(() => {
+    if (slides.length === 0) return;
+    setCurrent((i) => (i + 1) % slides.length);
+  }, [slides.length]);
 
-  const prevIdx = (current - 1 + slides.length) % slides.length;
-  const nextIdx = (current + 1) % slides.length;
+  const prevIdx = slides.length > 0 ? (current - 1 + slides.length) % slides.length : 0;
+  const nextIdx = slides.length > 0 ? (current + 1) % slides.length : 0;
 
   return (
     <>
@@ -319,72 +315,81 @@ export default function GalleryPage() {
           <p className="gl-sub">Explore photos from activities, celebrations and camps at Phulwari.</p>
         </header>
 
-        {/* Stage: side previews + main frame */}
-        <div className="gl-stage">
+        {slides.length > 0 ? (
+          <>
+            {/* Stage: side previews + main frame */}
+            <div className="gl-stage">
 
-          {/* Left side preview */}
-          <div className="gl-side" onClick={goPrev} aria-hidden="true">
-            <img src={slides[prevIdx].src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
-          </div>
+              {/* Left side preview */}
+              <div className="gl-side" onClick={goPrev} aria-hidden="true">
+                <img src={slides[prevIdx].src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
+              </div>
 
-          {/* Main frame */}
-          <div className="gl-main">
-            <div className="gl-frame cursor-pointer" onClick={() => setLightboxImg(slides[current]?.src)}>
-              <img
-                key={current}
-                className="gl-img"
-                src={slides[current]?.src}
-                alt={slides[current]?.title || `Phulwari Photo ${current + 1}`}
-                loading={current === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-                width={420}
-                height={560}
-                draggable={false}
-              />
-              <button className="gl-arrow gl-arrow--left" onClick={(e) => { e.stopPropagation(); goPrev(); }} aria-label="Previous photo">
-                <ChevronLeft />
-              </button>
-              <button className="gl-arrow gl-arrow--right" onClick={(e) => { e.stopPropagation(); goNext(); }} aria-label="Next photo">
-                <ChevronRight />
-              </button>
+              {/* Main frame */}
+              <div className="gl-main">
+                <div className="gl-frame cursor-pointer" onClick={() => setLightboxImg(slides[current]?.src)}>
+                  <img
+                    key={current}
+                    className="gl-img"
+                    src={slides[current]?.src}
+                    alt={slides[current]?.title || `Phulwari Photo ${current + 1}`}
+                    loading={current === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    width={420}
+                    height={560}
+                    draggable={false}
+                  />
+                  <button className="gl-arrow gl-arrow--left" onClick={(e) => { e.stopPropagation(); goPrev(); }} aria-label="Previous photo">
+                    <ChevronLeft />
+                  </button>
+                  <button className="gl-arrow gl-arrow--right" onClick={(e) => { e.stopPropagation(); goNext(); }} aria-label="Next photo">
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+
+              {/* Right side preview */}
+              <div className="gl-side" onClick={goNext} aria-hidden="true">
+                <img src={slides[nextIdx]?.src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
+              </div>
+
             </div>
-          </div>
 
-          {/* Right side preview */}
-          <div className="gl-side" onClick={goNext} aria-hidden="true">
-            <img src={slides[nextIdx]?.src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
-          </div>
-
-        </div>
-
-        {/* Counter + dots */}
-        <div className="gl-footer">
-          <p className="gl-counter"><strong>{current + 1}</strong> / {slides.length} — <span className="text-pink-500 font-bold">{slides[current]?.title || 'Phulwari Photo'}</span></p>
-          <div className="gl-dots">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                className={`gl-dot ${i === current ? 'active' : ''}`}
-                onClick={() => setCurrent(i)}
-                aria-label={`Go to photo ${i + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Thumbnail strip — desktop only */}
-        <div className="gl-thumbs">
-          {slides.map((s, i) => (
-            <div
-              key={i}
-              className={`gl-thumb ${i === current ? 'active' : ''}`}
-              onClick={() => setCurrent(i)}
-              aria-label={`Photo ${i + 1}`}
-            >
-              <img src={s.src} alt={s.title || ''} draggable={false} />
+            {/* Counter + dots */}
+            <div className="gl-footer">
+              <p className="gl-counter"><strong>{current + 1}</strong> / {slides.length} — <span className="text-pink-500 font-bold">{slides[current]?.title || 'Phulwari Photo'}</span></p>
+              <div className="gl-dots">
+                {slides.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`gl-dot ${i === current ? 'active' : ''}`}
+                    onClick={() => setCurrent(i)}
+                    aria-label={`Go to photo ${i + 1}`}
+                  />
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
+
+            {/* Thumbnail strip — desktop only */}
+            <div className="gl-thumbs">
+              {slides.map((s, i) => (
+                <div
+                  key={i}
+                  className={`gl-thumb ${i === current ? 'active' : ''}`}
+                  onClick={() => setCurrent(i)}
+                  aria-label={`Photo ${i + 1}`}
+                >
+                  <img src={s.src} alt={s.title || ''} draggable={false} />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-20 text-slate-400 font-bold flex flex-col items-center justify-center gap-2">
+            <span className="text-3xl">📷</span>
+            <p>No gallery photos found in the database yet.</p>
+          </div>
+        )}
 
       </div>
 

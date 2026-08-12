@@ -82,12 +82,12 @@ export default function StudentDashboardPage() {
     // 2. Fetch remote Supabase DB in background with 1.5s timeout race
     try {
       const supabase = createClient()
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500))
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
 
       const fetchPromise = Promise.all([
-        supabase.from('attendance').select('*').eq('student_id', studentId).order('date', { ascending: false }).catch(() => ({ data: null })),
-        supabase.from('fees').select('*').eq('student_id', studentId).order('due_date', { ascending: false }).catch(() => ({ data: null })),
-        supabase.from('announcements').select('*').order('created_at', { ascending: false }).catch(() => ({ data: null }))
+        supabase.from('attendance').select('*').eq('student_id', studentId).order('date', { ascending: false }).then(res => res, () => ({ data: null })),
+        supabase.from('fees').select('*').eq('student_id', studentId).order('due_date', { ascending: false }).then(res => res, () => ({ data: null })),
+        supabase.from('announcements').select('*').order('created_at', { ascending: false }).then(res => res, () => ({ data: null }))
       ])
 
       const res: any = await Promise.race([fetchPromise, timeoutPromise])
@@ -102,7 +102,8 @@ export default function StudentDashboardPage() {
       if (uniqueFees.length > 0) setFees(uniqueFees)
 
       const mergedNotices = [...(annData || []), ...localNotices]
-      if (mergedNotices.length > 0) setAnnouncements(mergedNotices)
+      const uniqueNotices = mergedNotices.filter((a, idx, self) => idx === self.findIndex(t => t.id === a.id))
+      if (uniqueNotices.length > 0) setAnnouncements(uniqueNotices)
     } catch (err) {
       // Non-blocking timeout or error catch
     } finally {

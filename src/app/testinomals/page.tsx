@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Phone, MessageCircle, Star, Quote, ThumbsUp, ExternalLink, Send, X, CheckCircle } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 const GOOGLE_REVIEW_URL =
   'https://www.google.com/search?q=phulwari+mother+and+child+activity+centre&oq=&gs_lcrp=EgZjaHJvbWUqBggBEEUYOzIGCAAQRRg5MgYIARBFGDsyBwgCEAAYgAQyBwgDEAAYgAQyBwgEEAAYgAQyBwgFEAAYgAQyBwgGEAAYgAQyBwgHEAAYgAQyBwgIEAAYgAQyBggJEEUYPDIHCAoQLhiABDIHCAsQABiABDIHCAwQABiABDIHCA0QABiABDIGCA4QRRg80gEINTQ5MGowajSoAgGwAgE&client=ms-android-motorola-rvo3&sourceid=chrome-mobile&ie=UTF-8&zx=1782149690079#sv=CAESzQEKuQEStgEKd0FJaVQ0dEpoZ3V3V1MyRnR5TWM1Z0dzbjlxLXBSZWpFWmZVeTlhRUNtRTFQQ1hVS0w0SWFrbUZDNS1uenpVaks4dWkyUFdCZVNzR01uX3ZSeC1NUkJZVGt4SklLelVZMmNqaVRpeFlRTE85TTRRcDVuaHpPWk5FEhdQSEk1YW9yVkRKS1RzZU1QMlp5NTZRRRoiQURzcjlmUmhsY2d1bFJRZWJvdzliRnhteVMxcmh5QVAwZxIEODA1MRoBMyoAMAA4AUAAGAAg9pm1jgxKAhAC';
 
 const WHATSAPP_BASE = 'https://wa.me/916207368839?text=';
 
-const reviews = [
+const defaultReviews = [
   {
     name: 'Priyaraj',
     avatar: 'PR',
@@ -104,7 +105,6 @@ const reviews = [
 const stats = [
   { value: '4.9', label: 'Google Rating', icon: '⭐' },
   { value: '200+', label: 'Happy Families', icon: '👨‍👩‍👧' },
-  { value: '5+', label: 'Years of Excellence', icon: '🏆' },
   { value: '100%', label: 'Parent Satisfaction', icon: '💯' },
 ];
 
@@ -162,15 +162,63 @@ function InteractiveStars({
 }
 
 export default function TestimonialsPage() {
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (data && data.length > 0) {
+          setReviewsList(data);
+        } else {
+          setReviewsList([]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch reviews:', err);
+        setReviewsList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  // Map reviews dynamically
+  const reviews = reviewsList.map(r => {
+    const colors = ['#FF4D8D', '#34B36B', '#8B5CF6', '#FF8A3D', '#3D8BFF', '#E8A621'];
+    const charCodeSum = (r.author_name || r.name || '').split('').reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
+    const color = colors[charCodeSum % colors.length];
+    const bg = color + '15'; // 10% opacity
+    
+    return {
+      id: r.id,
+      name: r.author_name || r.name,
+      avatar: (r.author_name || r.name || 'P').split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+      rating: r.rating || 5,
+      date: r.review_date || r.date,
+      text: r.content || r.text,
+      color: r.color || color,
+      bg: r.bg || bg,
+      program: r.program_tag || r.program || 'Phulwari Premium Circle',
+      is_verified: r.is_verified !== undefined ? r.is_verified : true
+    };
+  });
+
   const [showAll, setShowAll] = useState(false);
   const visible = showAll ? reviews : reviews.slice(0, 6);
 
   /* ── Carousel ── */
   const carouselRef = useRef<HTMLDivElement>(null);
   const [carouselIdx, setCarouselIdx] = useState(0);
-  const totalSlides = reviews.length;
+  const totalSlides = reviews.length || 1;
 
   useEffect(() => {
+    if (totalSlides <= 1) return;
     const id = setInterval(() => {
       setCarouselIdx((prev) => (prev + 1) % totalSlides);
     }, 3500);
@@ -187,14 +235,29 @@ export default function TestimonialsPage() {
   }, [carouselIdx]);
 
   /* ── Review form ── */
-  const [form, setForm] = useState({ name: '', program: '', rating: 0, message: '' });
+  const [form, setForm] = useState({ name: '', program: '', rating: 5, message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [lowRatingShown, setLowRatingShown] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.name.trim() || !form.message.trim() || form.rating === 0) return;
 
     if (form.rating >= 4) {
+      // Save directly to reviews table in Supabase
+      try {
+        const supabase = createClient();
+        await supabase.from('reviews').insert([{
+          author_name: form.name,
+          review_date: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+          rating: form.rating,
+          content: form.message,
+          program_tag: form.program || 'Phulwari Premium Circle',
+          is_verified: true
+        }]);
+      } catch (e) {
+        console.error('Failed to post review:', e);
+      }
+
       const text = `${form.message}`;
       navigator.clipboard.writeText(text).catch(() => {});
       window.open(GOOGLE_REVIEW_URL, '_blank');
@@ -301,7 +364,7 @@ export default function TestimonialsPage() {
         .btn-google { background-color:#4285F4; }
       `}</style>
 
-      <div className="tm-page">
+      <div className="tm-page" id="reviews">
 
         {/* Hero */}
         <header className="tm-hero">
@@ -363,48 +426,57 @@ export default function TestimonialsPage() {
         </div>
 
         {/* Auto-scroll Carousel */}
-        <div className="cs-wrap">
-          <div className="cs-track" ref={carouselRef}>
-            {reviews.map((r, i) => (
-              <div className="cs-card tm-card" key={i}>
-                <div className="tm-card-top">
-                  <div className="tm-avatar" style={{ backgroundColor: r.color }}>
-                    {r.avatar}
+        {reviews.length > 0 ? (
+          <div className="cs-wrap">
+            <div className="cs-track" ref={carouselRef}>
+              {reviews.map((r, i) => (
+                <div className="cs-card tm-card" key={i}>
+                  <div className="tm-card-top">
+                    <div className="tm-avatar" style={{ backgroundColor: r.color }}>
+                      {r.avatar}
+                    </div>
+                    <div>
+                      <div className="tm-name">{r.name}</div>
+                      <div className="tm-date">{r.date}</div>
+                    </div>
+                    <Quote size={18} className="tm-quote-icon" style={{ marginLeft: 'auto' }} />
                   </div>
-                  <div>
-                    <div className="tm-name">{r.name}</div>
-                    <div className="tm-date">{r.date}</div>
+                  <StarRating rating={r.rating} />
+                  <p className="tm-text">{r.text}</p>
+                  <div className="tm-card-footer">
+                    <span
+                      className="tm-program-pill"
+                      style={{ backgroundColor: r.bg, color: r.color }}
+                    >
+                      {r.program}
+                    </span>
+                    {r.is_verified && (
+                      <span className="tm-verified">
+                        <ThumbsUp size={13} />
+                        <span>Verified</span>
+                      </span>
+                    )}
                   </div>
-                  <Quote size={18} className="tm-quote-icon" style={{ marginLeft: 'auto' }} />
                 </div>
-                <StarRating rating={r.rating} />
-                <p className="tm-text">{r.text}</p>
-                <div className="tm-card-footer">
-                  <span
-                    className="tm-program-pill"
-                    style={{ backgroundColor: r.bg, color: r.color }}
-                  >
-                    {r.program}
-                  </span>
-                  <span className="tm-verified">
-                    <ThumbsUp size={13} />
-                    <span>Verified</span>
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="cs-dots">
+              {reviews.map((_, i) => (
+                <button
+                  key={i}
+                  className={`cs-dot ${i === carouselIdx ? 'active' : ''}`}
+                  onClick={() => setCarouselIdx(i)}
+                  aria-label={`Go to review ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
-          <div className="cs-dots">
-            {reviews.map((_, i) => (
-              <button
-                key={i}
-                className={`cs-dot ${i === carouselIdx ? 'active' : ''}`}
-                onClick={() => setCarouselIdx(i)}
-                aria-label={`Go to review ${i + 1}`}
-              />
-            ))}
+        ) : (
+          <div className="text-center py-12 text-slate-400 font-bold flex flex-col items-center justify-center gap-2">
+            <span className="text-2xl">💬</span>
+            <p>No parent reviews found in the database yet.</p>
           </div>
-        </div>
+        )}
 
         
        

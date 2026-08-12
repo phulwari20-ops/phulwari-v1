@@ -158,15 +158,31 @@ export default function BirthdayPartyPage() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-        console.log(`📡 [FRONTEND SUPABASE API REQUEST]: GET ${supabaseUrl}/rest/v1/party_packages`);
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
         const { data, error } = await supabase.from('party_packages').select('*');
         if (data && data.length > 0) {
           console.log('✅ [FRONTEND SUPABASE API RESPONSE SUCCESS]: Received party packages from database', data);
-          setPackagesList(prev => prev.map(p => {
-            const dbMatch = data.find((d: any) => d.name?.toLowerCase() === p.name.toLowerCase() || d.id === p.name)
-            return dbMatch ? { ...p, price: dbMatch.price || p.price } : p
-          }));
+          // Only show visible packages
+          const visibleDbPackages = data.filter((d: any) => d.is_visible !== false);
+          
+          if (visibleDbPackages.length > 0) {
+            // Map DB data to match frontend Package interface
+            const dynamicPackages = visibleDbPackages.map((d: any) => {
+              // Try to find a default package to borrow icons/colors, otherwise use defaults
+              const fallback = defaultPackages.find(dp => dp.name.toLowerCase() === d.name?.toLowerCase()) || defaultPackages[0];
+              return {
+                name: d.name,
+                tagline: d.tagline || fallback.tagline,
+                price: d.price || fallback.price,
+                features: d.includes ? d.includes.split(',').map((f:string) => f.trim()) : fallback.features,
+                icon: fallback.icon,
+                bgClass: fallback.bgClass,
+                btnClass: fallback.btnClass
+              };
+            });
+            setPackagesList(dynamicPackages);
+          }
         }
       } catch (err) {
         console.error('❌ [FRONTEND SUPABASE API EXCEPTION]:', err);

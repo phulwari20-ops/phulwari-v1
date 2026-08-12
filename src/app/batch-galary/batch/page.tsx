@@ -114,7 +114,7 @@ export default function BatchPage() {
       try {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
-        const { data, error } = await supabase.from('batches').select('*');
+        const { data, error } = await supabase.from('batches').select('*').neq('is_visible', false);
         if (!error && data && data.length > 0) {
           console.log('✅ Dynamic Batches fetched from DB:', data);
           setDynamicBatches(data);
@@ -131,21 +131,53 @@ export default function BatchPage() {
   const colors = ['#FF4D8D', '#8B5CF6', '#E8A621', '#10B981', '#3B82F6', '#F97316'];
   const bgs    = ['#FFE6EF', '#EFE7FE', '#FFF3D9', '#ECFDF5', '#EFF6FF', '#FFF7ED'];
 
-  const activeTableData = dynamicBatches.length > 0
-    ? dynamicBatches.map((b, idx) => {
-        const start = b.start_time || '';
-        const end   = b.end_time   || '';
-        const timing = start && end ? `${start} – ${end}` : start || end || '—';
-        return {
-          batch: b.batch_name,
-          age: b.age_group || '—',
-          timing,
-          days: b.days || '—',
-          color: colors[idx % colors.length],
-          bg:    bgs[idx % bgs.length]
-        };
-      })
-    : tableData;
+  const activeTableData = dynamicBatches.map((b, idx) => {
+    const start = b.start_time || '';
+    const end   = b.end_time   || '';
+    const timing = start && end ? `${start} – ${end}` : start || end || '—';
+    return {
+      batch: b.batch_name,
+      age: b.age_group || '—',
+      timing,
+      days: b.days || '—',
+      color: colors[idx % colors.length],
+      bg:    bgs[idx % bgs.length]
+    };
+  });
+
+  const activeBatches = dynamicBatches.map((b, idx) => {
+    const start = b.start_time || '';
+    const end   = b.end_time   || '';
+    const timing = start && end ? `${start} – ${end}` : start || end || '—';
+    const color = colors[idx % colors.length];
+    const bg = bgs[idx % bgs.length];
+
+    // Determine icon based on name
+    let Icon = Users2;
+    if (b.batch_name.toLowerCase().includes('toddler')) Icon = Baby;
+    else if (b.batch_name.toLowerCase().includes('core')) Icon = CalendarDays;
+
+    return {
+      id: b.id?.toString() || `batch-${idx}`,
+      badge: b.batch_name,
+      emoji: b.emoji || '⚡',
+      timing,
+      days: b.days || '—',
+      age: b.age_group || '—',
+      color,
+      bg,
+      icon: Icon,
+      tagline: b.tagline || 'Flexible child activity & learning sessions',
+      description: b.description || 'Specially designed schedule for kids activity engagement.',
+      includes: b.includes || [
+        { icon: Sparkles, text: 'Playzone & Physical Activity' },
+        { icon: Star, text: 'Expert Guided Mentorship' }
+      ],
+      childBenefits: b.child_benefits || ['Confidence Building', 'Social Interaction', 'Active Learning'],
+      motherBenefits: b.mother_benefits || [],
+      bestFor: b.best_for || 'Children seeking a fun, safe, and engaging environment.'
+    };
+  });
 
   return (
     <>
@@ -245,7 +277,7 @@ export default function BatchPage() {
 
         {/* Batch cards — tap to expand */}
         <div className="bt-cards">
-          {batches.map((batch, i) => {
+          {activeBatches.map((batch, i) => {
             const Icon = batch.icon;
             const isOpen = expandedBatch === batch.id;
             return (
