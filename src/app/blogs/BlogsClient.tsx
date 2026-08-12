@@ -85,62 +85,75 @@ export default function BlogsClient({ initialBlogs }: BlogsClientProps) {
             </p>
           </div>
 
-          {/* Category Pills */}
-          <div className="cats-wrap">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`cat-pill${selectedCategory === cat ? ' active' : ''}`}
-              >
-                {CATEGORY_ICONS[cat] || null}
-                {cat}
-              </button>
-            ))}
-          </div>
+        {/* Empty state when no published blogs in DB */}
+          {initialBlogs.length === 0 && (
+            <div className="empty-state">
+              <BookOpen style={{ width: 52, height: 52, margin: '0 auto 14px', opacity: 0.25, color: '#e91e8c', display: 'block' }} />
+              <p style={{ fontSize: 16, fontWeight: 800, color: '#475569', margin: '0 0 6px' }}>No Published Articles Yet</p>
+              <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>Check back soon — our team is working on great content for you!</p>
+            </div>
+          )}
+
+          {/* Category Pills — only show if blogs exist */}
+          {initialBlogs.length > 0 && (
+            <div className="cats-wrap">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`cat-pill${selectedCategory === cat ? ' active' : ''}`}
+                >
+                  {CATEGORY_ICONS[cat] || null}
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Blog Grid */}
-          <div className="blog-grid">
-            {filteredBlogs.map(blog => (
-              <article key={blog.id || blog.slug} className="blog-card">
-                {/* Image */}
-                <div className="blog-card-img-wrap">
-                  <img
-                    src={blog.featured_image || '/galary4.webp'}
-                    alt={blog.title}
-                    className="blog-card-img"
-                    onError={(e: any) => { e.target.src = '/galary4.webp'; }}
-                  />
-                  <span className="blog-card-badge">{blog.category}</span>
-                </div>
-
-                {/* Body */}
-                <div className="blog-card-body">
-                  <div className="blog-card-meta">
-                    <span className="blog-card-meta-item">
-                      <User size={12} className="blog-card-meta-icon" />
-                      {blog.author_name || 'Phulwari Admin'}
-                    </span>
-                    <span className="blog-card-meta-item">
-                      <Calendar size={12} className="blog-card-meta-icon" />
-                      {new Date(blog.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
+          {initialBlogs.length > 0 && (
+            <div className="blog-grid">
+              {filteredBlogs.map(blog => (
+                <article key={blog.id || blog.slug} className="blog-card">
+                  {/* Image */}
+                  <div className="blog-card-img-wrap">
+                    <img
+                      src={blog.featured_image || '/galary4.webp'}
+                      alt={blog.title}
+                      className="blog-card-img"
+                      onError={(e: any) => { e.target.src = '/galary4.webp'; }}
+                    />
+                    <span className="blog-card-badge">{blog.category}</span>
                   </div>
-                  <h2 className="blog-card-title">{blog.title}</h2>
-                  <p className="blog-card-desc">{blog.short_description}</p>
-                </div>
 
-                {/* Footer CTA */}
-                <div className="blog-card-footer">
-                  <Link href={`/blogs/${blog.slug}`} className="blog-card-link">
-                    Read Full Article <ArrowRight size={15} />
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+                  {/* Body */}
+                  <div className="blog-card-body">
+                    <div className="blog-card-meta">
+                      <span className="blog-card-meta-item">
+                        <User size={12} className="blog-card-meta-icon" />
+                        {blog.author_name || 'Phulwari Admin'}
+                      </span>
+                      <span className="blog-card-meta-item">
+                        <Calendar size={12} className="blog-card-meta-icon" />
+                        {new Date(blog.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <h2 className="blog-card-title">{blog.title}</h2>
+                    <p className="blog-card-desc">{blog.short_description}</p>
+                  </div>
 
-          {filteredBlogs.length === 0 && (
+                  {/* Footer CTA */}
+                  <div className="blog-card-footer">
+                    <Link href={`/blogs/${blog.slug}`} className="blog-card-link">
+                      Read Full Article <ArrowRight size={15} />
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {initialBlogs.length > 0 && filteredBlogs.length === 0 && (
             <div className="empty-state">
               <BookOpen style={{ width: 48, height: 48, margin: '0 auto 12px', opacity: 0.3 }} />
               <p style={{ fontSize: 14, fontWeight: 700 }}>No articles found in this category.</p>
