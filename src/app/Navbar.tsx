@@ -278,8 +278,8 @@ const Navbar: React.FC = () => {
         @media (min-width: 1024px) { .nav-spacer { height: 92px; } }
 
         .nav-bar {
-          max-width: 82rem; margin: 0 auto;
-          display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+          max-width: 90rem; margin: 0 auto;
+          display: flex; align-items: center; justify-content: space-between; gap: 0.4rem;
           padding: 0.55rem 0.6rem 0.55rem 1rem;
           background-color: transparent; border-radius: 9999px;
           box-shadow: none; border: 1px solid transparent;
@@ -315,12 +315,12 @@ const Navbar: React.FC = () => {
         .nav-mobile-brand-sub { font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: clamp(0.5rem, 2.1vw, 0.62rem); letter-spacing: 0.01em; color: #6B6480; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
         @media (min-width: 1024px) { .nav-mobile-brand { display: none; } }
 
-        .nav-links { display: none; align-items: center; gap: 0.2rem; font-family: 'Quicksand', sans-serif; }
+        .nav-links { display: none; align-items: center; gap: 0.1rem; font-family: 'Quicksand', sans-serif; }
         .nav-dropdown-wrap { position: relative; }
 
         .nav-link {
-          position: relative; display: inline-flex; align-items: center; gap: 0.3rem;
-          padding: 0.6rem 0.8rem; border-radius: 9999px; font-weight: 700; font-size: 0.84rem;
+          position: relative; display: inline-flex; align-items: center; gap: 0.25rem;
+          padding: 0.55rem 0.65rem; border-radius: 9999px; font-weight: 700; font-size: 0.8rem;
           color: #3F3A52; text-decoration: none; background: none; border: none; cursor: pointer;
           white-space: nowrap; transition: background-color 0.2s ease, color 0.2s ease;
         }
