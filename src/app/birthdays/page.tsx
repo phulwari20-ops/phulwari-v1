@@ -1,5 +1,4 @@
 import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
 import { ShieldCheck, Camera, PartyPopper, Gamepad2, Users, Sparkles, Droplets, Star, Quote, ChevronDown, CalendarHeart } from 'lucide-react'
 import FaqAccordion from './FaqAccordion'
 import LeadForm from './LeadForm'
@@ -16,21 +15,29 @@ interface BirthdayPackage {
 }
 
 export default async function LandingPage() {
-  const cookieStore = await cookies()
-  const supabase = await createClient()
+  let packages: any[] | null = null
+  let configRow: any = null
 
-  // Fetch packages from Supabase
-  const { data: packages, error: pkgError } = await supabase
-    .from('birthday_packages')
-    .select('*')
-    .order('id', { ascending: true })
+  try {
+    const supabase = await createClient()
 
-  // Fetch landing config from Supabase
-  const { data: configRow, error: configError } = await supabase
-    .from('birthday_landing_config')
-    .select('*')
-    .eq('id', 1)
-    .single()
+    // Fetch packages from Supabase
+    const { data: pkgData } = await supabase
+      .from('birthday_packages')
+      .select('*')
+      .order('id', { ascending: true })
+    packages = pkgData
+
+    // Fetch landing config from Supabase
+    const { data: cfgData } = await supabase
+      .from('birthday_landing_config')
+      .select('*')
+      .eq('id', 1)
+      .single()
+    configRow = cfgData
+  } catch (err) {
+    console.error('Failed to load birthday page data from Supabase:', err)
+  }
 
   // Dynamic config with precise fallback values matching mockup
   const config = configRow || {
