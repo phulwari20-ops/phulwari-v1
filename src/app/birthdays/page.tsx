@@ -23,8 +23,9 @@ export default async function LandingPage() {
 
     // Fetch packages from Supabase
     const { data: pkgData } = await supabase
-      .from('birthday_packages')
+      .from('party_packages')
       .select('*')
+      .eq('is_visible', true)
       .order('id', { ascending: true })
     packages = pkgData
 
@@ -102,54 +103,28 @@ export default async function LandingPage() {
     }
   }
 
-  const mockPackages = [
-    {
-      id: 1, name: "Basic Birthday Package", description: "Ideal for small family gatherings (1st milestone birthdays or intimate groups).",
-      features: ["Exclusive Celebration Space", "Basic Theme Decoration & Balloon Setup", "Background Music & Sound Setup", "Play Zone Access for Kids"],
-      ideal_for: "", is_popular: false, cta_text: "Inquire About Basic Package"
-    },
-    {
-      id: 2, name: "Premium Package", description: "The complete hassle-free party experience!",
-      features: ["Full Custom Theme Decoration (Backdrop, Props & Entrance Setup)", "Toddler Games Host & Interactive Activities", "Music, Dance Session & Entertainment Zone", "Dedicated Party Assistant & On-Site Support Team", "Photo-friendly lighting and cake table arrangements"],
-      ideal_for: "for 2nd - 5th Birthdays", is_popular: true, cta_text: "Get Premium Package Quote"
-    },
-    {
-      id: 3, name: "Fully Customized Celebration", description: "Tailor every single element to your exact preference, guest count, and budget.",
-      features: ["Custom Themes, Specialized Artists, Magicians, Tattoo Artists, or Character Mascots.", "Custom Activity Stations (Art & Craft, Mini Disco, Toddler Gym (Upto 6 years)."],
-      ideal_for: "", is_popular: false, cta_text: "Customize My Party"
+  const displayPackages: BirthdayPackage[] = (packages || []).map((pkg: any, idx: number) => {
+    const featuresArray = pkg.includes 
+      ? pkg.includes.split(',').map((f: string) => f.trim()).filter(Boolean)
+      : [];
+      
+    const isPremium = pkg.name?.toLowerCase().includes('premium');
+    
+    let desc = pkg.tagline || pkg.description || '';
+    if (pkg.price) {
+      desc = `${desc} | Price: ${pkg.price}`;
     }
-  ];
-
-  const rawPackages = configRow?.hero_section?.packages || packages;
-  
-  const displayPackages: BirthdayPackage[] = rawPackages && rawPackages.length > 0 
-    ? rawPackages.map((pkg: any, idx: number) => {
-        if (Array.isArray(pkg.features)) {
-          return pkg;
-        }
-        
-        const featuresArray = pkg.includes 
-          ? pkg.includes.split(',').map((f: string) => f.trim()).filter(Boolean)
-          : [];
-          
-        const isPremium = pkg.name?.toLowerCase().includes('premium');
-        
-        let desc = pkg.description || pkg.tagline || '';
-        if (pkg.price) {
-          desc = `${desc} | Price: ${pkg.price}`;
-        }
-        
-        return {
-          id: pkg.id || idx + 1,
-          name: pkg.name,
-          description: desc,
-          features: featuresArray,
-          ideal_for: isPremium ? "for 2nd - 5th Birthdays" : "",
-          is_popular: isPremium,
-          cta_text: pkg.cta_text || (isPremium ? "Get Premium Package Quote" : pkg.name?.toLowerCase().includes('custom') ? "Customize My Party" : "Inquire About Package")
-        };
-      })
-    : mockPackages;
+    
+    return {
+      id: pkg.id || idx + 1,
+      name: pkg.name || 'Unnamed Package',
+      description: desc,
+      features: featuresArray,
+      ideal_for: isPremium ? "for 2nd - 5th Birthdays" : "",
+      is_popular: isPremium,
+      cta_text: pkg.cta_text || (isPremium ? "Get Premium Package Quote" : pkg.name?.toLowerCase().includes('custom') ? "Customize My Party" : "Inquire About Package")
+    };
+  });
 
   const renderIcon = (iconName: string, className = "w-5 h-5") => {
     switch (iconName) {

@@ -18,6 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/activities/yoga-cricket',
     '/batch-galary/batch',
     '/batch-galary/gallery',
+    '/birthdays',
+    '/kids-and-child-birthday-party',
     '/contact',
     '/events/birthday',
     '/events/summer',

@@ -115,7 +115,7 @@ const navItems: NavItem[] = [
     subpages: [
       { href: '/events/summer',   label: 'Summer Camp',               icon: Sun,      color: '#E8A621', bg: '#FFF3D9' },
       { href: '/events/winter',   label: 'Winter Camp',               icon: Snowflake,color: '#3D8BFF', bg: '#E5EFFF' },
-      { href: '/birthdays', label: 'Birthday Party Celebrations',icon: Cake,    color: '#FF8A3D', bg: '#FFEADB' },
+      { href: '/kids-and-child-birthday-party', label: 'Birthday Party Celebrations',icon: Cake,    color: '#FF8A3D', bg: '#FFEADB' },
     ],
   },
   {

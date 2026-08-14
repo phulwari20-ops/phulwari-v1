@@ -11,7 +11,7 @@ export default function LeadForm() {
   
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleWhatsAppRedirect = () => {
+  const handleWhatsAppRedirect = async () => {
     if (!name || !phone || age === 'Select Age' || !date || guests === 'Select Guests') {
       alert('Please fill out all the fields to check availability!')
       return
@@ -19,6 +19,24 @@ export default function LeadForm() {
 
     setIsSubmitting(true)
     
+    try {
+      // Send Lead to Supabase Enquiries table
+      await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          childName: `Child turning ${age}`,
+          parentName: name,
+          phone: phone,
+          program: `Birthday Party (${guests} guests) on ${date}`,
+          followUpStatus: 'Pending (WhatsApp sent)'
+        })
+      })
+    } catch (err) {
+      console.error('Failed to submit enquiry', err)
+      // Continue to WhatsApp even if DB fails
+    }
+
     // Prepare WhatsApp Message text
     const message = `Hi Phulwari! 🎈\nI would like to check date availability for a Birthday Party:\n\n` + 
                     `👤 *Parent's Name:* ${name}\n` +
@@ -31,11 +49,9 @@ export default function LeadForm() {
     const waNumber = '919876543210' // Mock WhatsApp contact number matching mockup
     const waUrl = `https://api.whatsapp.com/send?phone=${waNumber}&text=${encodeURIComponent(message)}`
     
-    // Simulate slight API/Button delay for animations
-    setTimeout(() => {
-      window.open(waUrl, '_blank')
-      setIsSubmitting(false)
-    }, 800)
+    // Open WhatsApp
+    window.open(waUrl, '_blank')
+    setIsSubmitting(false)
   }
 
   return (

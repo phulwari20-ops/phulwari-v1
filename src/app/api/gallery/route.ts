@@ -28,7 +28,7 @@ export async function GET() {
 
   let dbItems: any[] = [];
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/gallery?select=*`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/gallery?select=*&order=created_at.desc`, {
       headers: {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`,
