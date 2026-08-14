@@ -37,3 +37,4 @@ export default async function BlogsPage() {
 
   return <BlogsClient initialBlogs={blogs} />;
 }
+export const dynamic = 'force-dynamic';

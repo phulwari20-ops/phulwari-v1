@@ -86,6 +86,13 @@ const navItems: NavItem[] = [
       { href: '/activities/play-zone',      label: 'Play Zone',          icon: Gamepad2, color: '#FF8A3D', bg: '#FFEADB' },
     ],
   },
+  {
+    label: 'Parent Portal',
+    href: '/portal/login',
+    accent: '#34B36B',
+    accentBg: '#E3F7EA',
+    icon: UserCheck,
+  },
   { label: 'Blogs', href: '/blogs', accent: '#FF8A3D', accentBg: '#FFEADB', icon: FileText },
   { label: 'FAQ', href: '/faq', accent: '#8B5CF6', accentBg: '#EFE7FE', icon: HelpCircle },
   {
@@ -140,13 +147,6 @@ const navItems: NavItem[] = [
     accent: '#FF4D8D',
     accentBg: '#FFE6EF',
     icon: Star,
-  },
-  {
-    label: 'Parent Portal',
-    href: '/portal/login',
-    accent: '#34B36B',
-    accentBg: '#E3F7EA',
-    icon: UserCheck,
   },
 ];
 
