@@ -5,6 +5,35 @@ import Footer from '@/app/footer/page';
 import './globals.css';
 import FloatingButton from './FloatingButtons';
 import { ApiLogger } from '@/components/ApiLogger';
+import { Poppins, Quicksand, Baloo_2, Lora } from 'next/font/google';
+
+const poppins = Poppins({
+  variable: '--font-poppins',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+});
+
+const quicksand = Quicksand({
+  variable: '--font-quicksand',
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+});
+
+const baloo2 = Baloo_2({
+  variable: '--font-baloo-2',
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  display: 'swap',
+});
+
+const lora = Lora({
+  variable: '--font-lora',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
 
 /* --------------------------------------------------------------------- */
 /*  Update these once — they're reused across all the metadata below     */
@@ -205,7 +234,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${poppins.variable} ${quicksand.variable} ${baloo2.variable} ${lora.variable} scroll-smooth`} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ApiLogger />
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-95W6V42HK2" strategy="afterInteractive" />

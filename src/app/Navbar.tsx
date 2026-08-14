@@ -78,17 +78,16 @@ const navItems: NavItem[] = [
     accentBg: '#E3F7EA',
     icon: Activity,
     subpages: [
-      { href: '/portal/login',              label: '🎓 Parent & Student Portal (ERP)', icon: UserCheck, color: '#FF4D8D', bg: '#FFE6EF' },
       { href: '/activities/music-dance',    label: 'Music & Dance',      icon: Music,    color: '#FF4D8D', bg: '#FFE6EF' },
       { href: '/activities/gymnastics-mma', label: 'Gymnastics & MMA',   icon: Swords,   color: '#3D8BFF', bg: '#E5EFFF' },
-      { href: '/activities/roller-skating', label: 'Roller Skating',     icon: Footprints,color: '#E8A621',bg: '#FFF3D9' },
+      { href: '/activities/roller-skating', label: 'Roller Skating & Karate', icon: Footprints,color: '#E8A621',bg: '#FFF3D9' },
       { href: '/activities/art-craft',      label: 'Art & Craft',        icon: Palette,  color: '#34B36B', bg: '#E3F7EA' },
       { href: '/activities/yoga-cricket',   label: 'Yoga & Cricket',     icon: Disc3,    color: '#8B5CF6', bg: '#EFE7FE' },
       { href: '/activities/play-zone',      label: 'Play Zone',          icon: Gamepad2, color: '#FF8A3D', bg: '#FFEADB' },
     ],
   },
   { label: 'Blogs', href: '/blogs', accent: '#FF8A3D', accentBg: '#FFEADB', icon: FileText },
-  { label: 'Parent Portal', href: '/portal/login', accent: '#FF4D8D', accentBg: '#FFE6EF', icon: Lock },
+  { label: 'FAQ', href: '/faq', accent: '#8B5CF6', accentBg: '#EFE7FE', icon: HelpCircle },
   {
     label: 'Programs for Mothers',
     href: '/mothers',
@@ -109,7 +108,7 @@ const navItems: NavItem[] = [
     subpages: [
       { href: '/events/summer',   label: 'Summer Camp',               icon: Sun,      color: '#E8A621', bg: '#FFF3D9' },
       { href: '/events/winter',   label: 'Winter Camp',               icon: Snowflake,color: '#3D8BFF', bg: '#E5EFFF' },
-      { href: '/events/birthday', label: 'Birthday Party Celebrations',icon: Cake,    color: '#FF8A3D', bg: '#FFEADB' },
+      { href: '/birthdays', label: 'Birthday Party Celebrations',icon: Cake,    color: '#FF8A3D', bg: '#FFEADB' },
     ],
   },
   {
@@ -134,6 +133,20 @@ const navItems: NavItem[] = [
       { href: '/legal/privacy', label: 'Privacy Policy',             icon: Lock,      color: '#3D8BFF', bg: '#E5EFFF' },
       { href: '/legal/faq',    label: 'Frequently Asked Questions',  icon: HelpCircle,color: '#FF8A3D', bg: '#FFEADB' },
     ],
+  },
+  {
+    label: 'Reviews',
+    href: '/testinomals',
+    accent: '#FF4D8D',
+    accentBg: '#FFE6EF',
+    icon: Star,
+  },
+  {
+    label: 'Parent Portal',
+    href: '/portal/login',
+    accent: '#34B36B',
+    accentBg: '#E3F7EA',
+    icon: UserCheck,
   },
 ];
 
@@ -514,13 +527,7 @@ const Navbar: React.FC = () => {
             })}
           </div>
 
-          <Link
-            href="/#reviews"
-            className="hidden xl:inline-flex items-center gap-2 px-4 py-1.5 bg-white text-slate-800 border border-slate-200 rounded-full text-xs font-bold shadow-sm hover:shadow-md hover:scale-105 transition text-decoration-none cursor-pointer"
-            title="Verified Reviews & Testimonials"
-          >
-            Reviews
-          </Link>
+
 
           <Link href="/contact" className="nav-cta">
             <Phone />

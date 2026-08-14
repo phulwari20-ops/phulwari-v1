@@ -61,33 +61,6 @@ export default function StudentLoginPage() {
         } catch (err) {}
       }
 
-      // 3. Fallback demo accounts check
-      if (!matchedStudent) {
-        if (cleanId === 'PH-2026-001' && cleanPw === 'parent123') {
-          matchedStudent = {
-            id: '33333333-3333-3333-3333-333333333333',
-            admission_id: 'PH-2026-001',
-            full_name: 'Aarav Sharma',
-            parent_name: 'Rajesh Sharma',
-            parent_phone: '+91 98765 43210',
-            class_name: 'Nursery',
-            section_name: 'A',
-            batches: { batch_name: 'Little Explorers (Morning)', start_time: '09:00 AM', end_time: '11:30 AM', days: 'Mon - Fri' }
-          }
-        } else if (cleanId === 'PH-2026-002' && cleanPw === 'parent123') {
-          matchedStudent = {
-            id: 'st-002',
-            admission_id: 'PH-2026-002',
-            full_name: 'Ananya Verma',
-            parent_name: 'Suresh Verma',
-            parent_phone: '+91 98765 43211',
-            class_name: 'LKG',
-            section_name: 'B',
-            batches: { batch_name: 'Junior Champions (Afternoon)', start_time: '03:00 PM', end_time: '05:30 PM', days: 'Mon - Sat' }
-          }
-        }
-      }
-
       if (!matchedStudent) {
         console.error(`❌ [STUDENT LOGIN FAILURE]: No match for Admission ID "${cleanId}"`)
         setError('Invalid Admission ID or Password. Please check your credentials.')
@@ -292,25 +265,8 @@ export default function StudentLoginPage() {
           </button>
         </form>
 
-        {/* Demo Credentials Box */}
+        {/* Return link */}
         <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #F1F5F9', textAlign: 'center' }}>
-          <div style={{
-            padding: '10px 12px',
-            background: '#FFF0F5',
-            border: '1px solid #FFE4E6',
-            borderRadius: '14px',
-            fontSize: '11px',
-            color: '#475569',
-            marginBottom: '10px'
-          }}>
-            <p style={{ fontWeight: 700, color: '#1E293B', marginBottom: '2px' }}>
-              💡 Demo Parent Login Credentials:
-            </p>
-            <p style={{ fontFamily: 'monospace', margin: 0 }}>
-              Admission ID: <strong style={{ color: '#FF4D8D' }}>PH-2026-001</strong> | Password: <strong style={{ color: '#FF4D8D' }}>parent123</strong>
-            </p>
-          </div>
-
           <Link href="/" style={{ fontSize: '12px', fontWeight: 600, color: '#64748B', textDecoration: 'none' }}>
             ← Return to Phulwari Main Website
           </Link>

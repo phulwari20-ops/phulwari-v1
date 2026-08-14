@@ -446,29 +446,89 @@ export default function StudentDashboardPage() {
         {activeTab === 'profile' && (
           <div style={{ background: '#ffffff', border: '1px solid #F1F5F9', borderRadius: '28px', padding: '2rem', boxShadow: '0 15px 40px rgba(0, 0, 0, 0.04)' }}>
             <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <User size={22} color="#FF4D8D" /> Child & Parent Information
+              <User size={22} color="#FF4D8D" /> Child Registration & Consent Profile
             </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-              <div style={{ background: '#F8FAFC', padding: '1.5rem', borderRadius: '20px', border: '1px solid #E2E8F0' }}>
-                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem' }}>Child Details</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#1E293B' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+              {/* 1. CHILD DETAILS */}
+              <div style={{ background: '#FFF5F7', padding: '1.5rem', borderRadius: '20px', border: '1px solid #FFE4E8' }}>
+                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#E11D48', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>🌸</span> Child Details
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#1E293B' }}>
                   <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Full Name:</strong> {student.full_name}</p>
                   <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Admission ID:</strong> {student.admission_id}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Class & Section:</strong> {student.class_name || 'Nursery'} - {student.section_name || 'A'}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Date of Birth:</strong> {student.dob || '14 May 2021'}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Gender:</strong> {student.gender || 'Boy'}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Blood Group:</strong> {student.blood_group || 'B+'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Date of Birth:</strong> {student.dob || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Gender:</strong> {student.gender || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Blood Group:</strong> {student.blood_group || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>City/State:</strong> {student.city || 'Patna'}, {student.state || 'Bihar'} {student.pin_code && `(${student.pin_code})`}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Address:</strong> {student.address || 'N/A'}</p>
                 </div>
               </div>
 
-              <div style={{ background: '#F8FAFC', padding: '1.5rem', borderRadius: '20px', border: '1px solid #E2E8F0' }}>
-                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem' }}>Parent Details</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#1E293B' }}>
+              {/* 2. PARENT DETAILS */}
+              <div style={{ background: '#FAF5FF', padding: '1.5rem', borderRadius: '20px', border: '1px solid #F3E8FF' }}>
+                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#6B21A8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>🍇</span> Parent Details
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#1E293B' }}>
                   <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Parent/Guardian:</strong> {student.parent_name}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Relationship:</strong> {student.parent_relationship || 'Father'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Occupation:</strong> {student.parent_occupation || 'N/A'}</p>
                   <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Contact Phone:</strong> {student.parent_phone}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Email:</strong> {student.parent_email || 'parent@example.com'}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Address:</strong> {student.address || 'Sector 15, Vasundhara'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Alternate Phone:</strong> {student.parent_alt_phone || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Email:</strong> {student.parent_email || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* 3. EMERGENCY CONTACT */}
+              <div style={{ background: '#F0FDF4', padding: '1.5rem', borderRadius: '20px', border: '1px solid #DCFCE7' }}>
+                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#16A34A', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>🌿</span> Emergency Details
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#1E293B' }}>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Contact Name:</strong> {student.emergency_contact_name || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Relationship:</strong> {student.emergency_relationship || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Phone No.:</strong> {student.emergency_phone || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Alternate Phone:</strong> {student.emergency_alt_phone || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* 4. PROGRAM & BATCH DETAILS */}
+              <div style={{ background: '#FFF7ED', padding: '1.5rem', borderRadius: '20px', border: '1px solid #FFEDD5' }}>
+                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#EA580C', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>🎯</span> Program & Batch
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#1E293B' }}>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Batch Name:</strong> {student.batch_name || 'Nursery - Afternoon'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Programs Active:</strong> {student.program_interested || 'General Activity'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Time Slot:</strong> {student.preferred_time_slot || 'Morning'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>End Date:</strong> {student.validity_end_date || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* 5. MEDICAL DETAILS */}
+              <div style={{ background: '#F0F9FF', padding: '1.5rem', borderRadius: '20px', border: '1px solid #E0F2FE' }}>
+                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#0284C7', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>🩺</span> Medical Information
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#1E293B' }}>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Condition:</strong> {student.has_medical_condition ? (student.medical_condition_details || 'Yes') : 'None'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Regular Medication:</strong> {student.regular_medication || 'None'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Doctor:</strong> {student.doctor_name || 'N/A'} {student.doctor_phone && `(${student.doctor_phone})`}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Hospital:</strong> {student.hospital_preference || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* 6. CONSENT STATUS */}
+              <div style={{ background: '#FFF1F2', padding: '1.5rem', borderRadius: '20px', border: '1px solid #FFE4E6' }}>
+                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#DB2777', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>📜</span> Legal & Consent
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#1E293B' }}>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Terms Agreed:</strong> {student.consent_accepted ? '✓ Yes, Agreed' : 'Pending Verification'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Status:</strong> <span style={{ color: student.status === 'active' ? '#16A34A' : '#DC2626', fontWeight: 'bold' }}>{student.status?.toUpperCase() || 'ACTIVE'}</span></p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Joined On:</strong> {student.created_at ? new Date(student.created_at).toLocaleDateString('en-GB') : 'N/A'}</p>
                 </div>
               </div>
             </div>

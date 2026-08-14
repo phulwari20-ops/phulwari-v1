@@ -1,15 +1,52 @@
 'use client';
 
 import { useState } from 'react';
+import { Phone, MessageCircle } from 'lucide-react';
 
 const INSTAGRAM_URL = 'https://www.instagram.com/phulwari.motherkids/';
 const FACEBOOK_URL = 'https://www.facebook.com/share/1DWjMMRAjT/';  
+const WHATSAPP_URL = 'https://wa.me/916207368839';
+const CALL_URL = 'tel:+916207368839';
+
 export default function FloatingButton() {
-  const [hovered, setHovered] = useState<'instagram' | 'facebook' | null>(null);
+  const [hovered, setHovered] = useState<'call' | 'whatsapp' | 'instagram' | 'facebook' | null>(null);
 
   return (
     <div style={styles.wrapper}>
       
+      {/* Call Now */}
+      <a
+        href={CALL_URL}
+        aria-label="Call Us Now"
+        onMouseEnter={() => setHovered('call')}
+        onMouseLeave={() => setHovered(null)}
+        style={{
+          ...styles.button,
+          background: hovered === 'call' ? '#007bbf' : '#009688',
+          transform: hovered === 'call' ? 'scale(1.15)' : 'scale(1)',
+        }}
+      >
+        <Phone size={22} color="white" />
+      </a>
+
+      {/* WhatsApp Now */}
+      <a
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Contact us on WhatsApp"
+        onMouseEnter={() => setHovered('whatsapp')}
+        onMouseLeave={() => setHovered(null)}
+        style={{
+          ...styles.button,
+          background: hovered === 'whatsapp' ? '#20ba5a' : '#25D366',
+          transform: hovered === 'whatsapp' ? 'scale(1.15)' : 'scale(1)',
+        }}
+      >
+        <MessageCircle size={22} color="white" />
+      </a>
+
+      {/* Instagram */}
       <a
         href={INSTAGRAM_URL}
         target="_blank"
@@ -26,7 +63,6 @@ export default function FloatingButton() {
           transform: hovered === 'instagram' ? 'scale(1.15)' : 'scale(1)',
         }}
       >
-  
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"
@@ -38,7 +74,7 @@ export default function FloatingButton() {
         </svg>
       </a>
 
-  
+      {/* Facebook */}
       <a
         href={FACEBOOK_URL}
         target="_blank"
@@ -52,7 +88,6 @@ export default function FloatingButton() {
           transform: hovered === 'facebook' ? 'scale(1.15)' : 'scale(1)',
         }}
       >
- 
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="22"

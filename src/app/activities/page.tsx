@@ -148,6 +148,18 @@ const activities = [
     bg: '#FFE6EF',
   },
   {
+    icon: Shield,
+    title: 'Karate Training',
+    tagline: 'Build Strength, Discipline & Confidence',
+    description: 'Karate helps children develop self-defence skills, discipline, focus and confidence.',
+    benefits: ['Self-Defence Skills', 'Strength & Fitness', 'Focus & Discipline', 'Confidence & Coordination', 'Respect & Teamwork'],
+    ageLabel: 'All Ages',
+    category: 'Sports',
+    href: '/activities/karate',
+    color: '#E8A621',
+    bg: '#FFF3D9',
+  },
+  {
     icon: Dumbbell,
     title: 'Fitness for Mothers',
     tagline: 'Stay Active, Healthy & Energetic',
@@ -236,6 +248,7 @@ export default function Activities() {
           position: absolute;
           pointer-events: none;
           animation: floatUp 4s ease-in-out infinite;
+          display: none;
         }
         .act-hero-badge {
           display: inline-flex;
@@ -476,6 +489,7 @@ export default function Activities() {
         @media (min-width: 1024px) {
           .act-hero-title { font-size: 3.5rem; }
           .act-grid { grid-template-columns: repeat(3, 1fr); }
+          .act-float { display: block; }
         }
       `}</style>
 

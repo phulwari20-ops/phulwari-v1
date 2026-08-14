@@ -160,11 +160,19 @@ export default function BirthdayPartyPage() {
       try {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
-        const { data, error } = await supabase.from('party_packages').select('*');
-        if (data && data.length > 0) {
-          console.log('✅ [FRONTEND SUPABASE API RESPONSE SUCCESS]: Received party packages from database', data);
-          // Only show visible packages
-          const visibleDbPackages = data.filter((d: any) => d.is_visible !== false);
+        
+        // Fetch from config table
+        const { data: configData } = await supabase
+          .from('birthday_landing_config')
+          .select('hero_section')
+          .eq('id', 1)
+          .single();
+          
+        const rawPkgs = configData?.hero_section?.packages;
+        
+        if (rawPkgs && rawPkgs.length > 0) {
+          console.log('✅ [FRONTEND SUPABASE API RESPONSE SUCCESS]: Received party packages from config row', rawPkgs);
+          const visibleDbPackages = rawPkgs.filter((d: any) => d.is_visible !== false);
           
           if (visibleDbPackages.length > 0) {
             // Map DB data to match frontend Package interface
@@ -175,9 +183,10 @@ export default function BirthdayPartyPage() {
                 name: d.name,
                 tagline: d.tagline || fallback.tagline,
                 price: d.price || fallback.price,
-                features: d.includes ? d.includes.split(',').map((f:string) => f.trim()) : fallback.features,
+                features: d.includes ? d.includes.split(',').map((f:string) => f.trim()) : (Array.isArray(d.features) ? d.features : fallback.features),
                 icon: fallback.icon,
                 bgClass: fallback.bgClass,
+                colorClass: fallback.colorClass,
                 btnClass: fallback.btnClass
               };
             });
@@ -185,7 +194,7 @@ export default function BirthdayPartyPage() {
           }
         }
       } catch (err) {
-        console.error('❌ [FRONTEND SUPABASE API EXCEPTION]:', err);
+        console.error('❌ [FRONTEND SUPABASE API RESPONSE ERROR]: Failed to fetch party packages', err);
       }
     };
     fetchPackages();

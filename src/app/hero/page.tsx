@@ -87,9 +87,7 @@ export default function HeroPage() {
           right: 0;
           bottom: 0;
           height: 40px;
-          background: radial-gradient(circle at 20px 0, transparent 21px, #ffffff 22px);
-          background-size: 40px 40px;
-          background-repeat: repeat-x;
+          background: #ffffff;
         }
 
         /* ---------- Floating decoration ---------- */
@@ -194,7 +192,6 @@ export default function HeroPage() {
           font-weight: 700;
           color: #6B4500;
           letter-spacing: 0.04em;
-          transform: rotate(-2deg);
         }
         .hero-badge svg { flex-shrink: 0; }
 

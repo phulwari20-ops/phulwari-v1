@@ -50,7 +50,14 @@ export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClie
   useEffect(() => {
     if (blog?.id) {
       const supabase = createClient();
-      supabase.rpc('increment_blog_views', { blog_id: blog.id }).catch(() => {});
+      const incrementViews = async () => {
+        try {
+          await supabase.rpc('increment_blog_views', { blog_id: blog.id });
+        } catch (e) {
+          console.error('Error incrementing views:', e);
+        }
+      };
+      incrementViews();
     }
   }, [blog]);
 
