@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
         destination: '/legal/faq',
         permanent: true,
       },
+      {
+        source: '/birthdays',
+        destination: '/kids-and-child-birthday-party',
+        permanent: true,
+      },
     ]
   },
 };

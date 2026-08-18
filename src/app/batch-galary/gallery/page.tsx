@@ -34,38 +34,45 @@ const defaultSlides = [
 ];
 
 export default function GalleryPage() {
-  const [slides, setSlides] = useState<any[]>([]);
+  const [slides, setSlides] = useState<any[]>(defaultSlides);
   const [current, setCurrent] = useState(0);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGallery = async () => {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
-      appLog('request', 'SUPABASE_REST', `GET ${supabaseUrl}/rest/v1/gallery`);
-
+      appLog('request', 'SUPABASE_CLIENT', 'Fetching gallery items from Supabase');
       try {
-        const res = await fetch(`${supabaseUrl}/rest/v1/gallery?select=*&order=created_at.desc`, {
-          headers: {
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`
-          },
-          cache: 'no-store'
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.length > 0) {
-            appLog('success', 'SUPABASE_REST', `Received ${data.length} gallery images from Supabase DB`);
-            setSlides(data.map((item: any) => ({ src: item.image_url || item.url || item.src, title: item.title || 'Phulwari Photo' })));
-          } else {
-            setSlides([]);
-          }
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('gallery')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          appLog('error', 'SUPABASE_CLIENT', error.message);
+          setSlides(defaultSlides);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          appLog('success', 'SUPABASE_CLIENT', `Received ${data.length} gallery images from Supabase DB`);
+          const dbSlides = data.map((item: any) => ({
+            src: item.image_url || item.url || item.src,
+            title: item.title || 'Phulwari Photo'
+          }));
+          
+          // Merge with defaultSlides uniquely
+          const merged = [...dbSlides, ...defaultSlides];
+          const uniqueSlides = merged.filter((item, index, self) =>
+            index === self.findIndex((t) => t.src === item.src)
+          );
+          setSlides(uniqueSlides);
         } else {
-          setSlides([]);
+          setSlides(defaultSlides);
         }
       } catch (err: any) {
-        appLog('error', 'SUPABASE_REST', err.message || 'REST Exception');
-        setSlides([]);
+        appLog('error', 'SUPABASE_CLIENT', err.message || 'Client Exception');
+        setSlides(defaultSlides);
       }
     };
     fetchGallery();

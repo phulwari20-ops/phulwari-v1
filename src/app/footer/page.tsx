@@ -65,7 +65,7 @@ const activities = [
   { icon: Disc3,       label: 'Dance Classes',               color: '#3D8BFF', href: '/activities/music-dance' },
   { icon: Activity,    label: 'Gymnastics',                  color: '#34B36B', href: '/activities/gymnastics-mma' },
   { icon: Swords,      label: 'MMA Training',                color: '#E8A621', href: '/activities/gymnastics-mma' },
-  { icon: Footprints,  label: 'Roller Skating',              color: '#8B5CF6', href: '/activities/roller-skating' },
+  { icon: Footprints,  label: 'Roller Skating & Karate',       color: '#8B5CF6', href: '/activities/roller-skating' },
   { icon: Palette,     label: 'Art & Craft',                 color: '#FF8A3D', href: '/activities/art-craft' },
   { icon: Target,      label: 'Cricket Training',            color: '#3D8BFF', href: '/activities/yoga-cricket' },
   { icon: Flower2,     label: 'Yoga',                        color: '#34B36B', href: '/activities/yoga-cricket' },

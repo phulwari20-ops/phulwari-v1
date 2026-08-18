@@ -4,6 +4,18 @@ import { redirect } from 'next/navigation'
 export const metadata = {
   title: 'Kids Birthday Party Venue in Patna | Phulwari Activity Centre',
   description: 'Host stress-free 1st to 5th birthday celebrations at Phulwari Activity Centre in Patna. Safe soft-play zone, custom themes, and full party planning. Book today!',
+  keywords: [
+    'Kids Birthday Party Venue Patna',
+    'Phulwari Activity Centre Patna',
+    'Patna kids birthday party',
+    'first birthday celebration venue Patna',
+    'soft play zone Patna',
+    'kids party themes Patna',
+    'birthday planner Patna',
+    'child birthday celebration Patna',
+    'birthday packages Patna',
+    'indoor play area Patna'
+  ],
   alternates: {
     canonical: 'https://phulwari.co.in/kids-and-child-birthday-party',
   },

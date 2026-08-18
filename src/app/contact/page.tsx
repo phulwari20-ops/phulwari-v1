@@ -21,6 +21,7 @@ import {
   Video,
   Star,
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 const PHONE_NUMBER = '+916207368839';
 const WHATSAPP_NUMBER = '916207368839';
@@ -132,13 +133,40 @@ export default function ContactPage() {
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
     setStatus('submitting');
-    const text = buildWhatsAppMessage(form);
-    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
-    setTimeout(() => { window.open(waUrl, '_blank', 'noopener,noreferrer'); setStatus('success'); setForm(initialForm); }, 600);
+    
+    try {
+      const supabase = createClient();
+      const newEnq = {
+        child_name: form.childName,
+        parent_name: form.parentName,
+        phone: form.mobile,
+        email: form.email,
+        program_interested: form.program,
+        message: form.message,
+        source: 'Website / Home Page',
+        status: 'New'
+      };
+      
+      const { error } = await supabase.from('enquiries').insert([newEnq]);
+      
+      if (error) {
+        console.error('Failed to submit enquiry:', error);
+        setStatus('idle');
+        alert('There was a problem sending your message. Please try again.');
+        return;
+      }
+      
+      setStatus('success');
+      setForm(initialForm);
+    } catch (err) {
+      console.error('Error submitting form:', err);
+      setStatus('idle');
+      alert('There was a problem sending your message. Please try again.');
+    }
   };
 
   return (
@@ -320,11 +348,11 @@ export default function ContactPage() {
         <section className="ct-section">
           <div className="ct-section-head">
             <h2 className="ct-section-title">Send Us <span>a Message</span></h2>
-            <p className="ct-section-text">Fill out the form below — hit send and we&apos;ll pop your message straight into WhatsApp, ready to go! 💬</p>
+            <p className="ct-section-text">Fill out the form below — hit send and we&apos;ll get back to you shortly! 💬</p>
           </div>
           <div className="ct-form-wrap">
             <form onSubmit={handleSubmit} noValidate>
-              <div className="ct-form-hint"><MessageCircle /><span>This opens WhatsApp with your message pre-filled — just hit send there!</span></div>
+              <div className="ct-form-hint"><MessageCircle /><span>Send us your details and our team will get back to you shortly!</span></div>
               <div className="ct-form-grid two-col">
                 <div className="ct-field">
                   <label htmlFor="parentName">Parent Name *</label>
@@ -359,9 +387,9 @@ export default function ContactPage() {
                 {errors.message && <span className="ct-field-error">{errors.message}</span>}
               </div>
               <button className="ct-submit-btn" type="submit" disabled={status === 'submitting'}>
-                {status === 'submitting' ? (<><span className="ct-submit-spinner" /><span>Packing up your message...</span></>) : (<><MessageCircle /><span>Send via WhatsApp</span></>)}
+                {status === 'submitting' ? (<><span className="ct-submit-spinner" /><span>Sending your message...</span></>) : (<><MessageCircle /><span>Send Message</span></>)}
               </button>
-              {status === 'success' && (<div className="ct-success"><CheckCircle2 /><span>Yay! 🎉 We&apos;ve opened WhatsApp with your message ready to go — just tap send over there and we&apos;ll reply in a jiffy!</span></div>)}
+              {status === 'success' && (<div className="ct-success"><CheckCircle2 /><span>Yay! 🎉 We&apos;ve received your message and will reach out to you shortly!</span></div>)}
             </form>
           </div>
         </section>

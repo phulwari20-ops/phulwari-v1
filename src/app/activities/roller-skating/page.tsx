@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Zap, Check } from 'lucide-react';
+import { Zap, Check, Shield } from 'lucide-react';
 
 const programs = [
   {
@@ -28,6 +28,31 @@ const programs = [
     dot1: '#E8A621',
     dot2: '#FF4D8D',
     reverse: false,
+  },
+  {
+    icon: Shield,
+    emoji: '🥋',
+    badge: 'Karate Training',
+    badgeColor: '#34B36B',
+    badgeBg: '#E3F7EA',
+    title: 'Build Strength,',
+    titleSpan: 'Discipline & Confidence',
+    spanColor: '#34B36B',
+    description:
+      'Karate helps children develop self-defence skills, discipline, focus and confidence while improving physical fitness. Our structured training helps children learn the fundamentals of Karate in a safe, fun and encouraging environment.',
+    benefits: [
+      'Self-Defence Skills',
+      'Physical Fitness',
+      'Improved Focus & Discipline',
+      'Confidence & Coordination',
+    ],
+    age: '3+ Years',
+    image: 'https://images.unsplash.com/photo-1555597673-b21d5c935865?w=800&auto=format&fit=crop&q=80',
+    sectionBg: '#FFFDF0',
+    blobRing: '#34B36B',
+    dot1: '#34B36B',
+    dot2: '#FF4D8D',
+    reverse: true,
   },
 ];
 
@@ -70,19 +95,20 @@ export default function RollerSkatingPage() {
       `}</style>
 
       <div className="pd-hero">
-        <div className="pd-hero-badge">🛼 Activities & Programs</div>
-        <h1 className="pd-hero-title">Roller <span>Skating</span></h1>
-        <p className="pd-hero-sub">An exciting way for children to stay active, improve balance and build confidence — all while having a blast on wheels!</p>
+        <div className="pd-hero-badge">🛼 &amp; 🥋 Activities &amp; Programs</div>
+        <h1 className="pd-hero-title">Roller Skating &amp; <span>Karate</span></h1>
+        <p className="pd-hero-sub">Exciting programs for children to stay active, improve balance, build strength, and develop self-defence skills and confidence!</p>
       </div>
 
       {programs.map((p, i) => {
-        const Icon = p.icon;
         return (
           <section key={i} className="pd-section" style={{ backgroundColor: p.sectionBg }}>
             <div className={`pd-inner${p.reverse ? ' reverse' : ''}`}>
               <div className="pd-blob">
                 <div className="pd-blob-ring" style={{ borderColor: p.blobRing }} />
-                <div className="pd-blob-shape"><img src={`/${p.image}`} alt={p.badge} /></div>
+                <div className="pd-blob-shape">
+                  <img src={p.image.startsWith('http') ? p.image : `/${p.image}`} alt={p.badge} />
+                </div>
                 <span className="pd-blob-dot pd-dot-1" style={{ backgroundColor: p.dot1 }} />
                 <span className="pd-blob-dot pd-dot-2" style={{ backgroundColor: p.dot2 }} />
               </div>
@@ -90,7 +116,7 @@ export default function RollerSkatingPage() {
                 <div className="pd-badge" style={{ backgroundColor: p.badgeBg, color: p.badgeColor }}>{p.emoji} {p.badge}</div>
                 <h2 className="pd-title">{p.title} <span style={{ color: p.spanColor }}>{p.titleSpan}</span></h2>
                 <p className="pd-text">{p.description}</p>
-                <div className="pd-age">🎂 Suitable Age: {p.age}</div>
+                <div className="pd-age" style={{ backgroundColor: p.badgeBg, color: p.badgeColor }}>🎂 Suitable Age: {p.age}</div>
                 <div className="pd-benefits">
                   {p.benefits.map((b, bi) => (
                     <div key={bi} className="pd-benefit">

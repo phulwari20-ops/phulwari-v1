@@ -27,7 +27,15 @@ export default async function LandingPage() {
       .select('*')
       .eq('is_visible', true)
       .order('id', { ascending: true })
-    packages = pkgData
+    packages = pkgData || [];
+    
+    console.log(`✅ Fetched ${packages.length} active party packages from DB`);
+    try {
+      const { appLog } = await import('@/lib/logger');
+      appLog(`Fetched ${packages.length} active party packages from DB`);
+    } catch (e) {
+      // logger might not be available
+    }
 
     // Fetch landing config from Supabase
     const { data: cfgData } = await supabase
@@ -552,7 +560,7 @@ export default async function LandingPage() {
           </div>
 
           {/* Lead Form */}
-          <LeadForm />
+          <LeadForm packages={displayPackages} />
         </section>
 
       </div>

@@ -77,9 +77,9 @@ const activities = [
   },
   {
     icon: Zap,
-    title: 'Roller Skating',
-    tagline: 'Fun on Wheels',
-    description: 'Roller skating is an exciting activity that improves balance, focus and coordination.',
+    title: 'Roller Skating & Karate',
+    tagline: 'Fun on Wheels & Martial Arts',
+    description: 'Develop balance on wheels and physical strength, self-defence skills, and discipline with our dual skating and Karate programs.',
     benefits: ['Improves Balance', 'Enhances Coordination', 'Builds Confidence', 'Encourages Active Lifestyle'],
     ageLabel: '4+ Years',
     category: 'Sports',
