@@ -179,15 +179,18 @@ export default function BirthdayPartyPage() {
             const dynamicPackages = visibleDbPackages.map((d: any) => {
               // Try to find a default package to borrow icons/colors, otherwise use defaults
               const fallback = defaultPackages.find(dp => dp.name.toLowerCase() === d.name?.toLowerCase()) || defaultPackages[0];
+              const isPremium = d.name?.toLowerCase().includes('premium');
+              const isBasic = d.name?.toLowerCase().includes('basic');
+              const accentColor = isPremium ? '#FF4D8D' : isBasic ? '#34B36B' : '#8B5CF6';
+              const accentBg = isPremium ? '#FFE6EF' : isBasic ? '#E3F7EA' : '#EFE7FE';
               return {
                 name: d.name,
                 tagline: d.tagline || fallback.tagline,
                 price: d.price || fallback.price,
-                features: d.includes ? d.includes.split(',').map((f:string) => f.trim()) : (Array.isArray(d.features) ? d.features : fallback.features),
-                icon: fallback.icon,
-                bgClass: fallback.bgClass,
-                colorClass: fallback.colorClass,
-                btnClass: fallback.btnClass
+                includes: d.includes ? d.includes.split(',').map((f: string) => f.trim()).filter(Boolean) : fallback.includes,
+                accentColor: accentColor,
+                accentBg: accentBg,
+                featured: isPremium
               };
             });
             setPackagesList(dynamicPackages);

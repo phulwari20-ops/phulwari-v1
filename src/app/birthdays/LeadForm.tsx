@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { MessageCircle, MessageSquare, Phone } from 'lucide-react'
 
 interface LeadFormProps {
   packages?: any[]
@@ -20,61 +21,106 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
   const [selectedPackage, setSelectedPackage] = useState('None')
   const [requirements, setRequirements] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle')
 
-  const handleWhatsAppRedirect = async () => {
+  const buildMessageText = () => {
+    const finalAge = showCustomAge ? customAge : age
+    const finalGuests = showCustomGuests ? customGuests : guests
+    return `Hi Phulwari! 🎈\nI would like to check date availability for a Birthday Party:\n\n` + 
+           `👤 *Parent's Name:* ${name}\n` +
+           `📞 *WhatsApp Phone:* ${phone}\n` +
+           `📧 *Email:* ${email || 'N/A'}\n` +
+           `👶 *Child's Age Turning:* ${finalAge}\n` +
+           `📅 *Tentative Date:* ${date}\n` +
+           `👥 *Expected Guest Count:* ${finalGuests}\n` +
+           `📦 *Selected Package:* ${selectedPackage}\n` +
+           `💬 *Requirements:* ${requirements || 'N/A'}\n\n` +
+           `Could you please get back to me with a personalized quote? Thank you!`
+  }
+
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.preventDefault()
     const finalAge = showCustomAge ? customAge : age
     const finalGuests = showCustomGuests ? customGuests : guests
 
     if (!name || !phone || finalAge === 'Select Age' || !finalAge || !date || finalGuests === 'Select Guests' || !finalGuests) {
-      alert('Please fill out all the fields to check availability!')
+      alert('Please fill out all the required fields to check availability!')
+      return
+    }
+    const text = buildMessageText()
+    window.open(`https://wa.me/916207368839?text=${encodeURIComponent(text)}`, '_blank')
+  }
+
+  const handleSMSClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const finalAge = showCustomAge ? customAge : age
+    const finalGuests = showCustomGuests ? customGuests : guests
+
+    if (!name || !phone || finalAge === 'Select Age' || !finalAge || !date || finalGuests === 'Select Guests' || !finalGuests) {
+      alert('Please fill out all the required fields to check availability!')
+      return
+    }
+    const text = buildMessageText()
+    window.location.href = `sms:+916207368839?body=${encodeURIComponent(text)}`
+  }
+
+  const handleCallClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    window.location.href = `tel:+916207368839`
+  }
+
+  const handleSubmitLead = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const finalAge = showCustomAge ? customAge : age
+    const finalGuests = showCustomGuests ? customGuests : guests
+
+    if (!name || !phone || finalAge === 'Select Age' || !finalAge || !date || finalGuests === 'Select Guests' || !finalGuests) {
+      alert('Please fill out all the required fields to check availability!')
       return
     }
 
     setIsSubmitting(true)
-    
+    setStatus('submitting')
     try {
-      // Send Lead to Supabase Bookings table
-      await fetch('/api/bookings', {
+      const res = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          parentName: name,
-          phone: phone,
-          email: email,
+          parentName: name.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
           childName: 'N/A',
           childAge: finalAge,
           eventDate: date,
           guests: finalGuests,
           packageSelection: selectedPackage,
-          requirements: requirements,
+          requirements: requirements.trim(),
           source: 'User Panel / Birthday Party Celebration',
           paymentStatus: 'Pending',
           status: 'New'
         })
       })
+
+      if (res.ok) {
+        setStatus('success')
+        setName('')
+        setPhone('')
+        setEmail('')
+        setDate('')
+        setAge('Select Age')
+        setGuests('Select Guests')
+        setSelectedPackage('None')
+        setRequirements('')
+      } else {
+        throw new Error('Failed response')
+      }
     } catch (err) {
       console.error('Failed to submit booking', err)
-      // Continue to WhatsApp even if DB fails
+      alert('There was a problem submitting your reservation request. Please try again.')
+      setStatus('idle')
+    } finally {
+      setIsSubmitting(false)
     }
-
-    // Prepare WhatsApp Message text
-    const message = `Hi Phulwari! 🎈\nI would like to check date availability for a Birthday Party:\n\n` + 
-                    `👤 *Parent's Name:* ${name}\n` +
-                    `📞 *WhatsApp Phone:* ${phone}\n` +
-                    `📧 *Email:* ${email || 'N/A'}\n` +
-                    `👶 *Child's Age Turning:* ${finalAge}\n` +
-                    `📅 *Tentative Date:* ${date}\n` +
-                    `👥 *Expected Guest Count:* ${finalGuests}\n` +
-                    `📦 *Selected Package:* ${selectedPackage}\n` +
-                    `💬 *Requirements:* ${requirements || 'N/A'}\n\n` +
-                    `Could you please get back to me with a personalized quote? Thank you!`
-    
-    const waNumber = '919876543210' // Mock WhatsApp contact number matching mockup
-    const waUrl = `https://api.whatsapp.com/send?phone=${waNumber}&text=${encodeURIComponent(message)}`
-    
-    // Open WhatsApp
-    window.open(waUrl, '_blank')
-    setIsSubmitting(false)
   }
 
   return (
@@ -90,7 +136,7 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
         </p>
       </div>
       
-      <form className="relative z-10 space-y-6 w-full">
+      <form onSubmit={handleSubmitLead} className="relative z-10 space-y-6 w-full">
         {/* Row 1: Basic Info */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Parent's Name */}
@@ -236,9 +282,9 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
         </div>
 
         {/* Row 3: Package & Requirements */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Package Selection */}
-          <div className="md:col-span-1">
+          <div className="sm:col-span-1">
             <label className="block text-xs font-black text-[#24364B] mb-2 ml-1">Select Package</label>
             <select 
               value={selectedPackage}
@@ -255,7 +301,7 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
           </div>
 
           {/* Special Requirements */}
-          <div className="md:col-span-2">
+          <div className="sm:col-span-2">
             <label className="block text-xs font-black text-[#24364B] mb-2 ml-1">Special Requirements or Message</label>
             <textarea 
               value={requirements}
@@ -266,26 +312,63 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
           </div>
         </div>
         
-        {/* Submit Button */}
-        <div className="w-full pt-4">
+        {/* Submit & Quick Actions Row */}
+        <div className="w-full pt-4 flex flex-col sm:flex-row items-center gap-4">
           <button 
-            type="button" 
-            onClick={handleWhatsAppRedirect}
+            type="submit" 
             disabled={isSubmitting}
-            className="w-full bg-gradient-to-r from-[#FF4081] to-[#E91E63] hover:from-[#E91E63] hover:to-[#C2185B] text-white font-extrabold py-4.5 px-8 rounded-full text-xs tracking-widest uppercase shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-80"
+            className="flex-1 bg-gradient-to-r from-[#FF4081] to-[#E91E63] hover:from-[#E91E63] hover:to-[#C2185B] text-white font-extrabold py-4.5 px-8 rounded-full text-xs tracking-widest uppercase shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-80 cursor-pointer"
           >
             {isSubmitting ? (
-              <span>Preparing WhatsApp Quote...</span>
+              <span>Submitting Quote Request...</span>
             ) : (
               <>
-                <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.864-9.83.002-2.623-1.023-5.086-2.887-6.95C16.587 1.96 14.138.933 11.52.933c-5.44 0-9.866 4.415-9.87 9.835-.001 1.77.465 3.492 1.353 5.009l-.995 3.633 3.737-.978zm11.758-6.866c-.32-.16-1.89-.93-2.185-1.038-.295-.108-.51-.16-.724.16-.215.32-.83.1.038-1.02.162-.19.16-.32.054-.48-.11-.16-.724-1.748-.993-2.395-.262-.63-.53-.544-.724-.554l-.617-.008c-.215 0-.564.08-.86.4-.295.32-1.128 1.102-1.128 2.69 0 1.587 1.155 3.123 1.316 3.339.16.215 2.274 3.473 5.51 4.868.77.332 1.37.53 1.838.679.774.246 1.48.21 2.037.127.62-.093 1.89-.772 2.158-1.48.268-.707.268-1.316.188-1.44-.08-.124-.295-.205-.616-.365z" />
-                </svg>
-                GET FREE INSTANT QUOTE ON WHATSAPP
+                <MessageCircle className="w-4 h-4" />
+                <span>Send Booking Enquiry</span>
               </>
             )}
           </button>
+
+          <div className="flex items-center gap-3 shrink-0">
+            {/* WhatsApp Quick Action Button */}
+            <button
+              onClick={handleWhatsAppClick}
+              type="button"
+              className="w-12 h-12 rounded-full bg-[#34B36B] hover:bg-[#2e9e5e] text-white flex items-center justify-center shadow-md hover:shadow-lg transition cursor-pointer"
+              title="Send Details via WhatsApp"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.5-5.739-1.453L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.451 5.403.002 9.803-4.394 9.806-9.805.002-2.617-1.013-5.074-2.86-6.921C16.375 2.03 13.927.994 11.999.994 6.595.994 2.195 5.391 2.193 10.803c-.001 1.512.404 2.99 1.173 4.298l-.993 3.624 3.714-.973zm10.23-7.228c-.282-.142-1.67-.823-1.929-.918-.258-.095-.447-.142-.636.142-.189.283-.733.918-.898 1.104-.165.188-.33.212-.612.07-.282-.142-1.192-.44-2.272-1.402-.84-.75-1.407-1.676-1.572-1.959-.165-.283-.018-.435.123-.576.127-.127.282-.33.424-.496.142-.165.189-.283.283-.472.095-.19.047-.354-.024-.496-.07-.142-.636-1.531-.871-2.097-.23-.553-.462-.477-.636-.486-.165-.008-.354-.01-.543-.01-.189 0-.496.07-.755.354-.26.283-.99.967-.99 2.36s1.013 2.735 1.155 2.924c.142.19 1.992 3.044 4.826 4.267.674.29 1.2.464 1.611.595.677.215 1.293.185 1.78.113.543-.08 1.67-.683 1.905-1.343.236-.66.236-1.226.165-1.343-.07-.118-.26-.189-.543-.33z"/>
+              </svg>
+            </button>
+
+            {/* SMS Message Button */}
+            <button
+              onClick={handleSMSClick}
+              type="button"
+              className="w-12 h-12 rounded-full bg-[#3b82f6] hover:bg-[#2563eb] text-white flex items-center justify-center shadow-md hover:shadow-lg transition cursor-pointer"
+              title="Send Details via SMS"
+            >
+              <MessageSquare className="w-5 h-5" />
+            </button>
+
+            {/* Phone Call Button */}
+            <button
+              onClick={handleCallClick}
+              type="button"
+              className="w-12 h-12 rounded-full bg-[#ec4899] hover:bg-[#db2777] text-white flex items-center justify-center shadow-md hover:shadow-lg transition cursor-pointer"
+              title="Call Centre Support"
+            >
+              <Phone className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+
+        {status === 'success' && (
+          <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 rounded-2xl text-xs font-bold font-mono animate-fadeIn flex items-center gap-2 mt-4">
+            🎉 <span>Yay! Your reservation enquiry has been submitted. Our team will verify date availability and get back to you shortly!</span>
+          </div>
+        )}
       </form>
     </div>
   )

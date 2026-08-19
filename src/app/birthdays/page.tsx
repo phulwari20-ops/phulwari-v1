@@ -26,7 +26,7 @@ export default async function LandingPage() {
       .from('party_packages')
       .select('*')
       .eq('is_visible', true)
-      .order('id', { ascending: true })
+      .order('name', { ascending: true })
     packages = pkgData || [];
     
     console.log(`✅ Fetched ${packages.length} active party packages from DB`);
@@ -111,22 +111,18 @@ export default async function LandingPage() {
     }
   }
 
-  const displayPackages: BirthdayPackage[] = (packages || []).map((pkg: any, idx: number) => {
+  const displayPackages: any[] = (packages || []).map((pkg: any, idx: number) => {
     const featuresArray = pkg.includes 
       ? pkg.includes.split(',').map((f: string) => f.trim()).filter(Boolean)
       : [];
       
     const isPremium = pkg.name?.toLowerCase().includes('premium');
     
-    let desc = pkg.tagline || pkg.description || '';
-    if (pkg.price) {
-      desc = `${desc} | Price: ${pkg.price}`;
-    }
-    
     return {
       id: pkg.id || idx + 1,
       name: pkg.name || 'Unnamed Package',
-      description: desc,
+      description: pkg.tagline || pkg.description || '',
+      price: pkg.price || '',
       features: featuresArray,
       ideal_for: isPremium ? "for 2nd - 5th Birthdays" : "",
       is_popular: isPremium,
@@ -441,9 +437,19 @@ export default async function LandingPage() {
                           )}
                         </h3>
                         
-                        <p className={`text-sm text-[#6C757D] leading-relaxed font-semibold ${isPremium ? 'text-center' : 'text-left'}`}>
+                        <p className={`text-sm text-[#6C757D] leading-relaxed font-semibold ${isPremium ? 'text-center' : 'text-left'} mb-3`}>
                           {pkg.description}
                         </p>
+
+                        {pkg.price && (
+                          <div className={`mt-3 text-center ${isPremium ? 'text-center' : 'text-left'}`}>
+                            <span className={`text-xl font-black ${
+                              isPremium ? 'text-[#FF477E] bg-[#FF477E]/10' : isBasic ? 'text-[#00B4D8] bg-[#00B4D8]/10' : 'text-[#8338EC] bg-[#8338EC]/10'
+                            } font-mono px-4 py-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 inline-block shadow-sm`}>
+                              Price: {pkg.price}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       <ul className="space-y-4 mb-8 flex-grow">

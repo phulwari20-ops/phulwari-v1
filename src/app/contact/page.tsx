@@ -169,6 +169,31 @@ export default function ContactPage() {
     }
   };
 
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!form.parentName.trim() || !form.mobile.trim() || !form.message.trim()) {
+      alert("Please fill in Parent Name, Mobile Number, and Message to send via WhatsApp.");
+      return;
+    }
+    const text = buildWhatsAppMessage(form);
+    window.open(`https://wa.me/916207368839?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const handleSMSClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!form.parentName.trim() || !form.mobile.trim() || !form.message.trim()) {
+      alert("Please fill in Parent Name, Mobile Number, and Message to send via SMS.");
+      return;
+    }
+    const text = buildWhatsAppMessage(form);
+    window.location.href = `sms:+916207368839?body=${encodeURIComponent(text)}`;
+  };
+
+  const handleCallClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.href = `tel:+916207368839`;
+  };
+
   return (
     <>
       <style>{`
@@ -235,10 +260,23 @@ export default function ContactPage() {
         @media (min-width: 640px) { .ct-form-grid.two-col { grid-template-columns: 1fr 1fr; } }
         .ct-form-hint { margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 700; color: #1F7A45; background-color: #E3F7EA; border-radius: 12px; padding: 0.65rem 0.9rem; }
         .ct-form-hint svg { width: 16px; height: 16px; flex-shrink: 0; stroke-width: 2.5; }
-        .ct-submit-btn { margin-top: 1.5rem; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; padding: 0.95rem 1.6rem; border: none; color: #ffffff; font-weight: 700; font-size: 0.95rem; font-family: 'Quicksand', sans-serif; border-radius: 9999px; cursor: pointer; background-color: #34B36B; box-shadow: 0 6px 16px rgba(52,179,107,0.32); transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease; }
+        .ct-submit-container { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.5rem; }
+        .ct-submit-btn { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; padding: 0.95rem 1.6rem; border: none; color: #ffffff; font-weight: 700; font-size: 0.95rem; font-family: 'Quicksand', sans-serif; border-radius: 9999px; cursor: pointer; background-color: #34B36B; box-shadow: 0 6px 16px rgba(52,179,107,0.32); transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease; }
         .ct-submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(52,179,107,0.4); }
         .ct-submit-btn:disabled { opacity: 0.8; cursor: progress; }
         .ct-submit-btn svg { width: 18px; height: 18px; stroke: #ffffff; stroke-width: 2.25; }
+        .ct-quick-actions { display: flex; align-items: center; gap: 0.5rem; }
+        .ct-circle-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; color: white; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); flex-shrink: 0; }
+        .ct-circle-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15); }
+        .ct-circle-btn.btn-wa { background-color: #25D366; }
+        .ct-circle-btn.btn-wa:hover { background-color: #20BA56; }
+        .ct-circle-btn.btn-wa svg { fill: #ffffff; width: 22px; height: 22px; }
+        .ct-circle-btn.btn-msg { background-color: #3D8BFF; color: white; }
+        .ct-circle-btn.btn-msg:hover { background-color: #2B7AEE; }
+        .ct-circle-btn.btn-msg svg { stroke: #ffffff; stroke-width: 2.25; width: 22px; height: 22px; }
+        .ct-circle-btn.btn-call-quick { background-color: #FF9F43; color: white; }
+        .ct-circle-btn.btn-call-quick:hover { background-color: #EE8E32; }
+        .ct-circle-btn.btn-call-quick svg { stroke: #ffffff; stroke-width: 2.25; width: 20px; height: 20px; }
         .ct-submit-spinner { width: 16px; height: 16px; border-radius: 9999px; border: 2.5px solid rgba(255,255,255,0.4); border-top-color: #ffffff; animation: ctSpinDots 0.7s linear infinite; }
         .ct-success { margin-top: 1.5rem; display: flex; align-items: flex-start; gap: 0.6rem; background-color: #E3F7EA; color: #1F7A45; border-radius: 14px; padding: 0.9rem 1.1rem; font-weight: 700; font-size: 0.85rem; animation: ctPop 0.3s ease both; }
         .ct-success svg { width: 18px; height: 18px; flex-shrink: 0; stroke-width: 2.5; margin-top: 0.1rem; }
@@ -386,9 +424,44 @@ export default function ContactPage() {
                 <textarea id="message" value={form.message} onChange={(e) => handleChange('message', e.target.value)} placeholder="Tell us a little about what you're looking for..." />
                 {errors.message && <span className="ct-field-error">{errors.message}</span>}
               </div>
-              <button className="ct-submit-btn" type="submit" disabled={status === 'submitting'}>
-                {status === 'submitting' ? (<><span className="ct-submit-spinner" /><span>Sending your message...</span></>) : (<><MessageCircle /><span>Send Message</span></>)}
-              </button>
+              <div className="ct-submit-container">
+                <button className="ct-submit-btn" type="submit" disabled={status === 'submitting'}>
+                  {status === 'submitting' ? (
+                    <><span className="ct-submit-spinner" /><span>Sending your message...</span></>
+                  ) : (
+                    <><MessageCircle /><span>Send Message</span></>
+                  )}
+                </button>
+
+                <div className="ct-quick-actions">
+                  <button
+                    onClick={handleWhatsAppClick}
+                    className="ct-circle-btn btn-wa"
+                    title="Inquire via WhatsApp"
+                    type="button"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.5-5.739-1.453L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.451 5.403.002 9.803-4.394 9.806-9.805.002-2.617-1.013-5.074-2.86-6.921C16.375 2.03 13.927.994 11.999.994 6.595.994 2.195 5.391 2.193 10.803c-.001 1.512.404 2.99 1.173 4.298l-.993 3.624 3.714-.973zm10.23-7.228c-.282-.142-1.67-.823-1.929-.918-.258-.095-.447-.142-.636.142-.189.283-.733.918-.898 1.104-.165.188-.33.212-.612.07-.282-.142-1.192-.44-2.272-1.402-.84-.75-1.407-1.676-1.572-1.959-.165-.283-.018-.435.123-.576.127-.127.282-.33.424-.496.142-.165.189-.283.283-.472.095-.19.047-.354-.024-.496-.07-.142-.636-1.531-.871-2.097-.23-.553-.462-.477-.636-.486-.165-.008-.354-.01-.543-.01-.189 0-.496.07-.755.354-.26.283-.99.967-.99 2.36s1.013 2.735 1.155 2.924c.142.19 1.992 3.044 4.826 4.267.674.29 1.2.464 1.611.595.677.215 1.293.185 1.78.113.543-.08 1.67-.683 1.905-1.343.236-.66.236-1.226.165-1.343-.07-.118-.26-.189-.543-.33z"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleSMSClick}
+                    className="ct-circle-btn btn-msg"
+                    title="Inquire via SMS Message"
+                    type="button"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={handleCallClick}
+                    className="ct-circle-btn btn-call-quick"
+                    title="Call Phulwari Centre"
+                    type="button"
+                  >
+                    <Phone className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
               {status === 'success' && (<div className="ct-success"><CheckCircle2 /><span>Yay! 🎉 We&apos;ve received your message and will reach out to you shortly!</span></div>)}
             </form>
           </div>
