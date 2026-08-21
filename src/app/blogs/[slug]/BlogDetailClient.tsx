@@ -152,7 +152,7 @@ export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClie
                     src={blog.featured_image}
                     alt={blog.title}
                     onError={(e: any) => { e.target.src = '/galary4.webp'; }}
-                  />
+                   loading="lazy" decoding="async" />
                 </div>
               )}
               <div className="bd-art-body">
@@ -212,7 +212,7 @@ export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClie
                           src={r.featured_image || '/galary4.webp'}
                           alt={r.title}
                           onError={(e: any) => { e.target.src = '/galary4.webp'; }}
-                        />
+                         loading="lazy" decoding="async" />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p className="related-title">{r.title}</p>

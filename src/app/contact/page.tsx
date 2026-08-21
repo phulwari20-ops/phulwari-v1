@@ -112,7 +112,15 @@ function buildWhatsAppMessage(form: FormState) {
   return lines.join('\n');
 }
 
-export default function ContactPage() {
+/**
+ * These sections are used two ways: as their own route (where the section
+ * heading is the page's single <h1>) and composed into the homepage (where the
+ * hero already owns the <h1>, so they must step down to <h2>).
+ * `headingLevel` lets the homepage demote them and keeps exactly one <h1> per
+ * page, which is what both the accessibility tree and Google expect.
+ */
+export default function ContactPage({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
+  const Heading = headingLevel;
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
@@ -300,7 +308,7 @@ export default function ContactPage() {
       <div className="ct-page">
         <section className="ct-intro">
           <span className="ct-intro-badge">Contact Us</span>
-          <h1 className="ct-intro-title">We&apos;d Love to <span>Hear From You!</span></h1>
+          <Heading className="ct-intro-title">We&apos;d Love to <span>Hear From You!</span></Heading>
           <p className="ct-intro-text">Whether you&apos;re looking to enroll your child, join our activity programs, book a birthday party, register for a camp, or simply learn more about Phulwari, our team is here to help.</p>
         </section>
 

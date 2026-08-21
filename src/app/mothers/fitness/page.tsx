@@ -228,7 +228,7 @@ export default function FitnessProgramPage() {
             <div className="pd-blob">
               <div className="pd-blob-ring" style={{ borderColor: accentColor, opacity: 0.45 }} />
               <div className="pd-blob-shape">
-                <img src="/motherfit.webp" alt="Mother Fitness Program" />
+                <img src="/motherfit.webp" alt="Mother Fitness Program"  loading="lazy" decoding="async" />
               </div>
               <span className="pd-blob-dot pd-blob-dot-1" style={{ backgroundColor: accentColor }} />
               <span className="pd-blob-dot pd-blob-dot-2" />

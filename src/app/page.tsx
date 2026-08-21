@@ -5,18 +5,55 @@ import Gallery from '@/app/batch-galary/gallery/page';
 import Batch from '@/app/batch-galary/batch/page';
 import Contact from '@/app/contact/page';
 import Testinomals from '@/app/testinomals/page';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { JsonLd } from '@/lib/seo/JsonLd';
+import { webPageSchema } from '@/lib/seo/schema';
+import { SITE_NAME } from '@/lib/seo/site';
 
+export const metadata = buildMetadata({
+  title: 'Mother & Child Activity Centre in Patna',
+  description:
+    'Patna’s mother & child activity centre in Kidwaipuri — gymnastics, skating, music, dance ' +
+    'and art for kids, plus fitness and toddler programs for mothers.',
+  path: '/',
+  keywords: [
+    'mother and child activity centre Patna',
+    'kids activity centre Patna',
+    'children activities Patna',
+    'kids classes Kidwaipuri Patna',
+    'Phulwari Patna',
+  ],
+});
 
+/**
+ * The homepage composes each section component. Those components are also
+ * standalone routes where their heading is the page <h1>, so here they are
+ * demoted to <h2> — the hero supplies the single <h1> for this page.
+ */
 export default function Home() {
   return (
-    <main>
-      <Hero />
-      <Activities />
-      <AboutUs />
-      <Gallery />
-      <Batch />
-      <Testinomals />
-      <Contact />
-    </main>
+    <>
+      <JsonLd
+        id="home-schema"
+        nodes={[
+          webPageSchema({
+            path: '/',
+            name: `${SITE_NAME} — Patna`,
+            description:
+              'Mother & child activity centre in Patna offering kids activity classes, ' +
+              'mother fitness programs, camps and birthday party celebrations.',
+          }),
+        ]}
+      />
+      <main>
+        <Hero />
+        <Activities headingLevel="h2" />
+        <AboutUs headingLevel="h2" />
+        <Gallery headingLevel="h2" />
+        <Batch headingLevel="h2" />
+        <Testinomals headingLevel="h2" />
+        <Contact headingLevel="h2" />
+      </main>
+    </>
   );
 }

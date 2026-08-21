@@ -103,7 +103,15 @@ const faqs = [
   { q: 'Are customized activities available?', a: 'Yes. Customized activity options are available under Phulwari Premium Circle.' },
 ];
 
-export default function BatchPage() {
+/**
+ * These sections are used two ways: as their own route (where the section
+ * heading is the page's single <h1>) and composed into the homepage (where the
+ * hero already owns the <h1>, so they must step down to <h2>).
+ * `headingLevel` lets the homepage demote them and keeps exactly one <h1> per
+ * page, which is what both the accessibility tree and Google expect.
+ */
+export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
+  const Heading = headingLevel;
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [dynamicBatches, setDynamicBatches] = useState<any[]>([]);
@@ -271,7 +279,7 @@ export default function BatchPage() {
         {/* Hero */}
         <header className="bt-hero">
           <span className="bt-hero-badge"><CalendarDays size={13} /> Batches & Timings</span>
-          <h1 className="bt-hero-title">Find the <span>Perfect Schedule</span><br />for Your Child</h1>
+          <Heading className="bt-hero-title">Find the <span>Perfect Schedule</span><br />for Your Child</Heading>
           <p className="bt-hero-sub">We offer flexible batches designed to suit different age groups and interests. Tap any program below to learn more.</p>
         </header>
 

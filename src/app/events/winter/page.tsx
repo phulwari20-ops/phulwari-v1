@@ -162,7 +162,7 @@ export default function WinterCampPage() {
             <div className="wc-blob">
               <div className="wc-blob-ring" />
               <div className="wc-blob-shape">
-                <img src="/wintercamp.webp" alt="Phulwari Winter Camp" />
+                <img src="/wintercamp.webp" alt="Phulwari Winter Camp"  loading="lazy" decoding="async" />
               </div>
               <span className="wc-blob-dot wc-blob-dot-1" />
               <span className="wc-blob-dot wc-blob-dot-2" />
@@ -272,7 +272,7 @@ export default function WinterCampPage() {
       {lightboxImg && (
         <div className="wc-lightbox" onClick={() => setLightboxImg(null)}>
           <button className="wc-lightbox-close" onClick={() => setLightboxImg(null)}><X /></button>
-          <img className="wc-lightbox-img" src={lightboxImg} alt="Winter camp moment" />
+          <img className="wc-lightbox-img" src={lightboxImg} alt="Winter camp moment"  loading="lazy" decoding="async" />
         </div>
       )}
     </>

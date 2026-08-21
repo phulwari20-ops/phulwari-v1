@@ -33,7 +33,15 @@ const defaultSlides = [
   { src: '/galary26.webp', title: 'Mother & Child Bonding' }
 ];
 
-export default function GalleryPage() {
+/**
+ * These sections are used two ways: as their own route (where the section
+ * heading is the page's single <h1>) and composed into the homepage (where the
+ * hero already owns the <h1>, so they must step down to <h2>).
+ * `headingLevel` lets the homepage demote them and keeps exactly one <h1> per
+ * page, which is what both the accessibility tree and Google expect.
+ */
+export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
+  const Heading = headingLevel;
   const [slides, setSlides] = useState<any[]>(defaultSlides);
   const [current, setCurrent] = useState(0);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
@@ -318,7 +326,7 @@ export default function GalleryPage() {
         {/* Hero */}
         <header className="gl-hero">
           <span className="gl-badge">Gallery</span>
-          <h1 className="gl-title">Moments of <span>Joy &amp; Growth</span></h1>
+          <Heading className="gl-title">Moments of <span>Joy &amp; Growth</span></Heading>
           <p className="gl-sub">Explore photos from activities, celebrations and camps at Phulwari.</p>
         </header>
 
@@ -386,7 +394,7 @@ export default function GalleryPage() {
                   onClick={() => setCurrent(i)}
                   aria-label={`Photo ${i + 1}`}
                 >
-                  <img src={s.src} alt={s.title || ''} draggable={false} />
+                  <img src={s.src} alt={s.title || ''} draggable={false}  loading="lazy" decoding="async" />
                 </div>
               ))}
             </div>
@@ -422,7 +430,7 @@ export default function GalleryPage() {
               src={lightboxImg}
               alt="Phulwari Full View"
               className="max-h-[80vh] w-auto object-contain rounded-2xl shadow-lg"
-            />
+             loading="lazy" decoding="async" />
 
             <div className="text-center text-white text-xs font-semibold pt-1">
               <span>Phulwari Mother & Child Activity Centre — Full Photo View</span>

@@ -393,7 +393,7 @@ export default function BirthdayPartyPage() {
             <div className="bp-blob">
               <div className="bp-blob-ring" />
               <div className="bp-blob-shape">
-                <img src="/birthdaycelebration.webp" alt="Birthday Party Celebrations at Phulwari" />
+                <img src="/birthdaycelebration.webp" alt="Birthday Party Celebrations at Phulwari"  loading="lazy" decoding="async" />
               </div>
               <span className="bp-blob-dot bp-blob-dot-1" />
               <span className="bp-blob-dot bp-blob-dot-2" />
@@ -562,7 +562,7 @@ export default function BirthdayPartyPage() {
           <button className="bp-lightbox-close" onClick={() => setLightboxImg(null)}>
             <X />
           </button>
-          <img className="bp-lightbox-img" src={lightboxImg} alt="Birthday celebration" />
+          <img className="bp-lightbox-img" src={lightboxImg} alt="Birthday celebration"  loading="lazy" decoding="async" />
         </div>
       )}
     </>

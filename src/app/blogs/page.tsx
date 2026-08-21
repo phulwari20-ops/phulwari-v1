@@ -1,21 +1,23 @@
 import React from 'react';
-import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { buildMetadata } from '@/lib/seo/metadata';
+import { JsonLd } from '@/lib/seo/JsonLd';
+import { breadcrumbSchema, webPageSchema } from '@/lib/seo/schema';
 import BlogsClient from './BlogsClient';
 
-export const metadata: Metadata = {
-  title: 'Parenting Guide & Child Development Blogs | Phulwari Patna',
-  description: 'Expert parenting guides, baby developmental milestones, active learning advice, gymnastics benefits, and kids wellness articles from Phulwari Patna.',
-  alternates: {
-    canonical: 'https://phulwari.co.in/blogs',
-  },
-  openGraph: {
-    title: 'Parenting Guide & Child Development Blogs | Phulwari Patna',
-    description: 'Expert parenting guides, baby developmental milestones, active learning advice, gymnastics benefits, and kids wellness articles from Phulwari Patna.',
-    url: 'https://phulwari.co.in/blogs',
-    type: 'website'
-  }
-};
+export const metadata = buildMetadata({
+  title: 'Parenting Guides & Child Development Blog',
+  description:
+    'Parenting guides, developmental milestones, active-learning advice and kids wellness ' +
+    'articles from the team at Phulwari Mother & Child Activity Centre, Patna.',
+  path: '/blogs',
+  keywords: [
+    'parenting blog Patna',
+    'child development articles',
+    'toddler milestones guide',
+    'kids activity tips',
+  ],
+});
 
 export default async function BlogsPage() {
   let blogs: any[] = [];
@@ -35,6 +37,29 @@ export default async function BlogsPage() {
     console.error('Failed to load blogs:', err);
   }
 
-  return <BlogsClient initialBlogs={blogs} />;
+  const breadcrumb = [
+    { name: 'Home', path: '/' },
+    { name: 'Blogs', path: '/blogs' },
+  ];
+
+  return (
+    <>
+      <JsonLd
+        id="blogs-schema"
+        nodes={[
+          webPageSchema({
+            path: '/blogs',
+            name: 'Parenting Guides & Child Development Blog',
+            description:
+              'Parenting guides, developmental milestones and kids wellness articles from Phulwari Patna.',
+            type: 'CollectionPage',
+            breadcrumb,
+          }),
+          breadcrumbSchema('/blogs', breadcrumb),
+        ]}
+      />
+      <BlogsClient initialBlogs={blogs} />
+    </>
+  );
 }
 export const dynamic = 'force-dynamic';

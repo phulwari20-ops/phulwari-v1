@@ -567,7 +567,7 @@ export default function HeroPage() {
                 className="hero-illustration-img"
                 src={`/${backgroundImage}`}
                 alt="A mother and child playing together"
-              />
+               loading="eager" fetchPriority="high" decoding="async" />
               <div className="hero-sticker">
                 <Star size={14} />
                 <span>A Joyful Spot for Moms &amp; Kids</span>

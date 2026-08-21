@@ -178,7 +178,7 @@ export default function MissionPage() {
           <div className="mission-blob">
             <div className="mission-blob-ring" />
             <div className="mission-blob-shape">
-              <img src={`/${image}`} alt="Children and mothers enjoying activities at Phulwari" />
+              <img src={`/${image}`} alt="Children and mothers enjoying activities at Phulwari"  loading="lazy" decoding="async" />
             </div>
             <span className="mission-blob-dot mission-blob-dot-1" />
             <span className="mission-blob-dot mission-blob-dot-2" />
@@ -187,9 +187,9 @@ export default function MissionPage() {
           <div>
             <div className="mission-badge">Our Mission</div>
 
-            <h2 className="mission-title">
+            <h1 className="mission-title">
               Helping every child <span>grow with confidence</span>
-            </h2>
+            </h1>
 
             <p className="mission-text">
               Our mission is to provide high-quality, activity-based learning experiences
