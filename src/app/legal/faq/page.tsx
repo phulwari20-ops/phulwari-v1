@@ -279,7 +279,9 @@ const PHONE_NUMBER = '+916207368839';
 const WHATSAPP_NUMBER = '916207368839';
 
 export default function FAQPage() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  // All FAQs start collapsed on page load — an answer only expands when the
+  // user clicks its question (accordion: opening one closes the others).
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggle = (i: number) => setOpenIndex(openIndex === i ? null : i);
 

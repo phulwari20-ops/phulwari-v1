@@ -107,7 +107,7 @@ const faqs = [
 
 const quickActions = [
   { icon: Phone,         label: 'Call Now',            bg: '#FF4D8D', href: 'tel:+916207368839',          external: true  },
-  { icon: MessageCircle, label: 'WhatsApp Now',        bg: '#34B36B', href: 'https://wa.me/916207368839', external: true  },
+  { icon: MessageCircle, label: 'WhatsApp Now',        bg: '#34B36B', href: 'https://wa.me/916207368839?text=Hello%20Phulwari!%20I%20need%20support.', external: true  },
   { icon: Cake,          label: 'Book Birthday Party', bg: '#FF8A3D', href: '/events/birthday',            external: false },
   { icon: Tent,          label: 'Join Summer Camp',    bg: '#3D8BFF', href: '/events/summer',              external: false },
   { icon: Snowflake,     label: 'Join Winter Camp',    bg: '#8B5CF6', href: '/events/winter',              external: false },
@@ -128,8 +128,8 @@ const socialLinks = [
   },
   {
     name: 'Instagram',
-    handle: '@phulwari.motherkids',
-    url: 'https://www.instagram.com/phulwari.motherkids/',
+    handle: '@motherandchildactivitycentre',
+    url: 'https://www.instagram.com/motherandchildactivitycentre/',
     bg: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
     hoverBg: 'linear-gradient(45deg, #d4821d, #ca5a33, #c0203a, #b01d58, #a01575)',
     icon: (
@@ -398,7 +398,7 @@ const Footer: React.FC = () => {
               <div className="footer-contact-item">
                 <span className="footer-contact-icon"><MessageCircle /></span>
                 <p className="footer-contact-text">
-                  <a href="https://wa.me/916207368839" target="_blank" rel="noopener noreferrer">
+                  <a href="https://wa.me/916207368839?text=Hello%20Phulwari!%20I%20need%20support." target="_blank" rel="noopener noreferrer">
                     WhatsApp Support Available<br /><span>+91 62073 68839</span>
                   </a>
                 </p>

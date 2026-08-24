@@ -45,7 +45,7 @@ export const BUSINESS = {
 
 export const SOCIAL_PROFILES = [
   'https://www.facebook.com/share/1DWjMMRAjT/',
-  'https://www.instagram.com/phulwari.motherkids/',
+  'https://www.instagram.com/motherandchildactivitycentre/',
   'https://youtube.com/@phulwari-s1d7o',
 ] as const
 

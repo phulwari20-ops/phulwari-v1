@@ -138,7 +138,6 @@ const navItems: NavItem[] = [
     subpages: [
       { href: '/legal/terms',   label: 'Terms & Conditions',         icon: FileText,  color: '#FF4D8D', bg: '#FFE6EF' },
       { href: '/legal/privacy', label: 'Privacy Policy',             icon: Lock,      color: '#3D8BFF', bg: '#E5EFFF' },
-      { href: '/legal/faq',    label: 'Frequently Asked Questions',  icon: HelpCircle,color: '#FF8A3D', bg: '#FFEADB' },
     ],
   },
   {
@@ -164,8 +163,8 @@ const socialLinks = [
   },
   {
     name: 'Instagram',
-    handle: '@phulwari.motherkids',
-    url: 'https://www.instagram.com/phulwari.motherkids/',
+    handle: '@motherandchildactivitycentre',
+    url: 'https://www.instagram.com/motherandchildactivitycentre/',
     bg: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style={{ color: '#fff' }}>

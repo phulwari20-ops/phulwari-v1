@@ -74,8 +74,8 @@ const socialLinks = [
   },
   {
     name: 'Instagram',
-    handle: '@phulwari.motherkids',
-    url: 'https://www.instagram.com/phulwari.motherkids/',
+    handle: '@motherandchildactivitycentre',
+    url: 'https://www.instagram.com/motherandchildactivitycentre/',
     bg: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22" style={{ color: '#fff' }}>
@@ -328,6 +328,15 @@ export default function ContactPage({ headingLevel = 'h1' }: { headingLevel?: 'h
               <h3 className="ct-card-title">WhatsApp Support</h3>
               <p className="ct-card-text">Chat with us directly for:</p>
               <ul className="ct-mini-list">{whatsappTopics.map((t, i) => <li key={i}>{t}</li>)}</ul>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello Phulwari! I need support.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ct-card-link"
+                style={{ color: '#34B36B' }}
+              >
+                <MessageCircle style={{ width: 16, height: 16 }} />Chat on WhatsApp
+              </a>
             </div>
             <div className="ct-card" style={{ animationDelay: '0.16s' }}>
               <div className="ct-card-icon" style={{ backgroundColor: '#E5EFFF' }}><Mail style={{ color: '#3D8BFF' }} /></div>

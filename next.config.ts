@@ -20,7 +20,9 @@ const CSP = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-  "frame-ancestors 'self'",
+  // 'self' plus the ERP admin so the admin's Birthday Landing Page editor can
+  // embed the live page in its preview iframe. All other origins are blocked.
+  "frame-ancestors 'self' https://admin.phulwari.co.in",
   'upgrade-insecure-requests',
 ].join('; ')
 
@@ -31,7 +33,10 @@ const SECURITY_HEADERS = [
     value: 'max-age=63072000; includeSubDomains; preload',
   },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  // NOTE: X-Frame-Options is intentionally omitted. It only supports DENY /
+  // SAMEORIGIN (ALLOW-FROM is obsolete), so it cannot permit the admin subdomain
+  // to frame the site. Clickjacking protection is provided by the CSP
+  // `frame-ancestors` directive above, which all modern browsers enforce.
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   {
     key: 'Permissions-Policy',
