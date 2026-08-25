@@ -26,6 +26,7 @@ import {
   Flower2,
   Medal,
   Drama,
+  Crown,
 } from 'lucide-react';
 
 const activities = [
@@ -172,6 +173,18 @@ const activities = [
     href: '/activities/play-zone',
     color: '#34B36B',
     bg: '#E3F7EA',
+  },
+  {
+    icon: Crown,
+    title: 'Chess',
+    tagline: 'Think, Plan & Win',
+    description: 'A structured chess programme that builds focus, patience and strategic thinking — from first moves to tournament play.',
+    benefits: ['Sharpens Focus & Memory', 'Strategic Thinking', 'Patience & Calm', 'Problem-Solving Skills'],
+    ageLabel: '5+ Years',
+    category: 'Sports',
+    href: '/activities/chess',
+    color: '#6D28D9',
+    bg: '#EDE9FE',
   },
 ];
 

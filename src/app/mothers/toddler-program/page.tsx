@@ -300,14 +300,24 @@ export default function ToddlerProgramPage() {
               </div>
 
               <div className="pd-cta-buttons">
-                <button className="pd-cta-button btn-call">
+                <a
+                  href="tel:+916207368839"
+                  className="pd-cta-button btn-call"
+                  style={{ textDecoration: 'none' }}
+                >
                   <Phone />
                   <span>Call Now</span>
-                </button>
-                <button className="pd-cta-button btn-whatsapp">
+                </a>
+                <a
+                  href={`https://wa.me/916207368839?text=${encodeURIComponent('Hello Phulwari! I am interested in the Mother & Toddler Program.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pd-cta-button btn-whatsapp"
+                  style={{ textDecoration: 'none' }}
+                >
                   <MessageCircle />
                   <span>WhatsApp Now</span>
-                </button>
+                </a>
               </div>
             </div>
           </div>

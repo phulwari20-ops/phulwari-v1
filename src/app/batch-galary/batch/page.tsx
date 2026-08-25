@@ -115,6 +115,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [dynamicBatches, setDynamicBatches] = useState<any[]>([]);
+  const [dynamicSchedules, setDynamicSchedules] = useState<any[]>([]);
   const [batchesLoading, setBatchesLoading] = useState(true);
 
   useEffect(() => {
@@ -122,11 +123,18 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
       try {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
-        const { data, error } = await supabase.from('batches').select('*').neq('is_visible', false);
+        // Fetch batches and their Class-Master schedules together so the user
+        // panel stays in sync with the admin Batches & Timings page — including
+        // customised batches whose real timetable lives in batch_schedules.
+        const [{ data, error }, { data: schData }] = await Promise.all([
+          supabase.from('batches').select('*').neq('is_visible', false),
+          supabase.from('batch_schedules').select('*'),
+        ]);
         if (!error && data && data.length > 0) {
           console.log('✅ Dynamic Batches fetched from DB:', data);
           setDynamicBatches(data);
         }
+        if (schData) setDynamicSchedules(schData);
       } catch (e) {
         console.error('❌ Batch fetch error:', e);
       } finally {
@@ -136,17 +144,33 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
     fetchBatchesFromDb();
   }, []);
 
+  // Group a batch's schedules by day so the detail view reads Day → Time → Class.
+  const schedulesFor = (batchId: any) =>
+    dynamicSchedules
+      .filter((s) => String(s.batch_id) === String(batchId))
+      .sort((a, b) => String(a.day_of_week).localeCompare(String(b.day_of_week)));
+
+  // A batch whose start/end is blank or 00:00 (e.g. the Customized Batch) shows
+  // its per-day schedule instead of a single misleading time range.
+  const isBlankTime = (t: string) => !t || t === '00:00' || t === '00:00:00';
+
   const colors = ['#FF4D8D', '#8B5CF6', '#E8A621', '#10B981', '#3B82F6', '#F97316'];
   const bgs    = ['#FFE6EF', '#EFE7FE', '#FFF3D9', '#ECFDF5', '#EFF6FF', '#FFF7ED'];
 
-  const activeTableData = dynamicBatches.map((b, idx) => {
+  const computeTiming = (b: any) => {
     const start = b.start_time || '';
     const end   = b.end_time   || '';
-    const timing = start && end ? `${start} – ${end}` : start || end || '—';
+    if (isBlankTime(start) && isBlankTime(end)) {
+      return schedulesFor(b.id).length > 0 ? 'As per schedule' : '—';
+    }
+    return start && end ? `${start} – ${end}` : start || end || '—';
+  };
+
+  const activeTableData = dynamicBatches.map((b, idx) => {
     return {
       batch: b.batch_name,
       age: b.age_group || '—',
-      timing,
+      timing: computeTiming(b),
       days: b.days || '—',
       color: colors[idx % colors.length],
       bg:    bgs[idx % bgs.length]
@@ -154,9 +178,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
   });
 
   const activeBatches = dynamicBatches.map((b, idx) => {
-    const start = b.start_time || '';
-    const end   = b.end_time   || '';
-    const timing = start && end ? `${start} – ${end}` : start || end || '—';
+    const timing = computeTiming(b);
     const color = colors[idx % colors.length];
     const bg = bgs[idx % bgs.length];
 
@@ -183,7 +205,8 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
       ],
       childBenefits: b.child_benefits || ['Confidence Building', 'Social Interaction', 'Active Learning'],
       motherBenefits: b.mother_benefits || [],
-      bestFor: b.best_for || 'Children seeking a fun, safe, and engaging environment.'
+      bestFor: b.best_for || 'Children seeking a fun, safe, and engaging environment.',
+      schedules: schedulesFor(b.id)
     };
   });
 
@@ -313,6 +336,28 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
                     <div className="bt-card-divider" />
                     <p className="bt-card-tagline">{batch.emoji} {batch.tagline}</p>
                     <p className="bt-card-desc">{batch.description}</p>
+
+                    {batch.schedules && batch.schedules.length > 0 && (
+                      <div>
+                        <p className="bt-detail-section-title">Class Schedule</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                          {batch.schedules.map((sch: any, idx: number) => (
+                            <div
+                              key={idx}
+                              style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                gap: '0.5rem', padding: '0.5rem 0.75rem', borderRadius: '0.6rem',
+                                background: batch.bg, fontSize: '0.82rem', fontWeight: 700, color: '#3F3A52',
+                              }}
+                            >
+                              <span style={{ minWidth: '90px' }}>📅 {sch.day_of_week}</span>
+                              <span style={{ fontFamily: 'monospace', color: batch.color }}>{sch.start_time} – {sch.end_time}</span>
+                              <span style={{ fontWeight: 800 }}>{sch.class_name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <div>
                       <p className="bt-detail-section-title">What's Included</p>

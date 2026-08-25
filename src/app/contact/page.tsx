@@ -53,9 +53,10 @@ const whatsappTopics = [
   'Program Information', 'General Inquiries',
 ];
 
+const OTHER_PROGRAM = 'Other (Specify / Mention)';
 const programOptions = [
   'Phulwari Premium Circle', 'Phulwari Core', 'Mother & Toddler Program',
-  'Mother Fitness Program', 'Birthday Party', 'Summer Camp', 'Winter Camp', 'General Inquiry',
+  'Mother Fitness Program', 'Birthday Party', 'Summer Camp', 'Winter Camp', 'General Inquiry', OTHER_PROGRAM,
 ];
 
 const mapsUrl = 'https://maps.app.goo.gl/g7qiU1BqineG2RF56';
@@ -94,9 +95,18 @@ const socialLinks = [
 
 interface FormState {
   parentName: string; childName: string; mobile: string;
-  email: string; program: string; message: string;
+  email: string; program: string; programOther: string; message: string;
 }
-const initialForm: FormState = { parentName: '', childName: '', mobile: '', email: '', program: '', message: '' };
+const initialForm: FormState = { parentName: '', childName: '', mobile: '', email: '', program: '', programOther: '', message: '' };
+
+// The label that actually represents the chosen program: when "Other" is
+// picked, fall back to the free-text the user typed.
+function resolveProgram(form: FormState) {
+  if (form.program === OTHER_PROGRAM) {
+    return form.programOther.trim() ? `Other: ${form.programOther.trim()}` : 'Other';
+  }
+  return form.program;
+}
 
 function buildWhatsAppMessage(form: FormState) {
   const lines = [
@@ -106,7 +116,7 @@ function buildWhatsAppMessage(form: FormState) {
     form.childName ? `🧒 *Child Name:* ${form.childName}` : null,
     `📱 *Mobile:* ${form.mobile}`,
     form.email ? `📧 *Email:* ${form.email}` : null,
-    form.program ? `🎈 *Interested Program:* ${form.program}` : null,
+    form.program ? `🎈 *Interested Program:* ${resolveProgram(form)}` : null,
     ``, `📝 *Message:*`, form.message,
   ].filter(Boolean);
   return lines.join('\n');
@@ -153,7 +163,7 @@ export default function ContactPage({ headingLevel = 'h1' }: { headingLevel?: 'h
         parent_name: form.parentName,
         phone: form.mobile,
         email: form.email,
-        program_interested: form.program,
+        program_interested: resolveProgram(form),
         message: form.message,
         source: 'Website / Home Page',
         status: 'New'
@@ -435,6 +445,16 @@ export default function ContactPage({ headingLevel = 'h1' }: { headingLevel?: 'h
                   <option value="">Select a program</option>
                   {programOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
+                {form.program === OTHER_PROGRAM && (
+                  <input
+                    id="programOther"
+                    type="text"
+                    value={form.programOther}
+                    onChange={(e) => handleChange('programOther', e.target.value)}
+                    placeholder="Please specify / mention the program you're interested in"
+                    style={{ marginTop: '0.6rem' }}
+                  />
+                )}
               </div>
               <div className="ct-field" style={{ marginTop: '1rem' }}>
                 <label htmlFor="message">Message *</label>

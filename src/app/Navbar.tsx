@@ -36,6 +36,7 @@ import {
   Video,
   UserCheck,
   Star,
+  Crown,
 } from 'lucide-react';
 
 interface SubItem {
@@ -83,6 +84,7 @@ const navItems: NavItem[] = [
       { href: '/activities/roller-skating', label: 'Roller Skating & Karate', icon: Footprints,color: '#E8A621',bg: '#FFF3D9' },
       { href: '/activities/art-craft',      label: 'Art & Craft',        icon: Palette,  color: '#34B36B', bg: '#E3F7EA' },
       { href: '/activities/yoga-cricket',   label: 'Yoga & Cricket',     icon: Disc3,    color: '#8B5CF6', bg: '#EFE7FE' },
+      { href: '/activities/chess',          label: 'Chess',              icon: Crown,    color: '#6D28D9', bg: '#EDE9FE' },
       { href: '/activities/play-zone',      label: 'Play Zone',          icon: Gamepad2, color: '#FF8A3D', bg: '#FFEADB' },
     ],
   },
