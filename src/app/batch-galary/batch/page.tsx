@@ -362,7 +362,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
                     <div>
                       <p className="bt-detail-section-title">What's Included</p>
                       <div className="bt-includes-list">
-                        {batch.includes.map((inc, idx) => {
+                        {batch.includes.map((inc: any, idx: number) => {
                           const IncIcon = inc.icon;
                           return (
                             <div className="bt-include-item" key={idx}>
@@ -377,7 +377,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
                     <div>
                       <p className="bt-detail-section-title">{batch.motherBenefits.length > 0 ? 'Benefits for Children' : 'Benefits'}</p>
                       <div className="bt-benefits-cols">
-                        {batch.childBenefits.map((b, idx) => (
+                        {batch.childBenefits.map((b: any, idx: number) => (
                           <div className="bt-benefit-item" key={idx}>
                             <CheckCircle2 style={{ color: batch.color }} />
                             <span>{b}</span>
@@ -390,7 +390,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
                       <div>
                         <p className="bt-detail-section-title">Benefits for Mothers</p>
                         <div className="bt-benefits-cols">
-                          {batch.motherBenefits.map((b, idx) => (
+                          {batch.motherBenefits.map((b: any, idx: number) => (
                             <div className="bt-benefit-item" key={idx}>
                               <CheckCircle2 style={{ color: batch.color }} />
                               <span>{b}</span>

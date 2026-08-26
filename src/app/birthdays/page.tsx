@@ -38,12 +38,6 @@ export default async function LandingPage() {
     packages = pkgData || [];
     
     console.log(`✅ Fetched ${packages.length} active party packages from DB`);
-    try {
-      const { appLog } = await import('@/lib/logger');
-      appLog(`Fetched ${packages.length} active party packages from DB`);
-    } catch (e) {
-      // logger might not be available
-    }
 
     // Fetch landing config from Supabase
     const { data: cfgData } = await supabase
@@ -461,8 +455,8 @@ export default async function LandingPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch w-full">
               {displayPackages.map((pkg) => {
-                const isBasic = pkg.id === 1;
-                const isPremium = pkg.id === 2;
+                const isBasic = pkg.name?.toLowerCase().includes('basic');
+                const isPremium = pkg.name?.toLowerCase().includes('premium');
 
                 return (
                   <div 
@@ -514,7 +508,7 @@ export default async function LandingPage() {
                       </div>
 
                       <ul className="space-y-4 mb-8 flex-grow">
-                        {pkg.features.map((feature, idx) => {
+                        {pkg.features.map((feature: any, idx: number) => {
                           return (
                             <li key={idx} className="flex items-start gap-3">
                               <div className={
