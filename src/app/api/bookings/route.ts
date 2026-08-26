@@ -79,6 +79,22 @@ export async function POST(req: Request) {
       )
     }
 
+    // Also insert into enquiries table to make it show up in the Lead Manager
+    const newEnquiryRow = {
+      parent_name: parentName,
+      phone: phone,
+      email: email,
+      child_name: childName || 'N/A',
+      program_interested: `Birthday: ${notesJson.package_selection || 'Custom'}`,
+      message: `Date: ${row.event_date || 'N/A'} | Age: ${body.childAge || 'N/A'} | Guests: ${notesJson.guests || 'N/A'} | Message: ${notesJson.requirements || 'None'}`,
+      source: 'User Panel / Birthday Party Celebration',
+      status: 'New'
+    }
+    const { error: enqErr } = await supabase.from('enquiries').insert([newEnquiryRow])
+    if (enqErr) {
+      console.warn('⚠️ Could not insert corresponding enquiry row:', enqErr.message)
+    }
+
     return NextResponse.json({ success: true, data }, { status: 200 })
   } catch (error) {
     // Reaching here almost always means Supabase credentials are missing.
