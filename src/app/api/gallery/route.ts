@@ -21,7 +21,7 @@ function saveLocalGallery(data: any[]) {
 }
 
 export async function GET() {
-  const localItems = getLocalGallery();
+  const localItems: any[] = getLocalGallery();
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';

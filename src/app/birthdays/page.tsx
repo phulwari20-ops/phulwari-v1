@@ -32,7 +32,7 @@ export default async function LandingPage() {
     console.log(`✅ Fetched ${packages.length} active party packages from DB`);
     try {
       const { appLog } = await import('@/lib/logger');
-      appLog(`Fetched ${packages.length} active party packages from DB`);
+      appLog('info', 'BIRTHDAYS', `Fetched ${packages.length} active party packages from DB`);
     } catch (e) {
       // logger might not be available
     }
@@ -453,7 +453,7 @@ export default async function LandingPage() {
                       </div>
 
                       <ul className="space-y-4 mb-8 flex-grow">
-                        {pkg.features.map((feature, idx) => {
+                        {pkg.features.map((feature: string, idx: number) => {
                           return (
                             <li key={idx} className="flex items-start gap-3">
                               <div className={
