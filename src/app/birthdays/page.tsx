@@ -2,6 +2,14 @@ import { createClient } from '@/utils/supabase/server'
 import { ShieldCheck, Camera, PartyPopper, Gamepad2, Users, Sparkles, Droplets, Star, Quote, ChevronDown, CalendarHeart } from 'lucide-react'
 import FaqAccordion from './FaqAccordion'
 import LeadForm from './LeadForm'
+import { JsonLd } from '@/lib/seo/JsonLd'
+import {
+  breadcrumbSchema,
+  faqSchema,
+  offerSchema,
+  serviceSchema,
+  webPageSchema,
+} from '@/lib/seo/schema'
 
 // Define interfaces based on our schema
 interface BirthdayPackage {
@@ -30,12 +38,6 @@ export default async function LandingPage() {
     packages = pkgData || [];
     
     console.log(`✅ Fetched ${packages.length} active party packages from DB`);
-    try {
-      const { appLog } = await import('@/lib/logger');
-      appLog(`Fetched ${packages.length} active party packages from DB`);
-    } catch (e) {
-      // logger might not be available
-    }
 
     // Fetch landing config from Supabase
     const { data: cfgData } = await supabase
@@ -195,7 +197,60 @@ export default async function LandingPage() {
     return <span>{feature}</span>;
   }
 
+  // Structured data is built from exactly the packages and FAQs rendered below,
+  // so the markup can never describe offers the page does not show.
+  const BIRTHDAY_PATH = '/kids-and-child-birthday-party'
+  const breadcrumb = [
+    { name: 'Home', path: '/' },
+    { name: 'Birthday Party Celebrations', path: BIRTHDAY_PATH },
+  ]
+  const pageFaqs = (config.faq_section?.faqs ?? [])
+    .filter((f: any) => f?.question && f?.answer)
+    .map((f: any) => ({ question: f.question, answer: f.answer }))
+
   return (
+    <>
+      <JsonLd
+        id="birthday-schema"
+        nodes={[
+          webPageSchema({
+            path: BIRTHDAY_PATH,
+            name: 'Kids Birthday Party Venue in Patna',
+            description:
+              'Birthday party celebrations for children at Phulwari Mother & Child Activity Centre, Patna.',
+            breadcrumb,
+          }),
+          breadcrumbSchema(BIRTHDAY_PATH, breadcrumb),
+          {
+            ...serviceSchema({
+              name: 'Kids Birthday Party Celebrations',
+              description:
+                'Themed birthday party celebrations for children aged 1 to 5 at Phulwari Patna, with a ' +
+                'safe soft-play zone, decoration, games and end-to-end party planning.',
+              path: BIRTHDAY_PATH,
+              serviceType: 'Birthday Party Venue',
+              audience: 'Parents of children aged 1-5',
+            }),
+            ...(displayPackages.length > 0
+              ? {
+                  hasOfferCatalog: {
+                    '@type': 'OfferCatalog',
+                    name: 'Birthday Party Packages',
+                    itemListElement: displayPackages.map((pkg: any) =>
+                      offerSchema({
+                        name: pkg.name,
+                        description: pkg.description || undefined,
+                        price: String(pkg.price ?? ''),
+                        path: BIRTHDAY_PATH,
+                      })
+                    ),
+                  },
+                }
+              : {}),
+          },
+          pageFaqs.length > 0 ? faqSchema(BIRTHDAY_PATH, pageFaqs) : null,
+        ]}
+      />
     <div 
       className="relative min-h-screen w-full bg-[#FFFBF9] text-[#344054] font-sans pt-24 pb-12 overflow-x-hidden" 
       style={{ 
@@ -268,16 +323,16 @@ export default async function LandingPage() {
                 src={config.hero_section.playzone_images?.[0] || 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=500'} 
                 alt="Playzone play area" 
                 className="w-full h-full object-cover rounded-[24px]"
-              />
+               loading="lazy" decoding="async" />
             </div>
 
             {/* 2 Smaller Overlapping Polaroid Photos */}
             <div className="absolute bottom-[2%] left-[5%] w-[150px] h-[110px] bg-white p-1.5 shadow-xl rounded-[16px] border border-slate-100 rotate-[-12deg] z-20 overflow-hidden">
-              <img src={config.hero_section.playzone_images?.[1] || 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=300'} alt="Playzone 2" className="w-full h-full object-cover rounded-[10px]" />
+              <img src={config.hero_section.playzone_images?.[1] || 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=300'} alt="Playzone 2" className="w-full h-full object-cover rounded-[10px]"  loading="lazy" decoding="async" />
             </div>
 
             <div className="absolute top-[5%] right-[5%] w-[150px] h-[110px] bg-white p-1.5 shadow-xl rounded-[16px] border border-slate-100 rotate-[10deg] z-20 overflow-hidden">
-              <img src={config.hero_section.playzone_images?.[2] || 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=300'} alt="Playzone 3" className="w-full h-full object-cover rounded-[10px]" />
+              <img src={config.hero_section.playzone_images?.[2] || 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=300'} alt="Playzone 3" className="w-full h-full object-cover rounded-[10px]"  loading="lazy" decoding="async" />
             </div>
 
             <div className="absolute bottom-[40%] right-[-5%] text-pink-300 animate-bounce -z-10"><Sparkles className="w-12 h-12" /></div>
@@ -309,7 +364,7 @@ export default async function LandingPage() {
                   </div>
                   <div className="w-full h-24 bg-slate-100 rounded-[20px] overflow-hidden flex items-center justify-center">
                     {point.image ? (
-                      <img src={point.image} alt={point.title} className="w-full h-full object-cover" />
+                      <img src={point.image} alt={point.title} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                     ) : (
                       <span className="text-[10px] text-slate-400 font-bold font-sans">Illustration</span>
                     )}
@@ -342,7 +397,7 @@ export default async function LandingPage() {
                     </svg>
                   </div>
                   <div className="w-full h-28 bg-slate-200 rounded-[20px] overflow-hidden shadow-sm border-2 border-white">
-                    <img src={config.pain_points_section.advantage_image || "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400"} alt="Phulwari Centre Facility" className="w-full h-full object-cover" />
+                    <img src={config.pain_points_section.advantage_image || "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400"} alt="Phulwari Centre Facility" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   </div>
                 </div>
               </div>
@@ -400,8 +455,8 @@ export default async function LandingPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch w-full">
               {displayPackages.map((pkg) => {
-                const isBasic = pkg.id === 1;
-                const isPremium = pkg.id === 2;
+                const isBasic = pkg.name?.toLowerCase().includes('basic');
+                const isPremium = pkg.name?.toLowerCase().includes('premium');
 
                 return (
                   <div 
@@ -453,7 +508,7 @@ export default async function LandingPage() {
                       </div>
 
                       <ul className="space-y-4 mb-8 flex-grow">
-                        {pkg.features.map((feature, idx) => {
+                        {pkg.features.map((feature: any, idx: number) => {
                           return (
                             <li key={idx} className="flex items-start gap-3">
                               <div className={
@@ -527,7 +582,7 @@ export default async function LandingPage() {
 
                     <div className="flex items-center gap-4 border-t border-slate-50 pt-4">
                       <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-[#FFF0F4] flex items-center justify-center">
-                        <img src={avatarUrl} alt={review.author} className="w-full h-full object-cover" />
+                        <img src={avatarUrl} alt={review.author} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                       </div>
                       <div className="text-left">
                         <p className="font-extrabold text-sm text-slate-800">{review.author}</p>
@@ -560,7 +615,7 @@ export default async function LandingPage() {
 
               {/* Ball Pit Image */}
               <div className="lg:col-span-5 w-full max-w-md aspect-video bg-slate-200 rounded-[32px] overflow-hidden shadow-lg border-8 border-white mx-auto">
-                <img src={config.faq_section.faq_image || "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=500"} alt="Toddlers playing in ball pit" className="w-full h-full object-cover" />
+                <img src={config.faq_section.faq_image || "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=500"} alt="Toddlers playing in ball pit" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               </div>
             </div>
           </div>
@@ -571,6 +626,7 @@ export default async function LandingPage() {
 
       </div>
     </div>
+    </>
   )
 }
 

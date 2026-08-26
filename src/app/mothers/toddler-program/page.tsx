@@ -228,7 +228,7 @@ export default function ToddlerProgramPage() {
             <div className="pd-blob">
               <div className="pd-blob-ring" style={{ borderColor: accentColor, opacity: 0.45 }} />
               <div className="pd-blob-shape">
-                <img src="/mothertod.webp" alt="Mother & Toddler Program" />
+                <img src="/mothertod.webp" alt="Mother & Toddler Program"  loading="lazy" decoding="async" />
               </div>
               <span className="pd-blob-dot pd-blob-dot-1" style={{ backgroundColor: accentColor }} />
               <span className="pd-blob-dot pd-blob-dot-2" />
@@ -300,14 +300,24 @@ export default function ToddlerProgramPage() {
               </div>
 
               <div className="pd-cta-buttons">
-                <button className="pd-cta-button btn-call">
+                <a
+                  href="tel:+916207368839"
+                  className="pd-cta-button btn-call"
+                  style={{ textDecoration: 'none' }}
+                >
                   <Phone />
                   <span>Call Now</span>
-                </button>
-                <button className="pd-cta-button btn-whatsapp">
+                </a>
+                <a
+                  href={`https://wa.me/916207368839?text=${encodeURIComponent('Hello Phulwari! I am interested in the Mother & Toddler Program.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pd-cta-button btn-whatsapp"
+                  style={{ textDecoration: 'none' }}
+                >
                   <MessageCircle />
                   <span>WhatsApp Now</span>
-                </button>
+                </a>
               </div>
             </div>
           </div>

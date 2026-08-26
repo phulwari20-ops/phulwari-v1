@@ -172,9 +172,9 @@ export default function CoreValuesPage() {
 
             <div>
               <div className="values-badge">What We Stand For</div>
-              <h2 className="values-title">
+              <h1 className="values-title">
                 Our Core <span>Values</span>
-              </h2>
+              </h1>
               <p className="values-text">
                 These are the principles that guide every program, every trainer and every
                 decision we make at Phulwari.

@@ -46,8 +46,8 @@ export async function GET() {
 
   // Merge dbItems and localItems uniquely
   const mergedMap = new Map();
-  dbItems.forEach(item => mergedMap.set(item.id || item.url, item));
-  localItems.forEach(item => mergedMap.set(item.id || item.url, item));
+  dbItems.forEach((item: any) => mergedMap.set(item.id || item.url, item));
+  localItems.forEach((item: any) => mergedMap.set(item.id || item.url, item));
 
   const finalItems = Array.from(mergedMap.values());
 

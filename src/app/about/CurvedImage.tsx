@@ -84,7 +84,7 @@ const CurvedImage: React.FC<CurvedImageProps> = ({
       <div className="curved-img-wrap" style={{ maxWidth: sizeMap[size] }}>
         <div className="curved-img-ring" style={{ '--ring-color': ringColor } as React.CSSProperties} />
         <div className="curved-img-shape">
-          <img src={src} alt={alt} />
+          <img src={src} alt={alt}  loading="lazy" decoding="async" />
         </div>
         <span className="curved-img-dot curved-img-dot-1" style={{ backgroundColor: dotColors[0] }} />
         <span className="curved-img-dot curved-img-dot-2" style={{ backgroundColor: dotColors[1] }} />

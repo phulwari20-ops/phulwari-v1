@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import BlogDetailClient from './BlogDetailClient';
+import { buildMetadata, truncateDescription } from '@/lib/seo/metadata';
+import { JsonLd } from '@/lib/seo/JsonLd';
+import { articleSchema, breadcrumbSchema, webPageSchema } from '@/lib/seo/schema';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -16,30 +19,38 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const supabase = await createClient();
     const { data: blog } = await supabase
       .from('blogs')
-      .select('title, short_description, featured_image')
+      .select('title, short_description, featured_image, created_at, updated_at, author_name, category, tags')
       .eq('slug', slug)
       .single();
 
     if (blog) {
-      return {
-        title: `${blog.title} | Parenting & Kids Development Blogs | Phulwari`,
-        description: blog.short_description || 'Insightful parenting guides and child development articles from Phulwari Patna.',
-        alternates: { canonical: `https://phulwari.co.in/blogs/${slug}` },
-        openGraph: {
-          title: blog.title,
-          description: blog.short_description,
-          url: `https://phulwari.co.in/blogs/${slug}`,
-          type: 'article',
-          images: blog.featured_image ? [{ url: blog.featured_image }] : []
-        }
-      };
+      return buildMetadata({
+        title: blog.title,
+        description: truncateDescription(
+          blog.short_description ||
+            'Parenting guidance and child development insight from Phulwari Patna.'
+        ),
+        path: `/blogs/${slug}`,
+        type: 'article',
+        image: blog.featured_image ? { url: blog.featured_image, alt: blog.title } : undefined,
+        publishedTime: blog.created_at ?? undefined,
+        modifiedTime: blog.updated_at ?? blog.created_at ?? undefined,
+        authors: blog.author_name ? [blog.author_name] : undefined,
+        section: blog.category ?? undefined,
+        tags: Array.isArray(blog.tags) ? blog.tags : undefined,
+      });
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error('Failed to build blog metadata:', err);
+  }
 
-  return {
-    title: 'Article Not Found | Phulwari Patna',
-    description: 'The requested blog article was not found.'
-  };
+  // Unknown slug: keep it out of the index rather than serving a thin page.
+  return buildMetadata({
+    title: 'Article Not Found',
+    description: 'The requested blog article was not found.',
+    path: `/blogs/${slug}`,
+    noIndex: true,
+  });
 }
 
 export default async function BlogDetailPage({ params }: PageProps) {
@@ -94,5 +105,42 @@ export default async function BlogDetailPage({ params }: PageProps) {
     );
   }
 
-  return <BlogDetailClient blog={blog} allBlogs={allBlogs} />;
+  const path = `/blogs/${slug}`;
+  const breadcrumb = [
+    { name: 'Home', path: '/' },
+    { name: 'Blogs', path: '/blogs' },
+    { name: blog.title, path },
+  ];
+
+  return (
+    <>
+      <JsonLd
+        id="blog-post-schema"
+        nodes={[
+          webPageSchema({
+            path,
+            name: blog.title,
+            description: blog.short_description || '',
+            breadcrumb,
+            primaryImage: blog.featured_image || undefined,
+            datePublished: blog.created_at || undefined,
+            dateModified: blog.updated_at || blog.created_at || undefined,
+          }),
+          breadcrumbSchema(path, breadcrumb),
+          articleSchema({
+            title: blog.title,
+            description: blog.short_description || '',
+            path,
+            image: blog.featured_image || undefined,
+            datePublished: blog.created_at || undefined,
+            dateModified: blog.updated_at || blog.created_at || undefined,
+            authorName: blog.author_name || undefined,
+            section: blog.category || undefined,
+            tags: Array.isArray(blog.tags) ? blog.tags : undefined,
+          }),
+        ]}
+      />
+      <BlogDetailClient blog={blog} allBlogs={allBlogs} />
+    </>
+  );
 }

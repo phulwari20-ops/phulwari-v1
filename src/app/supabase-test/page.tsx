@@ -3,7 +3,16 @@ import Link from 'next/link'
 import { CheckCircle2, XCircle, Database, ShieldCheck, Globe, ArrowLeft } from 'lucide-react'
 import PingButton from './PingButton'
 
+import { buildMetadata } from '@/lib/seo/metadata';
 export const revalidate = 0
+
+export const metadata = buildMetadata({
+  title: 'Connection Test',
+  description:
+    'Internal connectivity check.',
+  path: '/supabase-test',
+  noIndex: true,
+});
 
 export default async function SupabaseTestPage() {
   let isConnected = false
