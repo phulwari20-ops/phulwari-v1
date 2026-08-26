@@ -11,6 +11,8 @@ import {
   webPageSchema,
 } from '@/lib/seo/schema'
 
+export const dynamic = 'force-dynamic'
+
 // Define interfaces based on our schema
 interface BirthdayPackage {
   id: number
