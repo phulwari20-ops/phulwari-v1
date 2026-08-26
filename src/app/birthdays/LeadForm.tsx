@@ -22,6 +22,7 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
   const [requirements, setRequirements] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const buildMessageText = () => {
     const finalAge = showCustomAge ? customAge : age
@@ -44,7 +45,7 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
     const finalGuests = showCustomGuests ? customGuests : guests
 
     if (!name || !phone || finalAge === 'Select Age' || !finalAge || !date || finalGuests === 'Select Guests' || !finalGuests) {
-      alert('Please fill out all the required fields to check availability!')
+      setErrorMessage('Please fill out all the required fields to check availability.')
       return
     }
     const text = buildMessageText()
@@ -57,7 +58,7 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
     const finalGuests = showCustomGuests ? customGuests : guests
 
     if (!name || !phone || finalAge === 'Select Age' || !finalAge || !date || finalGuests === 'Select Guests' || !finalGuests) {
-      alert('Please fill out all the required fields to check availability!')
+      setErrorMessage('Please fill out all the required fields to check availability.')
       return
     }
     const text = buildMessageText()
@@ -75,12 +76,14 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
     const finalGuests = showCustomGuests ? customGuests : guests
 
     if (!name || !phone || finalAge === 'Select Age' || !finalAge || !date || finalGuests === 'Select Guests' || !finalGuests) {
-      alert('Please fill out all the required fields to check availability!')
+      setErrorMessage('Please fill out all the required fields to check availability.')
       return
     }
 
     setIsSubmitting(true)
     setStatus('submitting')
+    setErrorMessage('')
+
     try {
       const res = await fetch('/api/bookings', {
         method: 'POST',
@@ -101,22 +104,32 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
         })
       })
 
-      if (res.ok) {
-        setStatus('success')
-        setName('')
-        setPhone('')
-        setEmail('')
-        setDate('')
-        setAge('Select Age')
-        setGuests('Select Guests')
-        setSelectedPackage('None')
-        setRequirements('')
-      } else {
-        throw new Error('Failed response')
+      const payload = await res.json().catch(() => null)
+
+      if (!res.ok || !payload?.success) {
+        throw new Error(payload?.error || `Request failed (${res.status})`)
       }
+
+      setStatus('success')
+      setName('')
+      setPhone('')
+      setEmail('')
+      setDate('')
+      setAge('Select Age')
+      setCustomAge('')
+      setShowCustomAge(false)
+      setGuests('Select Guests')
+      setCustomGuests('')
+      setShowCustomGuests(false)
+      setSelectedPackage('None')
+      setRequirements('')
     } catch (err) {
       console.error('Failed to submit booking', err)
-      alert('There was a problem submitting your reservation request. Please try again.')
+      setErrorMessage(
+        err instanceof Error && err.message
+          ? `We could not submit your request: ${err.message}. Please try again, or reach us on WhatsApp using the green button.`
+          : 'We could not submit your request. Please try again, or reach us on WhatsApp using the green button.'
+      )
       setStatus('idle')
     } finally {
       setIsSubmitting(false)
@@ -364,8 +377,19 @@ export default function LeadForm({ packages = [] }: LeadFormProps) {
           </div>
         </div>
 
+        {errorMessage && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-700 rounded-2xl text-xs font-bold flex items-start gap-2 mt-4"
+          >
+            <span aria-hidden="true">⚠️</span>
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         {status === 'success' && (
-          <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 rounded-2xl text-xs font-bold font-mono animate-fadeIn flex items-center gap-2 mt-4">
+          <div role="status" aria-live="polite" className="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 rounded-2xl text-xs font-bold font-mono animate-fadeIn flex items-center gap-2 mt-4">
             🎉 <span>Yay! Your reservation enquiry has been submitted. Our team will verify date availability and get back to you shortly!</span>
           </div>
         )}

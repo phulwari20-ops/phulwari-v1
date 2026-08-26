@@ -159,7 +159,7 @@ export default function SummerCampPage() {
             <div className="sc-blob">
               <div className="sc-blob-ring" />
               <div className="sc-blob-shape">
-                <img src="/summercamp.webp" alt="Phulwari Summer Camp" />
+                <img src="/summercamp.webp" alt="Phulwari Summer Camp"  loading="lazy" decoding="async" />
               </div>
               <span className="sc-blob-dot sc-blob-dot-1" />
               <span className="sc-blob-dot sc-blob-dot-2" />
@@ -269,7 +269,7 @@ export default function SummerCampPage() {
       {lightboxImg && (
         <div className="sc-lightbox" onClick={() => setLightboxImg(null)}>
           <button className="sc-lightbox-close" onClick={() => setLightboxImg(null)}><X /></button>
-          <img className="sc-lightbox-img" src={lightboxImg} alt="Summer camp moment" />
+          <img className="sc-lightbox-img" src={lightboxImg} alt="Summer camp moment"  loading="lazy" decoding="async" />
         </div>
       )}
     </>

@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { JsonLd } from '@/lib/seo/JsonLd';
+import { breadcrumbSchema, webPageSchema } from '@/lib/seo/schema';
 import {
   Phone,
   MessageCircle,
@@ -187,9 +189,31 @@ const developmentPillars = [
 /*  Component                                                                */
 /* -------------------------------------------------------------------------- */
 
+
+const SEO_PATH = '/mothers';
+const SEO_BREADCRUMB = [
+  { name: 'Home', path: '/' },
+  { name: 'For Mothers', path: '/mothers' },
+];
+
 export default function MothersPage() {
   const imageBasePath = '/';
   return (
+    <>
+      <JsonLd
+        id="mothers-schema"
+        nodes={[
+          webPageSchema({
+            path: SEO_PATH,
+            name: 'Programs for Mothers in Patna',
+            description:
+              'Fitness and zumba batches for mothers plus a mother & toddler program, run alongside the children’s activity classes at Phulwari Patna.',
+            type: 'CollectionPage',
+            breadcrumb: SEO_BREADCRUMB,
+          }),
+          breadcrumbSchema(SEO_PATH, SEO_BREADCRUMB),
+        ]}
+      />
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
@@ -550,7 +574,7 @@ export default function MothersPage() {
                   <img
                     src={`${imageBasePath}${program.image}`}
                     alt={program.badge}
-                  />
+                   loading="lazy" decoding="async" />
                 </div>
                 <span
                   className="pg-blob-dot pg-blob-dot-1"
@@ -668,6 +692,7 @@ export default function MothersPage() {
 
         
       </div>
+    </>
     </>
   );
 }

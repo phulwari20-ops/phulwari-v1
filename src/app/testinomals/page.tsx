@@ -162,7 +162,15 @@ function InteractiveStars({
   );
 }
 
-export default function TestimonialsPage() {
+/**
+ * These sections are used two ways: as their own route (where the section
+ * heading is the page's single <h1>) and composed into the homepage (where the
+ * hero already owns the <h1>, so they must step down to <h2>).
+ * `headingLevel` lets the homepage demote them and keeps exactly one <h1> per
+ * page, which is what both the accessibility tree and Google expect.
+ */
+export default function TestimonialsPage({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
+  const Heading = headingLevel;
   const [reviewsList, setReviewsList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -372,9 +380,9 @@ export default function TestimonialsPage() {
           <div className="tm-hero-badge">
             <Star size={12} /> Reviews &amp; Testimonials
           </div>
-          <h1 className="tm-hero-title">
+          <Heading className="tm-hero-title">
             What <span>Parents Say</span> About Us
-          </h1>
+          </Heading>
           <p className="tm-hero-sub">
             Real stories from real families who have experienced the Phulwari difference. Trusted by hundreds of parents in Patna.
           </p>

@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { JsonLd } from '@/lib/seo/JsonLd';
+import { breadcrumbSchema, webPageSchema } from '@/lib/seo/schema';
 import {
   Music,
   PersonStanding,
@@ -24,6 +26,7 @@ import {
   Flower2,
   Medal,
   Drama,
+  Crown,
 } from 'lucide-react';
 
 const activities = [
@@ -171,6 +174,18 @@ const activities = [
     color: '#34B36B',
     bg: '#E3F7EA',
   },
+  {
+    icon: Crown,
+    title: 'Chess',
+    tagline: 'Think, Plan & Win',
+    description: 'A structured chess programme that builds focus, patience and strategic thinking — from first moves to tournament play.',
+    benefits: ['Sharpens Focus & Memory', 'Strategic Thinking', 'Patience & Calm', 'Problem-Solving Skills'],
+    ageLabel: '5+ Years',
+    category: 'Sports',
+    href: '/activities/chess',
+    color: '#6D28D9',
+    bg: '#EDE9FE',
+  },
 ];
 
 const filters = ['All', 'Arts', 'Sports', 'Wellness', 'Play'];
@@ -201,7 +216,25 @@ const stats = [
   { num: '5★',   label: 'Expert Trainers', color: '#E8A621', icon: Trophy },
 ];
 
-export default function Activities() {
+/**
+ * These sections are used two ways: as their own route (where the section
+ * heading is the page's single <h1>) and composed into the homepage (where the
+ * hero already owns the <h1>, so they must step down to <h2>).
+ * `headingLevel` lets the homepage demote them and keeps exactly one <h1> per
+ * page, which is what both the accessibility tree and Google expect.
+ */
+
+const SEO_PATH = '/activities';
+const SEO_BREADCRUMB = [
+  { name: 'Home', path: '/' },
+  { name: 'Activities', path: '/activities' },
+];
+
+export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
+  const Heading = headingLevel;
+  // Composed into the homepage as an <h2> section; only the standalone
+  // route should emit this page's structured data.
+  const isStandalone = headingLevel === 'h1';
   const [activeFilter, setActiveFilter] = useState('All');
   const [expanded, setExpanded] = useState<number | null>(null);
 
@@ -210,6 +243,21 @@ export default function Activities() {
     : activities.filter(a => a.category === activeFilter);
 
   return (
+    <>
+      {isStandalone && <JsonLd
+        id="activities-schema"
+        nodes={[
+          webPageSchema({
+            path: SEO_PATH,
+            name: 'Kids Activities & Classes in Patna',
+            description:
+              'Every activity Phulwari runs in Patna — music, dance, gymnastics, MMA, roller skating, karate, art & craft, yoga, cricket and an indoor play zone.',
+            type: 'CollectionPage',
+            breadcrumb: SEO_BREADCRUMB,
+          }),
+          breadcrumbSchema(SEO_PATH, SEO_BREADCRUMB),
+        ]}
+      />}
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
@@ -521,9 +569,9 @@ export default function Activities() {
             <Sparkles style={{ width: 13, height: 13, stroke: '#FF4D8D', strokeWidth: 2.5 }} />
             Activities & Programs
           </div>
-          <h1 className="act-hero-title">
+          <Heading className="act-hero-title">
             Where Kids <span>Learn, Play</span><br />& Grow Every Day
-          </h1>
+          </Heading>
           <p className="act-hero-sub">
             11 carefully designed activities to support every child's physical, mental,
             emotional and social development — while mothers stay active and supported too.
@@ -631,6 +679,7 @@ export default function Activities() {
         </div>
 
       </div>
+    </>
     </>
   );
 }

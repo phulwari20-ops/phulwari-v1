@@ -1,9 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Phone,
-  MessageCircle,
   Cake,
   ShieldCheck,
   Gamepad2,
@@ -104,100 +102,53 @@ interface Package {
   price?: string;
 }
 
-const defaultPackages: Package[] = [
-  {
-    name: 'Basic Birthday Package',
-    tagline: 'Perfect for small and cozy celebrations.',
-    price: '₹4,999 onwards',
-    accentColor: '#34B36B',
-    accentBg: '#E3F7EA',
-    includes: [
-      'Celebration Space',
-      'Basic Decoration',
-      'Music & Entertainment',
-      'Fun Activities',
-      'Birthday Setup',
-    ],
-  },
-  {
-    name: 'Premium Birthday Package',
-    tagline: 'Designed for a more memorable and exciting experience.',
-    price: '₹9,999 onwards',
-    accentColor: '#FF4D8D',
-    accentBg: '#FFE6EF',
-    featured: true,
-    includes: [
-      'Theme-Based Decoration',
-      'Enhanced Activity Setup',
-      'Interactive Games',
-      'Entertainment Activities',
-      'Photo-Friendly Decoration',
-      'Customized Arrangements',
-    ],
-  },
-  {
-    name: 'Customized Birthday Package',
-    tagline: 'A fully customized birthday experience, tailored to you.',
-    price: 'Custom Pricing',
-    accentColor: '#8B5CF6',
-    accentBg: '#EFE7FE',
-    includes: [
-      'Custom Themes',
-      'Personalized Decoration',
-      'Special Activities',
-      'Flexible Planning Options',
-      'Unique Celebration Setup',
-    ],
-  },
-];
-
 export default function BirthdayPartyPage() {
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
-  const [packagesList, setPackagesList] = useState<Package[]>(defaultPackages);
+  // Start empty — packages are driven entirely by what the admin publishes.
+  // No hardcoded packages are ever shown to users.
+  const [packagesList, setPackagesList] = useState<Package[]>([]);
+  const [packagesLoaded, setPackagesLoaded] = useState(false);
 
   useEffect(() => {
     const fetchPackages = async () => {
       try {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
-        
-        // Fetch from config table
-        const { data: configData } = await supabase
-          .from('birthday_landing_config')
-          .select('hero_section')
-          .eq('id', 1)
-          .single();
-          
-        const rawPkgs = configData?.hero_section?.packages;
-        
+
+        // Single source of truth: the party_packages table managed by the admin.
+        // Only packages explicitly marked visible are shown.
+        const { data: rawPkgs } = await supabase
+          .from('party_packages')
+          .select('*')
+          .eq('is_visible', true)
+          .order('name', { ascending: true });
+
         if (rawPkgs && rawPkgs.length > 0) {
-          console.log('✅ [FRONTEND SUPABASE API RESPONSE SUCCESS]: Received party packages from config row', rawPkgs);
-          const visibleDbPackages = rawPkgs.filter((d: any) => d.is_visible !== false);
-          
-          if (visibleDbPackages.length > 0) {
-            // Map DB data to match frontend Package interface
-            const dynamicPackages = visibleDbPackages.map((d: any) => {
-              // Try to find a default package to borrow icons/colors, otherwise use defaults
-              const fallback = defaultPackages.find(dp => dp.name.toLowerCase() === d.name?.toLowerCase()) || defaultPackages[0];
-              const isPremium = d.name?.toLowerCase().includes('premium');
-              const isBasic = d.name?.toLowerCase().includes('basic');
-              const accentColor = isPremium ? '#FF4D8D' : isBasic ? '#34B36B' : '#8B5CF6';
-              const accentBg = isPremium ? '#FFE6EF' : isBasic ? '#E3F7EA' : '#EFE7FE';
-              return {
-                name: d.name,
-                tagline: d.tagline || fallback.tagline,
-                price: d.price || fallback.price,
-                includes: d.includes ? d.includes.split(',').map((f: string) => f.trim()).filter(Boolean) : fallback.includes,
-                accentColor: accentColor,
-                accentBg: accentBg,
-                featured: isPremium
-              };
-            });
-            setPackagesList(dynamicPackages);
-          }
+          // Map DB data to match frontend Package interface
+          const dynamicPackages = rawPkgs.map((d: any) => {
+            const isPremium = d.name?.toLowerCase().includes('premium');
+            const isBasic = d.name?.toLowerCase().includes('basic');
+            const accentColor = isPremium ? '#FF4D8D' : isBasic ? '#34B36B' : '#8B5CF6';
+            const accentBg = isPremium ? '#FFE6EF' : isBasic ? '#E3F7EA' : '#EFE7FE';
+            return {
+              name: d.name || 'Party Package',
+              tagline: d.tagline || '',
+              price: d.price || '',
+              includes: d.includes ? d.includes.split(',').map((f: string) => f.trim()).filter(Boolean) : [],
+              accentColor: accentColor,
+              accentBg: accentBg,
+              featured: isPremium
+            };
+          });
+          setPackagesList(dynamicPackages);
+        } else {
+          setPackagesList([]);
         }
       } catch (err) {
         console.error('❌ [FRONTEND SUPABASE API RESPONSE ERROR]: Failed to fetch party packages', err);
+        setPackagesList([]);
+      } finally {
+        setPackagesLoaded(true);
       }
     };
     fetchPackages();
@@ -393,7 +344,7 @@ export default function BirthdayPartyPage() {
             <div className="bp-blob">
               <div className="bp-blob-ring" />
               <div className="bp-blob-shape">
-                <img src="/birthdaycelebration.webp" alt="Birthday Party Celebrations at Phulwari" />
+                <img src="/birthdaycelebration.webp" alt="Birthday Party Celebrations at Phulwari"  loading="lazy" decoding="async" />
               </div>
               <span className="bp-blob-dot bp-blob-dot-1" />
               <span className="bp-blob-dot bp-blob-dot-2" />
@@ -466,6 +417,11 @@ export default function BirthdayPartyPage() {
             </h2>
             <p className="bp-section-text">Choose the celebration that fits your vision.</p>
           </div>
+          {packagesLoaded && packagesList.length === 0 && (
+            <p className="bp-section-text" style={{ textAlign: 'center' }}>
+              Our celebration packages are being updated. Please contact us for the latest party packages and pricing.
+            </p>
+          )}
           <div className="bp-packages">
             {packagesList.map((pkg, i) => (
               <div className={`bp-package-card ${pkg.featured ? 'featured' : ''}`} key={i}>
@@ -475,9 +431,11 @@ export default function BirthdayPartyPage() {
                 </div>
                 <h3 className="bp-package-name">{pkg.name}</h3>
                 <p className="bp-package-tagline">{pkg.tagline}</p>
-                <div style={{ margin: '0.6rem 0', fontWeight: 800, fontSize: '1.05rem', color: pkg.accentColor, fontFamily: "'Baloo 2', sans-serif" }}>
-                  {pkg.price || (i === 0 ? '₹4,999 onwards' : i === 1 ? '₹9,999 onwards' : 'Custom Pricing')}
-                </div>
+                {pkg.price && (
+                  <div style={{ margin: '0.6rem 0', fontWeight: 800, fontSize: '1.05rem', color: pkg.accentColor, fontFamily: "'Baloo 2', sans-serif" }}>
+                    {pkg.price}
+                  </div>
+                )}
                 <div className="bp-package-includes">
                   {pkg.includes.map((inc, j) => (
                     <div className="bp-package-includes-item" key={j}>
@@ -562,7 +520,7 @@ export default function BirthdayPartyPage() {
           <button className="bp-lightbox-close" onClick={() => setLightboxImg(null)}>
             <X />
           </button>
-          <img className="bp-lightbox-img" src={lightboxImg} alt="Birthday celebration" />
+          <img className="bp-lightbox-img" src={lightboxImg} alt="Birthday celebration"  loading="lazy" decoding="async" />
         </div>
       )}
     </>

@@ -122,7 +122,7 @@ export default function BlogsClient({ initialBlogs }: BlogsClientProps) {
                       alt={blog.title}
                       className="blog-card-img"
                       onError={(e: any) => { e.target.src = '/galary4.webp'; }}
-                    />
+                     loading="lazy" decoding="async" />
                     <span className="blog-card-badge">{blog.category}</span>
                   </div>
 

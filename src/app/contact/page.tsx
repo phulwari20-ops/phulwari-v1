@@ -53,9 +53,10 @@ const whatsappTopics = [
   'Program Information', 'General Inquiries',
 ];
 
+const OTHER_PROGRAM = 'Other (Specify / Mention)';
 const programOptions = [
   'Phulwari Premium Circle', 'Phulwari Core', 'Mother & Toddler Program',
-  'Mother Fitness Program', 'Birthday Party', 'Summer Camp', 'Winter Camp', 'General Inquiry',
+  'Mother Fitness Program', 'Birthday Party', 'Summer Camp', 'Winter Camp', 'General Inquiry', OTHER_PROGRAM,
 ];
 
 const mapsUrl = 'https://maps.app.goo.gl/g7qiU1BqineG2RF56';
@@ -74,8 +75,8 @@ const socialLinks = [
   },
   {
     name: 'Instagram',
-    handle: '@phulwari.motherkids',
-    url: 'https://www.instagram.com/phulwari.motherkids/',
+    handle: '@motherandchildactivitycentre',
+    url: 'https://www.instagram.com/motherandchildactivitycentre/',
     bg: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22" style={{ color: '#fff' }}>
@@ -94,9 +95,18 @@ const socialLinks = [
 
 interface FormState {
   parentName: string; childName: string; mobile: string;
-  email: string; program: string; message: string;
+  email: string; program: string; programOther: string; message: string;
 }
-const initialForm: FormState = { parentName: '', childName: '', mobile: '', email: '', program: '', message: '' };
+const initialForm: FormState = { parentName: '', childName: '', mobile: '', email: '', program: '', programOther: '', message: '' };
+
+// The label that actually represents the chosen program: when "Other" is
+// picked, fall back to the free-text the user typed.
+function resolveProgram(form: FormState) {
+  if (form.program === OTHER_PROGRAM) {
+    return form.programOther.trim() ? `Other: ${form.programOther.trim()}` : 'Other';
+  }
+  return form.program;
+}
 
 function buildWhatsAppMessage(form: FormState) {
   const lines = [
@@ -106,13 +116,21 @@ function buildWhatsAppMessage(form: FormState) {
     form.childName ? `🧒 *Child Name:* ${form.childName}` : null,
     `📱 *Mobile:* ${form.mobile}`,
     form.email ? `📧 *Email:* ${form.email}` : null,
-    form.program ? `🎈 *Interested Program:* ${form.program}` : null,
+    form.program ? `🎈 *Interested Program:* ${resolveProgram(form)}` : null,
     ``, `📝 *Message:*`, form.message,
   ].filter(Boolean);
   return lines.join('\n');
 }
 
-export default function ContactPage() {
+/**
+ * These sections are used two ways: as their own route (where the section
+ * heading is the page's single <h1>) and composed into the homepage (where the
+ * hero already owns the <h1>, so they must step down to <h2>).
+ * `headingLevel` lets the homepage demote them and keeps exactly one <h1> per
+ * page, which is what both the accessibility tree and Google expect.
+ */
+export default function ContactPage({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
+  const Heading = headingLevel;
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
@@ -145,7 +163,7 @@ export default function ContactPage() {
         parent_name: form.parentName,
         phone: form.mobile,
         email: form.email,
-        program_interested: form.program,
+        program_interested: resolveProgram(form),
         message: form.message,
         source: 'Website / Home Page',
         status: 'New'
@@ -300,7 +318,7 @@ export default function ContactPage() {
       <div className="ct-page">
         <section className="ct-intro">
           <span className="ct-intro-badge">Contact Us</span>
-          <h1 className="ct-intro-title">We&apos;d Love to <span>Hear From You!</span></h1>
+          <Heading className="ct-intro-title">We&apos;d Love to <span>Hear From You!</span></Heading>
           <p className="ct-intro-text">Whether you&apos;re looking to enroll your child, join our activity programs, book a birthday party, register for a camp, or simply learn more about Phulwari, our team is here to help.</p>
         </section>
 
@@ -320,6 +338,15 @@ export default function ContactPage() {
               <h3 className="ct-card-title">WhatsApp Support</h3>
               <p className="ct-card-text">Chat with us directly for:</p>
               <ul className="ct-mini-list">{whatsappTopics.map((t, i) => <li key={i}>{t}</li>)}</ul>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello Phulwari! I need support.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ct-card-link"
+                style={{ color: '#34B36B' }}
+              >
+                <MessageCircle style={{ width: 16, height: 16 }} />Chat on WhatsApp
+              </a>
             </div>
             <div className="ct-card" style={{ animationDelay: '0.16s' }}>
               <div className="ct-card-icon" style={{ backgroundColor: '#E5EFFF' }}><Mail style={{ color: '#3D8BFF' }} /></div>
@@ -418,6 +445,16 @@ export default function ContactPage() {
                   <option value="">Select a program</option>
                   {programOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
+                {form.program === OTHER_PROGRAM && (
+                  <input
+                    id="programOther"
+                    type="text"
+                    value={form.programOther}
+                    onChange={(e) => handleChange('programOther', e.target.value)}
+                    placeholder="Please specify / mention the program you're interested in"
+                    style={{ marginTop: '0.6rem' }}
+                  />
+                )}
               </div>
               <div className="ct-field" style={{ marginTop: '1rem' }}>
                 <label htmlFor="message">Message *</label>

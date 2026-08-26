@@ -129,9 +129,9 @@ export default function FacilitiesPage() {
           <div className="fac-intro">
             <div>
               <div className="fac-badge">Take a Look Inside</div>
-              <h2 className="fac-title">
+              <h1 className="fac-title">
                 Our <span>Facilities</span>
-              </h2>
+              </h1>
               <p className="fac-text">
                 Every corner of Phulwari is designed with children's safety and comfort in
                 mind &mdash; and with enough space for mothers to stay active too.

@@ -4,7 +4,25 @@ import React from 'react';
 import { Users, Palette, Shield, GraduationCap, Compass } from 'lucide-react';
 import CurvedImage from './CurvedImage';
 
-export default function AboutPage() {
+import { JsonLd } from '@/lib/seo/JsonLd';
+import { breadcrumbSchema, webPageSchema } from '@/lib/seo/schema';
+/**
+ * Renders as its own /about route (where this heading is the page's single
+ * <h1>) and as a section of the homepage (where the hero owns the <h1>, so this
+ * steps down to <h2>).
+ */
+
+const SEO_PATH = '/about';
+const SEO_BREADCRUMB = [
+  { name: 'Home', path: '/' },
+  { name: 'About Us', path: '/about' },
+];
+
+export default function AboutPage({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
+  const Heading = headingLevel;
+  // Composed into the homepage as an <h2> section; only the standalone
+  // route should emit this page's structured data.
+  const isStandalone = headingLevel === 'h1';
   const image = 'childrens_cricket.webp';
   const highlights = [
     {
@@ -38,6 +56,21 @@ export default function AboutPage() {
   ];
 
   return (
+    <>
+      {isStandalone && <JsonLd
+        id="about-schema"
+        nodes={[
+          webPageSchema({
+            path: SEO_PATH,
+            name: 'About Phulwari — Mother & Child Activity Centre, Patna',
+            description:
+              'Phulwari is Patna\'s mother & child activity centre in Kidwaipuri, built around activity-based learning for children and programs that keep mothers active and involved.',
+            type: 'AboutPage',
+            breadcrumb: SEO_BREADCRUMB,
+          }),
+          breadcrumbSchema(SEO_PATH, SEO_BREADCRUMB),
+        ]}
+      />}
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
@@ -212,9 +245,9 @@ export default function AboutPage() {
             <div>
               <div className="about-badge">Who We Are</div>
 
-              <h2 className="about-title">
+              <Heading className="about-title">
                 Welcome to <span>Phulwari</span>
-              </h2>
+              </Heading>
 
               <p className="about-text">
                 Phulwari Mother &amp; Child Activity Centre is a space dedicated to children's
@@ -274,6 +307,7 @@ export default function AboutPage() {
           </p>
         </div>
       </section>
+    </>
     </>
   );
 }

@@ -170,9 +170,9 @@ export default function WhyChooseUsPage() {
           <div className="why-intro">
             <div>
               <div className="why-badge">Why Phulwari</div>
-              <h2 className="why-title">
+              <h1 className="why-title">
                 Why Choose <span>Us</span>
-              </h2>
+              </h1>
               <p className="why-text">
                 What makes Phulwari different isn't just our activities &mdash; it's how we bring
                 mothers and children together, with safety, experienced guidance and real family

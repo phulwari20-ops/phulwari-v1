@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Phone, MessageCircle } from 'lucide-react';
 
-const INSTAGRAM_URL = 'https://www.instagram.com/phulwari.motherkids/';
-const FACEBOOK_URL = 'https://www.facebook.com/share/1DWjMMRAjT/';  
-const WHATSAPP_URL = 'https://wa.me/916207368839';
+const INSTAGRAM_URL = 'https://www.instagram.com/motherandchildactivitycentre/';
+const FACEBOOK_URL = 'https://www.facebook.com/share/1DWjMMRAjT/';
+const WHATSAPP_URL = `https://wa.me/916207368839?text=${encodeURIComponent('Hello Phulwari! I need support.')}`;
 const CALL_URL = 'tel:+916207368839';
 
 export default function FloatingButton() {

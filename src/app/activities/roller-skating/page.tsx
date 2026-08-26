@@ -107,7 +107,7 @@ export default function RollerSkatingPage() {
               <div className="pd-blob">
                 <div className="pd-blob-ring" style={{ borderColor: p.blobRing }} />
                 <div className="pd-blob-shape">
-                  <img src={p.image.startsWith('http') ? p.image : `/${p.image}`} alt={p.badge} />
+                  <img src={p.image.startsWith('http') ? p.image : `/${p.image}`} alt={p.badge}  loading="lazy" decoding="async" />
                 </div>
                 <span className="pd-blob-dot pd-dot-1" style={{ backgroundColor: p.dot1 }} />
                 <span className="pd-blob-dot pd-dot-2" style={{ backgroundColor: p.dot2 }} />

@@ -101,9 +101,10 @@ export default function StudentDashboardPage() {
       )
       if (uniqueFees.length > 0) setFees(uniqueFees)
 
-      const mergedNotices = [...(annData || []), ...localNotices]
-      const uniqueNotices = mergedNotices.filter((a, idx, self) => idx === self.findIndex(t => t.id === a.id))
-      if (uniqueNotices.length > 0) setAnnouncements(uniqueNotices)
+      if (annData) {
+        setAnnouncements(annData)
+        try { localStorage.setItem('phulwari_announcements', JSON.stringify(annData)) } catch (e) {}
+      }
     } catch (err) {
       // Non-blocking timeout or error catch
     } finally {
