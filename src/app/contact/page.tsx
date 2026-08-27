@@ -387,19 +387,7 @@ export default function ContactPage({ headingLevel = 'h1' }: { headingLevel?: 'h
           </div>
         </section>
 
-        {/* Working hours */}
-        <section className="ct-section">
-          <div className="ct-section-head"><h2 className="ct-section-title">Working <span>Hours</span></h2></div>
-          <div className="ct-hours-grid">
-            {workingHours.map((h, i) => (
-              <div className="ct-hour-card" key={i}>
-                <span className="ct-hour-badge" style={{ backgroundColor: h.bg, color: h.color }}>{h.name}</span>
-                <div className="ct-hour-time"><Clock3 style={{ color: h.color }} />{h.time}</div>
-                <div className="ct-hour-days">{h.days}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+
 
         {/* Services */}
         <section className="ct-section">

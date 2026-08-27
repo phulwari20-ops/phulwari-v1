@@ -47,7 +47,7 @@ const programs = [
       'Confidence & Sportsmanship',
     ],
     age: '5+ Years',
-    image: 'https://images.unsplash.com/photo-1560174038-594a6e2e8f5f?w=800&auto=format&fit=crop&q=80',
+    image: '/mind_development.jpg',
     sectionBg: '#F7F5FF',
     blobRing: '#3D8BFF',
     dot1: '#3D8BFF',
@@ -126,7 +126,7 @@ export default function ChessPage() {
                 <div className="pd-badge" style={{ backgroundColor: p.badgeBg, color: p.badgeColor }}>{p.emoji} {p.badge}</div>
                 <h2 className="pd-title">{p.title} <span style={{ color: p.spanColor }}>{p.titleSpan}</span></h2>
                 <p className="pd-text">{p.description}</p>
-                <div className="pd-age" style={{ backgroundColor: p.badgeBg, color: p.badgeColor }}>🎂 Suitable Age: {p.age}</div>
+
                 <div className="pd-benefits">
                   {p.benefits.map((b, bi) => (
                     <div key={bi} className="pd-benefit">

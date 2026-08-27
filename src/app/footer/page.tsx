@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -34,6 +34,7 @@ import {
   HelpCircle,
   ShieldCheck,
   Video,
+  Puzzle,
 } from 'lucide-react';
 
 interface LinkItem {
@@ -53,6 +54,7 @@ const quickLinks: LinkItem[] = [
   { label: 'Gallery',                href: '/batch-galary/gallery' },
   { label: 'FAQ',                    href: '/legal/faq' },
   { label: 'Contact Us',             href: '/contact' },
+  { label: 'Blog',                   href: '/blogs' },
 ];
 
 const legalLinks: LinkItem[] = [
@@ -72,6 +74,7 @@ const activities = [
   { icon: Blocks,      label: 'Play Zone',                   color: '#FF4D8D', href: '/activities/play-zone' },
   { icon: Baby,        label: 'Mother & Toddler Program',    color: '#E8A621', href: '/mothers/toddler-program' },
   { icon: Dumbbell,    label: 'Fitness Program for Mothers', color: '#8B5CF6', href: '/mothers/fitness' },
+  { icon: Puzzle,      label: 'Chess',                       color: '#14B8A6', href: '/activities/chess' },
 ];
 
 const programs = [
@@ -157,9 +160,18 @@ const socialLinks = [
 ];
 
 const Footer: React.FC = () => {
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Only evaluate active state on the client after hydration to keep
+  // SSR and initial client HTML identical → no hydration mismatch.
+  const pathname = mounted ? rawPathname : null;
   const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname?.startsWith(`${href}/`);
+    !pathname ? false : href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <>

@@ -97,9 +97,18 @@ export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClie
         .bd-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 12px 0; margin-bottom: 24px; }
         .bd-meta-item { display: flex; align-items: center; gap: 5px; }
         .bd-meta-icon { color: #f472b6; }
-        .bd-content { font-size: 14.5px; color: #4a5568; line-height: 1.85; white-space: pre-line; }
+        .bd-content { font-size: 14.5px; color: #4a5568; line-height: 1.85; }
+        .bd-content h1 { font-family: 'Baloo 2', sans-serif; font-size: 24px; font-weight: 900; color: #1e293b; margin: 24px 0 12px; }
         .bd-content h2 { font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800; color: #1e293b; margin: 28px 0 10px; }
         .bd-content h3 { font-family: 'Baloo 2', sans-serif; font-size: 17px; font-weight: 700; color: #1e293b; margin: 20px 0 8px; }
+        .bd-content p { margin: 12px 0; }
+        .bd-content blockquote { border-left: 4px solid #f472b6; background: #fff1f2; padding: 12px 18px; margin: 16px 0; border-radius: 8px; font-style: italic; font-weight: 600; color: #db2777; }
+        .bd-content ul { list-style-type: disc; margin: 12px 0 12px 24px; padding-left: 0; }
+        .bd-content ol { list-style-type: decimal; margin: 12px 0 12px 24px; padding-left: 0; }
+        .bd-content li { margin-bottom: 6px; }
+        .bd-content a { color: #db2777; text-decoration: underline; font-weight: 700; }
+        .bd-content a:hover { color: #9d174d; }
+        .bd-content img { border-radius: 16px; max-width: 100%; height: auto; margin: 20px 0; box-shadow: 0 4px 14px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
         .back-link { display: inline-flex; align-items: center; gap: 6px; color: #e91e8c; font-size: 13px; font-weight: 800; text-decoration: none; margin-top: 28px; border-top: 1px solid #f1f5f9; padding-top: 20px; transition: color 0.2s; }
         .back-link:hover { color: #9d174d; }
 
@@ -163,9 +172,10 @@ export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClie
                   <span className="bd-meta-item"><Calendar size={13} className="bd-meta-icon" /> {new Date(blog.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                   <span className="bd-meta-item"><Clock size={13} className="bd-meta-icon" /> {readTime} min read</span>
                 </div>
-                <div className="bd-content">
-                  {blog.content || blog.short_description}
-                </div>
+                <div 
+                  className="bd-content"
+                  dangerouslySetInnerHTML={{ __html: blog.content || blog.short_description || '' }}
+                />
                 <Link href="/blogs" className="back-link">
                   <ArrowLeft size={15} /> Back to All Articles
                 </Link>

@@ -284,7 +284,7 @@ export default function MusicDancePage() {
 
                 <p className="pd-text">{p.description}</p>
 
-                <div className="pd-age">🎂 Suitable Age: {p.age}</div>
+
 
                 <div className="pd-benefits">
                   {p.benefits.map((b, bi) => (

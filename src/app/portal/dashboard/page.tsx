@@ -72,11 +72,7 @@ export default function StudentDashboardPage() {
     // Populate local state immediately & clear loading screen instantly!
     if (localFees.length > 0) setFees(localFees)
     if (localNotices.length > 0) setAnnouncements(localNotices)
-    setAttendance([
-      { date: '2026-08-01', status: 'present', remarks: 'Active participant' },
-      { date: '2026-08-02', status: 'present', remarks: 'Great energy' },
-      { date: '2026-08-03', status: 'present', remarks: 'On time' }
-    ])
+    setAttendance([])
     setLoading(false)
 
     // 2. Fetch remote Supabase DB in background with 1.5s timeout race
@@ -289,7 +285,7 @@ export default function StudentDashboardPage() {
                 </span>
               </h1>
               <p style={{ fontSize: '12px', color: '#64748B', margin: 0, fontFamily: 'monospace' }}>
-                Admission ID: <strong style={{ color: '#FF4D8D' }}>{student.admission_id}</strong> | Class: <strong>{student.class_name || 'Nursery'}-{student.section_name || 'A'}</strong>
+                Admission ID: <strong style={{ color: '#FF4D8D' }}>{student.admission_id}</strong> | Batch: <strong>{student.batches?.batch_name || student.batch_name || 'N/A'}</strong>
               </p>
             </div>
           </div>
@@ -384,7 +380,7 @@ export default function StudentDashboardPage() {
             <p style={{ fontSize: '24px', fontWeight: 900, color: '#D97706', margin: 0 }}>
               ₹{fees.filter(f => f.status === 'pending').reduce((sum, f) => sum + Number(f.amount), 0)}
             </p>
-            <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>1 invoice pending</p>
+            <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>{fees.filter(f => f.status === 'pending').length} invoice(s) pending</p>
           </div>
 
           <div style={{ background: '#ffffff', border: '1px solid #FFE4E6', borderRadius: '24px', padding: '1.25rem 1.5rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)' }}>
@@ -547,35 +543,58 @@ export default function StudentDashboardPage() {
                 <thead>
                   <tr style={{ borderBottom: '2px solid #E2E8F0', color: '#64748B', textAlign: 'left', background: '#F8FAFC' }}>
                     <th style={{ padding: '14px 16px' }}>Date</th>
+                    <th style={{ padding: '14px 16px' }}>Activity</th>
                     <th style={{ padding: '14px 16px' }}>Status</th>
                     <th style={{ padding: '14px 16px' }}>Remarks</th>
                   </tr>
                 </thead>
                 <tbody style={{ fontFamily: 'monospace' }}>
-                  {attendance.map((record, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                      <td style={{ padding: '14px 16px', fontFamily: 'sans-serif', fontWeight: 600, color: '#0F172A' }}>{record.date}</td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <span style={{
-                          padding: '4px 12px',
-                          borderRadius: '20px',
-                          fontSize: '12px',
-                          fontWeight: 800,
-                          background: '#ECFDF5',
-                          color: '#059669',
-                          border: '1px solid #A7F3D0',
-                          fontFamily: 'sans-serif',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}>
-                          <CheckCircle2 size={14} />
-                          {record.status?.toUpperCase()}
-                        </span>
+                  {attendance.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif', color: '#64748B' }}>
+                        No attendance records found.
                       </td>
-                      <td style={{ padding: '14px 16px', fontFamily: 'sans-serif', color: '#64748B' }}>{record.remarks || 'Standard day'}</td>
                     </tr>
-                  ))}
+                  ) : (
+                    attendance.map((record, i) => {
+                      const stat = record.status?.toLowerCase() || 'unmarked'
+                      const isPresent = stat === 'present'
+                      const isAbsent = stat === 'absent'
+                      const isHalfday = stat === 'halfday'
+                      const isLeave = stat === 'leave'
+                      const isHoliday = stat === 'holiday'
+
+                      const bg = isPresent ? '#ECFDF5' : isAbsent ? '#FEF2F2' : isHalfday ? '#FFFBEB' : isLeave ? '#EFF6FF' : '#F3E8FF'
+                      const textCol = isPresent ? '#059669' : isAbsent ? '#DC2626' : isHalfday ? '#D97706' : isLeave ? '#2563EB' : '#7E22CE'
+                      const borderCol = isPresent ? '#A7F3D0' : isAbsent ? '#FCA5A5' : isHalfday ? '#FDE68A' : isLeave ? '#BFDBFE' : '#E9D5FF'
+
+                      return (
+                        <tr key={i} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                          <td style={{ padding: '14px 16px', fontFamily: 'sans-serif', fontWeight: 600, color: '#0F172A' }}>{record.date}</td>
+                          <td style={{ padding: '14px 16px', fontFamily: 'sans-serif', fontWeight: 700, color: '#4F46E5' }}>{record.class_name || 'General Activity'}</td>
+                          <td style={{ padding: '14px 16px' }}>
+                            <span style={{
+                              padding: '4px 12px',
+                              borderRadius: '20px',
+                              fontSize: '12px',
+                              fontWeight: 800,
+                              background: bg,
+                              color: textCol,
+                              border: `1px solid ${borderCol}`,
+                              fontFamily: 'sans-serif',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}>
+                              <CheckCircle2 size={14} />
+                              {record.status?.toUpperCase() || 'MARKED'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '14px 16px', fontFamily: 'sans-serif', color: '#64748B' }}>{record.remarks || 'Standard day'}</td>
+                        </tr>
+                      )
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -598,90 +617,77 @@ export default function StudentDashboardPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {[
-                { title: 'April 2026 Monthly Activity Fee', month: 'April 2026', due_date: '2026-04-10', defaultAmount: 3500 },
-                { title: 'May 2026 Monthly Activity Fee', month: 'May 2026', due_date: '2026-05-10', defaultAmount: 3500 },
-                { title: 'June 2026 Monthly Activity Fee', month: 'June 2026', due_date: '2026-06-10', defaultAmount: 3500 },
-                { title: 'July 2026 Monthly Activity Fee', month: 'July 2026', due_date: '2026-07-10', defaultAmount: 3500 },
-                { title: 'August 2026 Monthly Activity Fee', month: 'August 2026', due_date: '2026-08-10', defaultAmount: 3500 },
-                { title: 'September 2026 Monthly Activity Fee', month: 'September 2026', due_date: '2026-09-10', defaultAmount: 3500 },
-                { title: 'October 2026 Monthly Activity Fee', month: 'October 2026', due_date: '2026-10-10', defaultAmount: 3500 },
-                { title: 'November 2026 Monthly Activity Fee', month: 'November 2026', due_date: '2026-11-10', defaultAmount: 3500 },
-                { title: 'December 2026 Monthly Activity Fee', month: 'December 2026', due_date: '2026-12-10', defaultAmount: 3500 },
-                { title: 'January 2027 Monthly Activity Fee', month: 'January 2027', due_date: '2027-01-10', defaultAmount: 3500 },
-                { title: 'February 2027 Monthly Activity Fee', month: 'February 2027', due_date: '2027-02-10', defaultAmount: 3500 },
-                { title: 'March 2027 Monthly Activity Fee', month: 'March 2027', due_date: '2027-03-10', defaultAmount: 3500 }
-              ].map((item, idx) => {
-                const recorded = fees.find(f => 
-                  f.title?.toLowerCase().includes(item.month.toLowerCase()) || 
-                  (f.month && f.month.toLowerCase() === item.month.toLowerCase())
-                )
-                const isPaid = recorded?.status === 'paid'
-                const displayFee = recorded || item
-
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      background: isPaid ? '#F0FDF4' : '#FFFBEB',
-                      border: isPaid ? '1.5px solid #BBF7D0' : '1.5px solid #FDE68A',
-                      borderRadius: '20px',
-                      padding: '1.25rem',
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '1rem'
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', margin: '0 0 4px 0' }}>{item.title}</h3>
-                      <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-                        Due Date: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#1E293B' }}>{item.due_date}</span>
-                      </p>
-                      {isPaid && recorded?.receipt_no && (
-                        <p style={{ fontSize: '12px', fontFamily: 'monospace', color: '#059669', fontWeight: 700, margin: '4px 0 0 0' }}>Receipt No: {recorded.receipt_no}</p>
-                      )}
-                    </div>
-
-                    <div style={{ textAlign: 'right', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {fees.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#64748B', fontSize: '14px', fontWeight: 600 }}>
+                  No fee records found.
+                </div>
+              ) : (
+                fees.map((recorded, idx) => {
+                  const isPaid = recorded?.status === 'paid'
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        background: isPaid ? '#F0FDF4' : '#FFFBEB',
+                        border: isPaid ? '1.5px solid #BBF7D0' : '1.5px solid #FDE68A',
+                        borderRadius: '20px',
+                        padding: '1.25rem',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '1rem'
+                      }}
+                    >
                       <div>
-                        <p style={{ fontSize: '18px', fontWeight: 900, fontFamily: 'monospace', color: '#0F172A', margin: '0 0 4px 0' }}>₹{recorded?.amount || item.defaultAmount}</p>
-                        <span style={
-                          isPaid
-                            ? { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }
-                            : { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A' }
-                        }>
-                          {isPaid ? 'PAID' : 'PENDING'}
-                        </span>
+                        <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', margin: '0 0 4px 0' }}>{recorded.title || 'Monthly Activity Fee'}</h3>
+                        <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+                          Due Date: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#1E293B' }}>{recorded.due_date || '—'}</span>
+                        </p>
+                        {isPaid && recorded?.receipt_no && (
+                          <p style={{ fontSize: '12px', fontFamily: 'monospace', color: '#059669', fontWeight: 700, margin: '4px 0 0 0' }}>Receipt No: {recorded.receipt_no}</p>
+                        )}
                       </div>
 
-                      {isPaid && (
-                        <button
-                          onClick={() => setSelectedReceipt(recorded)}
-                          style={{
-                            padding: '10px 16px',
-                            background: '#ECFDF5',
-                            color: '#059669',
-                            border: '1px solid #A7F3D0',
-                            borderRadius: '14px',
-                            fontSize: '13px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)'
-                          }}
-                        >
-                          <Download size={15} />
-                          <span>Download Receipt</span>
-                        </button>
-                      )}
+                      <div style={{ textAlign: 'right', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div>
+                          <p style={{ fontSize: '18px', fontWeight: 900, fontFamily: 'monospace', color: '#0F172A', margin: '0 0 4px 0' }}>₹{recorded?.amount || recorded?.net_amount || 3500}</p>
+                          <span style={
+                            isPaid
+                              ? { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }
+                              : { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A' }
+                          }>
+                            {isPaid ? 'PAID' : 'PENDING'}
+                          </span>
+                        </div>
+
+                        {isPaid && (
+                          <button
+                            onClick={() => setSelectedReceipt(recorded)}
+                            style={{
+                              padding: '10px 16px',
+                              background: '#ECFDF5',
+                              color: '#059669',
+                              border: '1px solid #A7F3D0',
+                              borderRadius: '14px',
+                              fontSize: '13px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)'
+                            }}
+                          >
+                            <Download size={15} />
+                            <span>Download Receipt</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })
+              )}
             </div>
           </div>
         )}
@@ -767,8 +773,8 @@ export default function StudentDashboardPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>
-                <span style={{ color: '#64748B', fontWeight: 600 }}>Class & Section:</span>
-                <strong style={{ color: '#0F172A' }}>{student.class_name || 'Nursery'} - {student.section_name || 'A'}</strong>
+                <span style={{ color: '#64748B', fontWeight: 600 }}>Batch Assigned:</span>
+                <strong style={{ color: '#0F172A' }}>{student.batches?.batch_name || student.batch_name || 'N/A'}</strong>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>

@@ -116,7 +116,7 @@ export default function RollerSkatingPage() {
                 <div className="pd-badge" style={{ backgroundColor: p.badgeBg, color: p.badgeColor }}>{p.emoji} {p.badge}</div>
                 <h2 className="pd-title">{p.title} <span style={{ color: p.spanColor }}>{p.titleSpan}</span></h2>
                 <p className="pd-text">{p.description}</p>
-                <div className="pd-age" style={{ backgroundColor: p.badgeBg, color: p.badgeColor }}>🎂 Suitable Age: {p.age}</div>
+
                 <div className="pd-benefits">
                   {p.benefits.map((b, bi) => (
                     <div key={bi} className="pd-benefit">

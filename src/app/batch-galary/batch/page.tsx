@@ -363,11 +363,13 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
                       <p className="bt-detail-section-title">What's Included</p>
                       <div className="bt-includes-list">
                         {batch.includes.map((inc: any, idx: number) => {
-                          const IncIcon = inc.icon;
+                          const isObj = inc && typeof inc === 'object' && 'text' in inc;
+                          const IncIcon = isObj ? (inc.icon || Sparkles) : Sparkles;
+                          const text = isObj ? inc.text : inc;
                           return (
                             <div className="bt-include-item" key={idx}>
                               <IncIcon style={{ color: batch.color }} />
-                              <span>{inc.text}</span>
+                              <span>{text}</span>
                             </div>
                           );
                         })}

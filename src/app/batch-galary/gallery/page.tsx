@@ -42,7 +42,7 @@ const defaultSlides = [
  */
 export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
   const Heading = headingLevel;
-  const [slides, setSlides] = useState<any[]>(defaultSlides);
+  const [slides, setSlides] = useState<any[]>([]);
   const [current, setCurrent] = useState(0);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
@@ -68,13 +68,7 @@ export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h
             src: item.image_url || item.url || item.src,
             title: item.title || 'Phulwari Photo'
           }));
-          
-          // Merge with defaultSlides uniquely
-          const merged = [...dbSlides, ...defaultSlides];
-          const uniqueSlides = merged.filter((item, index, self) =>
-            index === self.findIndex((t) => t.src === item.src)
-          );
-          setSlides(uniqueSlides);
+          setSlides(dbSlides);
         } else {
           setSlides(defaultSlides);
         }
@@ -322,7 +316,6 @@ export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h
       `}</style>
 
       <div className="gl-page">
-
         {/* Hero */}
         <header className="gl-hero">
           <span className="gl-badge">Gallery</span>
@@ -330,83 +323,83 @@ export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h
           <p className="gl-sub">Explore photos from activities, celebrations and camps at Phulwari.</p>
         </header>
 
-        {slides.length > 0 ? (
-          <>
-            {/* Stage: side previews + main frame */}
-            <div className="gl-stage">
+          {slides.length > 0 ? (
+            <>
+              {/* Stage: side previews + main frame */}
+              <div className="gl-stage">
 
-              {/* Left side preview */}
-              <div className="gl-side" onClick={goPrev} aria-hidden="true">
-                <img src={slides[prevIdx].src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
+                {/* Left side preview */}
+                <div className="gl-side" onClick={goPrev} aria-hidden="true">
+                  <img src={slides[prevIdx]?.src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
+                </div>
+
+                {/* Main frame */}
+                <div className="gl-main">
+                  <div className="gl-frame cursor-pointer" onClick={() => setLightboxImg(slides[current]?.src)}>
+                    <img
+                      key={current}
+                      className="gl-img"
+                      src={slides[current]?.src}
+                      alt={slides[current]?.title || `Phulwari Photo ${current + 1}`}
+                      loading={current === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      width={420}
+                      height={560}
+                      draggable={false}
+                    />
+                    <button className="gl-arrow gl-arrow--left" onClick={(e) => { e.stopPropagation(); goPrev(); }} aria-label="Previous photo">
+                      <ChevronLeft />
+                    </button>
+                    <button className="gl-arrow gl-arrow--right" onClick={(e) => { e.stopPropagation(); goNext(); }} aria-label="Next photo">
+                      <ChevronRight />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right side preview */}
+                <div className="gl-side" onClick={goNext} aria-hidden="true">
+                  <img src={slides[nextIdx]?.src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
+                </div>
+
               </div>
 
-              {/* Main frame */}
-              <div className="gl-main">
-                <div className="gl-frame cursor-pointer" onClick={() => setLightboxImg(slides[current]?.src)}>
-                  <img
-                    key={current}
-                    className="gl-img"
-                    src={slides[current]?.src}
-                    alt={slides[current]?.title || `Phulwari Photo ${current + 1}`}
-                    loading={current === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    width={420}
-                    height={560}
-                    draggable={false}
-                  />
-                  <button className="gl-arrow gl-arrow--left" onClick={(e) => { e.stopPropagation(); goPrev(); }} aria-label="Previous photo">
-                    <ChevronLeft />
-                  </button>
-                  <button className="gl-arrow gl-arrow--right" onClick={(e) => { e.stopPropagation(); goNext(); }} aria-label="Next photo">
-                    <ChevronRight />
-                  </button>
+              {/* Counter + dots */}
+              <div className="gl-footer">
+                <p className="gl-counter"><strong>{current + 1}</strong> / {slides.length} — <span className="text-pink-500 font-bold">{slides[current]?.title || 'Phulwari Photo'}</span></p>
+                <div className="gl-dots">
+                  {slides.map((_, i) => (
+                    <button
+                      key={i}
+                      className={`gl-dot ${i === current ? 'active' : ''}`}
+                      onClick={() => setCurrent(i)}
+                      aria-label={`Go to photo ${i + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
 
-              {/* Right side preview */}
-              <div className="gl-side" onClick={goNext} aria-hidden="true">
-                <img src={slides[nextIdx]?.src} alt="Phulwari Activity Preview" loading="lazy" decoding="async" width={220} height={293} draggable={false} />
-              </div>
-
-            </div>
-
-            {/* Counter + dots */}
-            <div className="gl-footer">
-              <p className="gl-counter"><strong>{current + 1}</strong> / {slides.length} — <span className="text-pink-500 font-bold">{slides[current]?.title || 'Phulwari Photo'}</span></p>
-              <div className="gl-dots">
-                {slides.map((_, i) => (
-                  <button
+              {/* Thumbnail strip — desktop only */}
+              <div className="gl-thumbs">
+                {slides.map((s, i) => (
+                  <div
                     key={i}
-                    className={`gl-dot ${i === current ? 'active' : ''}`}
+                    className={`gl-thumb ${i === current ? 'active' : ''}`}
                     onClick={() => setCurrent(i)}
-                    aria-label={`Go to photo ${i + 1}`}
-                  />
+                    aria-label={`Photo ${i + 1}`}
+                  >
+                    <img src={s.src} alt={s.title || ''} draggable={false}  loading="lazy" decoding="async" />
+                  </div>
                 ))}
               </div>
+            </>
+          ) : (
+            <div className="text-center py-20 text-slate-400 font-bold flex flex-col items-center justify-center gap-2">
+              <span className="text-3xl">📷</span>
+              <p>No gallery photos found in the database yet.</p>
             </div>
+          )}
 
-            {/* Thumbnail strip — desktop only */}
-            <div className="gl-thumbs">
-              {slides.map((s, i) => (
-                <div
-                  key={i}
-                  className={`gl-thumb ${i === current ? 'active' : ''}`}
-                  onClick={() => setCurrent(i)}
-                  aria-label={`Photo ${i + 1}`}
-                >
-                  <img src={s.src} alt={s.title || ''} draggable={false}  loading="lazy" decoding="async" />
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-20 text-slate-400 font-bold flex flex-col items-center justify-center gap-2">
-            <span className="text-3xl">📷</span>
-            <p>No gallery photos found in the database yet.</p>
-          </div>
-        )}
-
-      </div>
+        </div>
 
       {/* Lightbox Fullscreen Popup Modal with Top-Right Cross X Button */}
       {lightboxImg && (
