@@ -68,11 +68,11 @@ export default async function LandingPage() {
       sub_headline: "— Zero Stress for You!",
       description: "Safe, spacious, and toddler-friendly party celebrations at Phulwari Activity Centre. Creative themes, soft-play fun, and complete end-to-end event management.",
       cta_text: "Check Date Availability & Get Free Quote",
-      hero_image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop", 
+      hero_image: "/birthday/birthday_1.png", 
       playzone_images: [
-        "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400", 
-        "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400", 
-        "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=400"  
+        "/birthday/birthday_1.png", 
+        "/birthday/birthday_2.png", 
+        "/birthday/birthday_3.png"  
       ]
     },
     trust_badges: [
@@ -84,9 +84,9 @@ export default async function LandingPage() {
       title: "Planning a Toddler’s Birthday Party Shouldn't Leave You Exhausted.",
       description: "When your child is under 5, hosting a birthday party at home or in an adult banquet hall can be overwhelming:",
       points: [
-        { icon: "ShieldAlert", title: "The Mess & Safety Risks", desc: "Sharp corners, fragile decor, and crowded spaces.", image: "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400" },
-        { icon: "Frown", title: "Toddler Boredom", desc: "Traditional party venues don't keep 1–5-year-olds engaged.", image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400" },
-        { icon: "Frown", title: "Parent Exhaustion", desc: "You spend the whole party managing logistics instead of enjoying the moment.", image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400" }
+        { icon: "ShieldAlert", title: "The Mess & Safety Risks", desc: "Sharp corners, fragile decor, and crowded spaces.", image: "/birthday/The Mesh & Safety Risk.png" },
+        { icon: "Frown", title: "Toddler Boredom", desc: "Traditional party venues don't keep 1–5-year-olds engaged.", image: "/birthday/Toddler Boredom.png" },
+        { icon: "Frown", title: "Parent Exhaustion", desc: "You spend the whole party managing logistics instead of enjoying the moment.", image: "/birthday/parent_exhaution.png" }
       ],
       advantage_title: "The Phulwari Advantage:",
       advantage_desc: "At Phulwari Mother & Child Activity Centre, we create child-centric celebrations where your little one can play freely in a safe, soft-padded environment while you relax and celebrate with guests.",

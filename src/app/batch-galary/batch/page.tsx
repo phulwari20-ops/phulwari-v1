@@ -322,13 +322,8 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
                     <span className="bt-card-name">{batch.badge}</span>
                     {isOpen ? <ChevronUp className="bt-card-chevron" /> : <ChevronDown className="bt-card-chevron" />}
                   </div>
-                  <div className="bt-card-divider" />
-                  <div className="bt-card-meta">
-                    <div className="bt-meta-row"><Clock3 style={{ color: batch.color }} />{batch.timing}</div>
-                    <div className="bt-meta-row"><CalendarDays style={{ color: batch.color }} />{batch.days}</div>
-                    <div className="bt-meta-row"><Baby style={{ color: batch.color }} />{batch.age}</div>
-                  </div>
                 </div>
+
 
                 {/* Expanded detail */}
                 {isOpen && (

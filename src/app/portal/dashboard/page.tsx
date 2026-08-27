@@ -31,6 +31,8 @@ export default function StudentDashboardPage() {
   // Printable Fee Receipt Modal State
   const [selectedReceipt, setSelectedReceipt] = useState<any | null>(null)
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false)
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState<boolean>(false)
+  const [isDueAlertOpen, setIsDueAlertOpen] = useState<boolean>(false)
 
   useEffect(() => {
     const sessionStr = localStorage.getItem('phulwari_student')
@@ -101,6 +103,19 @@ export default function StudentDashboardPage() {
         setAnnouncements(annData)
         try { localStorage.setItem('phulwari_announcements', JSON.stringify(annData)) } catch (e) {}
       }
+      
+      // Due Alert Check
+      const pendingAmount = uniqueFees.filter(f => f.status === 'due' || f.status === 'pending' || f.status === 'partial')
+                                      .reduce((sum, f) => sum + Number(f.pending_amount || f.amount || 0), 0)
+      if (pendingAmount > 0) {
+        const lastAlertDate = localStorage.getItem('phulwari_due_alert_date')
+        const todayStr = new Date().toISOString().split('T')[0]
+        if (lastAlertDate !== todayStr) {
+          setIsDueAlertOpen(true)
+          localStorage.setItem('phulwari_due_alert_date', todayStr)
+        }
+      }
+
     } catch (err) {
       // Non-blocking timeout or error catch
     } finally {
@@ -350,17 +365,23 @@ export default function StudentDashboardPage() {
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 1.5rem' }}>
         {/* Quick Summary Cards Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
-          <div style={{ background: '#ffffff', border: '1px solid #FFE4E6', borderRadius: '24px', padding: '1.25rem 1.5rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)' }}>
+          <div 
+            onClick={() => setIsBatchModalOpen(true)}
+            style={{ background: '#ffffff', border: '1px solid #FFE4E6', borderRadius: '24px', padding: '1.25rem 1.5rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)', cursor: 'pointer', transition: 'all 0.2s' }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '4px' }}>
               <span>Batch Assigned</span>
               <BookOpen size={18} color="#FF4D8D" />
             </div>
             <p style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-              {student.batches?.batch_name || 'Little Explorers'}
+              {student.batches?.name || student.batches?.batch_name || student.batch_name || 'Not Assigned'}
             </p>
             <p style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace', margin: '4px 0 0 0' }}>
-              {student.batches?.start_time || '09:00 AM'} - {student.batches?.end_time || '11:30 AM'}
+              {student.batches?.start_time || 'N/A'} - {student.batches?.end_time || 'N/A'}
             </p>
+            <div style={{ fontSize: '10px', color: '#FF4D8D', fontWeight: 700, marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Click to view details <ArrowRight size={12} />
+            </div>
           </div>
 
           <div style={{ background: '#ffffff', border: '1px solid #FFE4E6', borderRadius: '24px', padding: '1.25rem 1.5rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)' }}>
@@ -378,9 +399,9 @@ export default function StudentDashboardPage() {
               <CreditCard size={18} color="#D97706" />
             </div>
             <p style={{ fontSize: '24px', fontWeight: 900, color: '#D97706', margin: 0 }}>
-              ₹{fees.filter(f => f.status === 'pending').reduce((sum, f) => sum + Number(f.amount), 0)}
+              ₹{fees.filter(f => f.status === 'pending' || f.status === 'due' || f.status === 'partial').reduce((sum, f) => sum + Number(f.pending_amount || f.amount || 0), 0).toLocaleString('en-IN')}
             </p>
-            <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>{fees.filter(f => f.status === 'pending').length} invoice(s) pending</p>
+            <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>{fees.filter(f => f.status === 'pending' || f.status === 'due' || f.status === 'partial').length} invoice(s) pending</p>
           </div>
 
           <div style={{ background: '#ffffff', border: '1px solid #FFE4E6', borderRadius: '24px', padding: '1.25rem 1.5rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)' }}>
@@ -601,92 +622,81 @@ export default function StudentDashboardPage() {
           </div>
         )}
 
+        {/* Tab 3: Fee Payments */}
         {activeTab === 'fees' && (
-          <div style={{ background: '#ffffff', border: '1px solid #F1F5F9', borderRadius: '28px', padding: '2rem', boxShadow: '0 15px 40px rgba(0, 0, 0, 0.04)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <CreditCard size={22} color="#D97706" /> Complete Monthly Fee Payment Ledger
-                </h2>
-                <p style={{ fontSize: '12px', color: '#64748B', margin: '4px 0 0 0' }}>2026-2027 Academic Session Ledger & Payment History</p>
+          <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #FDE68A', borderRadius: '24px', padding: '2rem', boxShadow: '0 15px 35px rgba(0,0,0,0.03)' }}>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ background: '#FEF3C7', padding: '12px', borderRadius: '16px', color: '#D97706' }}>
+                    <CreditCard size={24} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0 }}>Fee History & Ledger</h2>
+                    <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Complete record of all fee collections and dues</p>
+                  </div>
+                </div>
               </div>
 
-              <div style={{ padding: '6px 14px', background: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A', borderRadius: '20px', fontSize: '12px', fontWeight: 800 }}>
-                Monthly Fee: ₹3,500
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {fees.length === 0 ? (
-                <div style={{ padding: '2rem', textAlign: 'center', color: '#64748B', fontSize: '14px', fontWeight: 600 }}>
-                  No fee records found.
+                <div style={{ textAlign: 'center', padding: '4rem 1rem', background: '#F8FAFC', borderRadius: '16px', border: '1px dashed #E2E8F0' }}>
+                  <CreditCard size={48} color="#CBD5E1" style={{ margin: '0 auto 1rem auto' }} />
+                  <p style={{ color: '#64748B', fontWeight: 600 }}>No fee records found.</p>
                 </div>
               ) : (
-                fees.map((recorded, idx) => {
-                  const isPaid = recorded?.status === 'paid'
-                  return (
-                    <div
-                      key={idx}
-                      style={{
-                        background: isPaid ? '#F0FDF4' : '#FFFBEB',
-                        border: isPaid ? '1.5px solid #BBF7D0' : '1.5px solid #FDE68A',
-                        borderRadius: '20px',
-                        padding: '1.25rem',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '1rem'
-                      }}
-                    >
-                      <div>
-                        <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', margin: '0 0 4px 0' }}>{recorded.title || 'Monthly Activity Fee'}</h3>
-                        <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-                          Due Date: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#1E293B' }}>{recorded.due_date || '—'}</span>
-                        </p>
-                        {isPaid && recorded?.receipt_no && (
-                          <p style={{ fontSize: '12px', fontFamily: 'monospace', color: '#059669', fontWeight: 700, margin: '4px 0 0 0' }}>Receipt No: {recorded.receipt_no}</p>
-                        )}
-                      </div>
-
-                      <div style={{ textAlign: 'right', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div>
-                          <p style={{ fontSize: '18px', fontWeight: 900, fontFamily: 'monospace', color: '#0F172A', margin: '0 0 4px 0' }}>₹{recorded?.amount || recorded?.net_amount || 3500}</p>
-                          <span style={
-                            isPaid
-                              ? { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }
-                              : { padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A' }
-                          }>
-                            {isPaid ? 'PAID' : 'PENDING'}
-                          </span>
-                        </div>
-
-                        {isPaid && (
-                          <button
-                            onClick={() => setSelectedReceipt(recorded)}
-                            style={{
-                              padding: '10px 16px',
-                              background: '#ECFDF5',
-                              color: '#059669',
-                              border: '1px solid #A7F3D0',
-                              borderRadius: '14px',
-                              fontSize: '13px',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)'
-                            }}
-                          >
-                            <Download size={15} />
-                            <span>Download Receipt</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })
+                <div style={{ overflowX: 'auto', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                  <table style={{ width: '100%', minWidth: '900px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
+                    <thead>
+                      <tr style={{ background: '#F8FAFC', borderBottom: '2px solid #E2E8F0' }}>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700 }}>Fee Head</th>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700 }}>Month/Year</th>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700, textAlign: 'right' }}>Total Fee</th>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700, textAlign: 'right' }}>Discount</th>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700, textAlign: 'right' }}>Paid</th>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700, textAlign: 'right' }}>Due</th>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700 }}>Status</th>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700 }}>Pay. Mode</th>
+                        <th style={{ padding: '1rem', color: '#475569', fontWeight: 700 }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {fees.map((f, i) => (
+                        <tr key={f.id || i} style={{ borderBottom: '1px solid #F1F5F9', background: i % 2 === 0 ? '#ffffff' : '#F8FAFC' }}>
+                          <td style={{ padding: '1rem', fontWeight: 700, color: '#0F172A' }}>{f.fee_head || f.title || 'Fee Payment'}</td>
+                          <td style={{ padding: '1rem', color: '#64748B' }}>{f.collected_for || f.month || 'One Time'}</td>
+                          <td style={{ padding: '1rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>₹{Number(f.amount || 0).toLocaleString('en-IN')}</td>
+                          <td style={{ padding: '1rem', textAlign: 'right', fontFamily: 'monospace', color: '#D97706' }}>₹{Number(f.discount || 0).toLocaleString('en-IN')}</td>
+                          <td style={{ padding: '1rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 900, color: '#10B981' }}>₹{Number(f.amount_paid || f.net_amount || 0).toLocaleString('en-IN')}</td>
+                          <td style={{ padding: '1rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 900, color: '#EF4444' }}>
+                            ₹{Number(f.pending_amount || (f.status==='pending'?f.amount:0)).toLocaleString('en-IN')}
+                          </td>
+                          <td style={{ padding: '1rem' }}>
+                            {f.status === 'paid' ? (
+                              <span style={{ padding: '4px 10px', background: '#D1FAE5', color: '#059669', borderRadius: '12px', fontSize: '10px', fontWeight: 800 }}>PAID</span>
+                            ) : f.status === 'partial' ? (
+                              <span style={{ padding: '4px 10px', background: '#FEF3C7', color: '#D97706', borderRadius: '12px', fontSize: '10px', fontWeight: 800 }}>PARTIAL</span>
+                            ) : (
+                              <span style={{ padding: '4px 10px', background: '#FEE2E2', color: '#DC2626', borderRadius: '12px', fontSize: '10px', fontWeight: 800 }}>DUE</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '1rem', color: '#64748B' }}>{f.mode_of_payment || f.payment_method || '—'}</td>
+                          <td style={{ padding: '1rem' }}>
+                            {f.status === 'paid' ? (
+                              <button onClick={() => handleDownloadReceiptFile(f)} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#F1F5F9', color: '#475569', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>
+                                <Download size={14} /> Receipt
+                              </button>
+                            ) : (
+                              <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FF4D8D', color: '#ffffff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>
+                                Pay Now
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </div>
@@ -774,7 +784,7 @@ export default function StudentDashboardPage() {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>
                 <span style={{ color: '#64748B', fontWeight: 600 }}>Batch Assigned:</span>
-                <strong style={{ color: '#0F172A' }}>{student.batches?.batch_name || student.batch_name || 'N/A'}</strong>
+                <strong style={{ color: '#0F172A' }}>{student.batches?.name || student.batches?.batch_name || student.batch_name || 'N/A'}</strong>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>

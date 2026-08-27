@@ -48,7 +48,7 @@ export default function StudentLoginPage() {
         try {
           const supabase = createClient()
           const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500))
-          const queryPromise = supabase.from('students').select('*').ilike('admission_id', cleanId)
+          const queryPromise = supabase.from('students').select('*, batches(*)').ilike('admission_id', cleanId)
           const res: any = await Promise.race([queryPromise, timeoutPromise])
           const dbStudents = res?.data
 

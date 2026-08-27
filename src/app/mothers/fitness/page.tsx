@@ -249,20 +249,7 @@ export default function FitnessProgramPage() {
                 trainers — five days a week, in a warm and supportive community of moms.
               </p>
 
-              <div className="pd-meta">
-                <span className="pd-meta-pill" style={{ color: accentColor }}>
-                  <Clock3 style={{ color: accentColor }} />
-                  5:00 PM Onwards
-                </span>
-                <span className="pd-meta-pill" style={{ color: accentColor }}>
-                  <Baby style={{ color: accentColor }} />
-                  For Mothers
-                </span>
-                <span className="pd-meta-pill" style={{ color: accentColor }}>
-                  <CalendarDays style={{ color: accentColor }} />
-                  5 Days a Week
-                </span>
-              </div>
+
 
               <h2 className="pd-subhead">Includes</h2>
               <div className="pd-includes">
