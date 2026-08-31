@@ -84,9 +84,27 @@ export default async function LandingPage() {
       title: "Planning a Toddler’s Birthday Party Shouldn't Leave You Exhausted.",
       description: "When your child is under 5, hosting a birthday party at home or in an adult banquet hall can be overwhelming:",
       points: [
-        { icon: "ShieldAlert", title: "The Mess & Safety Risks", desc: "Sharp corners, fragile decor, and crowded spaces.", image: "/birthday/The Mesh & Safety Risk.png" },
-        { icon: "Frown", title: "Toddler Boredom", desc: "Traditional party venues don't keep 1–5-year-olds engaged.", image: "/birthday/Toddler Boredom.png" },
-        { icon: "Frown", title: "Parent Exhaustion", desc: "You spend the whole party managing logistics instead of enjoying the moment.", image: "/birthday/parent_exhaution.png" }
+        { 
+          icon: "ShieldAlert", 
+          title: "The Mess & Safety Risks", 
+          desc: "Sharp corners, fragile decor, and crowded spaces.", 
+          image: "/birthday/The Mesh & Safety Risk.png",
+          fallbackImage: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=500&auto=format&fit=crop&q=80"
+        },
+        { 
+          icon: "Frown", 
+          title: "Toddler Boredom", 
+          desc: "Traditional party venues don't keep 1–5-year-olds engaged.", 
+          image: "/birthday/Toddler Boredom.png",
+          fallbackImage: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=500&auto=format&fit=crop&q=80"
+        },
+        { 
+          icon: "Frown", 
+          title: "Parent Exhaustion", 
+          desc: "You spend the whole party managing logistics instead of enjoying the moment.", 
+          image: "/birthday/parent_exhaution.png",
+          fallbackImage: "https://images.unsplash.com/photo-1537655780520-1e392ed8101a?w=500&auto=format&fit=crop&q=80"
+        }
       ],
       advantage_title: "The Phulwari Advantage:",
       advantage_desc: "At Phulwari Mother & Child Activity Centre, we create child-centric celebrations where your little one can play freely in a safe, soft-padded environment while you relax and celebrate with guests.",
@@ -370,12 +388,19 @@ export default async function LandingPage() {
                     <h3 className="text-[15px] font-extrabold text-slate-800 mb-2 leading-tight">{point.title}</h3>
                     <p className="text-[11px] text-slate-500 leading-relaxed font-semibold">{point.desc}</p>
                   </div>
-                  <div className="w-full h-24 bg-slate-100 rounded-[20px] overflow-hidden flex items-center justify-center">
-                    {point.image ? (
-                      <img src={point.image} alt={point.title} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
-                    ) : (
-                      <span className="text-[10px] text-slate-400 font-bold font-sans">Illustration</span>
-                    )}
+                  <div className="w-full h-28 bg-gradient-to-br from-pink-50 to-purple-50 rounded-[20px] overflow-hidden flex items-center justify-center border border-pink-100/60 shadow-inner">
+                    <img 
+                      src={point.image} 
+                      alt={point.title} 
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"  
+                      loading="lazy" 
+                      decoding="async"
+                      onError={(e) => {
+                        if (point.fallbackImage && e.currentTarget.src !== point.fallbackImage) {
+                          e.currentTarget.src = point.fallbackImage;
+                        }
+                      }} 
+                    />
                   </div>
                 </div>
               ))}
