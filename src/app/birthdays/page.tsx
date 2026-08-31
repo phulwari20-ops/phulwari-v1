@@ -88,22 +88,19 @@ export default async function LandingPage() {
           icon: "ShieldAlert", 
           title: "The Mess & Safety Risks", 
           desc: "Sharp corners, fragile decor, and crowded spaces.", 
-          image: "/birthday/The Mesh & Safety Risk.png",
-          fallbackImage: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=500&auto=format&fit=crop&q=80"
+          image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=500&auto=format&fit=crop&q=80"
         },
         { 
           icon: "Frown", 
           title: "Toddler Boredom", 
           desc: "Traditional party venues don't keep 1–5-year-olds engaged.", 
-          image: "/birthday/Toddler Boredom.png",
-          fallbackImage: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=500&auto=format&fit=crop&q=80"
+          image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=500&auto=format&fit=crop&q=80"
         },
         { 
           icon: "Frown", 
           title: "Parent Exhaustion", 
           desc: "You spend the whole party managing logistics instead of enjoying the moment.", 
-          image: "/birthday/parent_exhaution.png",
-          fallbackImage: "https://images.unsplash.com/photo-1537655780520-1e392ed8101a?w=500&auto=format&fit=crop&q=80"
+          image: "https://images.unsplash.com/photo-1537655780520-1e392ed8101a?w=500&auto=format&fit=crop&q=80"
         }
       ],
       advantage_title: "The Phulwari Advantage:",
@@ -395,11 +392,6 @@ export default async function LandingPage() {
                       className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"  
                       loading="lazy" 
                       decoding="async"
-                      onError={(e) => {
-                        if (point.fallbackImage && e.currentTarget.src !== point.fallbackImage) {
-                          e.currentTarget.src = point.fallbackImage;
-                        }
-                      }} 
                     />
                   </div>
                 </div>
