@@ -106,7 +106,7 @@ const stats = [
   { value: '4.9', label: 'Google Rating', icon: '⭐' },
   { value: '200+', label: 'Happy Families', icon: '👨‍👩‍👧' },
   { value: '100%', label: 'Parent Satisfaction', icon: '💯' },
-  { value: '10+', label: 'Fun and learning activities', icon: '🎯' },
+  { value: '11+', label: 'Fun and learning activities', icon: '🎯' },
 ];
 
 function StarRating({ rating }: { rating: number }) {

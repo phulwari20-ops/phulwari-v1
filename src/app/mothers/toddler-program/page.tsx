@@ -269,12 +269,25 @@ export default function ToddlerProgramPage() {
               <div className="pd-includes">
                 {includes.map((item, i) => {
                   const Icon = item.icon;
-                  return (
-                    <span className="pd-include-pill" key={i}>
+                  const isFitness = item.text.toLowerCase().includes('fitness programme');
+                  const pillContent = (
+                    <span className="pd-include-pill">
                       <span className="pd-include-icon" style={{ backgroundColor: accentColor }}>
                         <Icon />
                       </span>
                       <span className="pd-include-text">{item.text}</span>
+                    </span>
+                  );
+                  if (isFitness) {
+                    return (
+                      <a href="https://phulwari.co.in/mothers/fitness" key={i} className="hover:opacity-85 transition-opacity">
+                        {pillContent}
+                      </a>
+                    );
+                  }
+                  return (
+                    <span key={i}>
+                      {pillContent}
                     </span>
                   );
                 })}

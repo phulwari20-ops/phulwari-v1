@@ -620,8 +620,10 @@ export default function MothersPage() {
                 <div className="pg-includes">
                   {program.includes.map((item, i) => {
                     const Icon = item.icon;
-                    return (
-                      <span className="pg-include-pill" key={i}>
+                    const isFitness = item.text.toLowerCase().includes('fitness programme');
+                    const isToddler = item.text.toLowerCase().includes('parent-child engagement');
+                    const pillContent = (
+                      <span className="pg-include-pill">
                         <span
                           className="pg-include-icon"
                           style={{ backgroundColor: program.accentColor }}
@@ -629,6 +631,25 @@ export default function MothersPage() {
                           <Icon />
                         </span>
                         <span className="pg-include-text">{item.text}</span>
+                      </span>
+                    );
+                    if (isFitness) {
+                      return (
+                        <a href="https://phulwari.co.in/mothers/fitness" key={i} className="hover:opacity-85 transition-opacity">
+                          {pillContent}
+                        </a>
+                      );
+                    }
+                    if (isToddler) {
+                      return (
+                        <a href="https://phulwari.co.in/mothers/toddler-program" key={i} className="hover:opacity-85 transition-opacity">
+                          {pillContent}
+                        </a>
+                      );
+                    }
+                    return (
+                      <span key={i}>
+                        {pillContent}
                       </span>
                     );
                   })}
