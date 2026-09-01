@@ -55,22 +55,40 @@ export default function StudentLoginPage() {
         }
       } catch (e) {}
 
-      // 2. Query Supabase DB with a 1.5s timeout race if not found locally
+      // 2. Query Supabase DB with a 4s timeout race if not found locally
       if (!matchedStudent) {
         try {
           const supabase = createClient()
-          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1500))
-          const queryPromise = supabase.from('students').select('*, batches(*)').ilike('admission_id', cleanId)
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 4000))
+          const queryPromise = supabase
+            .from('students')
+            .select('*')
+            .or(`admission_id.ilike.${cleanId},parent_email.ilike.${cleanId},parent_phone.eq.${cleanId}`)
+          
           const res: any = await Promise.race([queryPromise, timeoutPromise])
-          const dbStudents = res?.data
+          let dbStudents = res?.data
+
+          if (!dbStudents || dbStudents.length === 0) {
+            // Fallback: try fetching all students if .or filter was strict
+            const fallbackRes = await supabase.from('students').select('*').limit(200)
+            dbStudents = fallbackRes.data || []
+          }
 
           if (dbStudents && dbStudents.length > 0) {
-            const match = dbStudents.find((s: any) => s.password === cleanPw)
+            const match = dbStudents.find((s: any) => {
+              const matchesId = s.admission_id?.trim().toUpperCase() === cleanId ||
+                                s.parent_email?.trim().toUpperCase() === cleanId ||
+                                s.parent_phone?.trim() === cleanId
+              const matchesPw = s.password && s.password.trim() === cleanPw
+              return matchesId && matchesPw
+            })
             if (match) {
               matchedStudent = match
             }
           }
-        } catch (err) {}
+        } catch (err) {
+          console.error('Login query exception:', err)
+        }
       }
 
       if (!matchedStudent) {
