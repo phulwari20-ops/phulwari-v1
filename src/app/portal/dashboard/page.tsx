@@ -16,7 +16,8 @@ import {
   Download,
   Printer,
   X,
-  FileCheck
+  FileCheck,
+  ArrowRight
 } from 'lucide-react'
 
 export default function StudentDashboardPage() {
