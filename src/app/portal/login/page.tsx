@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -13,6 +13,18 @@ export default function StudentLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    try {
+      const savedSt = localStorage.getItem('phulwari_student')
+      if (savedSt) {
+        const parsed = JSON.parse(savedSt)
+        if (parsed && (parsed.id || parsed.admission_id)) {
+          router.replace('/portal/dashboard')
+        }
+      }
+    } catch (e) {}
+  }, [router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

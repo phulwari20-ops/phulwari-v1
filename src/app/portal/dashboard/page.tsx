@@ -35,23 +35,44 @@ export default function StudentDashboardPage() {
   const [isDueAlertOpen, setIsDueAlertOpen] = useState<boolean>(false)
 
   useEffect(() => {
-    const sessionStr = localStorage.getItem('phulwari_student')
-    if (!sessionStr) {
-      router.push('/portal/login')
-      return
+    const checkAuth = () => {
+      const sessionStr = localStorage.getItem('phulwari_student')
+      if (!sessionStr) {
+        router.replace('/portal/login')
+        return
+      }
+
+      try {
+        const studentData = JSON.parse(sessionStr)
+        if (!studentData || (!studentData.id && !studentData.admission_id)) {
+          localStorage.removeItem('phulwari_student')
+          router.replace('/portal/login')
+          return
+        }
+        setStudent(studentData)
+        fetchDashboardData(studentData)
+      } catch {
+        localStorage.removeItem('phulwari_student')
+        router.replace('/portal/login')
+      }
     }
 
-    try {
-      const studentData = JSON.parse(sessionStr)
-      setStudent(studentData)
-      fetchDashboardData(studentData.id || studentData.admission_id)
-    } catch {
-      router.push('/portal/login')
+    checkAuth()
+
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted || !localStorage.getItem('phulwari_student')) {
+        checkAuth()
+      }
     }
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
   }, [router])
 
-  const fetchDashboardData = async (studentId: string) => {
-    // 1. Instantly load local persistent data so user NEVER experiences infinite loading
+  const fetchDashboardData = async (currentStudentObj: any) => {
+    const studentId = currentStudentObj?.id || currentStudentObj?.admission_id || ''
+    const admissionId = currentStudentObj?.admission_id || ''
+    if (!studentId) return
+
     let localFees: any[] = []
     let localNotices: any[] = []
     try {
@@ -60,8 +81,8 @@ export default function StudentDashboardPage() {
         const parsed = JSON.parse(savedFees)
         localFees = parsed.filter((f: any) => 
           f.student_id === studentId || 
-          f.students?.admission_id === student?.admission_id ||
-          f.students?.admission_id === studentId
+          f.students?.admission_id === admissionId ||
+          f.admission_id === admissionId
         )
       }
 
@@ -71,13 +92,11 @@ export default function StudentDashboardPage() {
       }
     } catch (e) {}
 
-    // Populate local state immediately & clear loading screen instantly!
     if (localFees.length > 0) setFees(localFees)
     if (localNotices.length > 0) setAnnouncements(localNotices)
     setAttendance([])
     setLoading(false)
 
-    // 2. Fetch remote Supabase DB in background with 1.5s timeout race
     try {
       const supabase = createClient()
       const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
@@ -104,7 +123,6 @@ export default function StudentDashboardPage() {
         try { localStorage.setItem('phulwari_announcements', JSON.stringify(annData)) } catch (e) {}
       }
       
-      // Due Alert Check
       const pendingAmount = uniqueFees.filter(f => f.status === 'due' || f.status === 'pending' || f.status === 'partial')
                                       .reduce((sum, f) => sum + Number(f.pending_amount || f.amount || 0), 0)
       if (pendingAmount > 0) {
@@ -117,7 +135,7 @@ export default function StudentDashboardPage() {
       }
 
     } catch (err) {
-      // Non-blocking timeout or error catch
+      // Non-blocking catch
     } finally {
       setLoading(false)
     }
@@ -256,7 +274,8 @@ export default function StudentDashboardPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('phulwari_student')
-    router.push('/portal/login')
+    try { sessionStorage.clear() } catch (e) {}
+    router.replace('/portal/login')
   }
 
   if (loading || !student) {
