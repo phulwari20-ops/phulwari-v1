@@ -30,9 +30,13 @@ export const metadata = buildMetadata({
  * standalone routes where their heading is the page <h1>, so here they are
  * demoted to <h2> — the hero supplies the single <h1> for this page.
  */
+import DynamicBanners from '@/components/DynamicBanners';
+
 export default function Home() {
   return (
     <>
+      <DynamicBanners position="Top Announcement Bar" />
+      <DynamicBanners position="Popup Banner" />
       <JsonLd
         id="home-schema"
         nodes={[
@@ -46,12 +50,14 @@ export default function Home() {
         ]}
       />
       <main>
+        <DynamicBanners position="Hero Section" className="max-w-6xl mx-auto px-4 pt-4" />
         <Hero />
         <Activities headingLevel="h2" />
         <AboutUs headingLevel="h2" />
         <Gallery headingLevel="h2" />
         <Batch headingLevel="h2" />
         <Testinomals headingLevel="h2" />
+        <DynamicBanners position="Pre-Footer" className="max-w-6xl mx-auto px-4 py-6" />
         <Contact headingLevel="h2" />
       </main>
     </>

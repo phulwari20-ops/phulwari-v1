@@ -66,7 +66,21 @@ export default function StudentDashboardPage() {
       }
     }
     window.addEventListener('pageshow', handlePageShow)
-    return () => window.removeEventListener('pageshow', handlePageShow)
+
+    const intervalId = setInterval(() => {
+      const sessionStr = localStorage.getItem('phulwari_student')
+      if (sessionStr) {
+        try {
+          const sObj = JSON.parse(sessionStr)
+          if (sObj) fetchDashboardData(sObj)
+        } catch(e){}
+      }
+    }, 3000)
+
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow)
+      clearInterval(intervalId)
+    }
   }, [router])
 
   const fetchDashboardData = async (currentStudentObj: any) => {

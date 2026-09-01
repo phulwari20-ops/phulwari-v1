@@ -37,13 +37,14 @@ export default function DynamicBanners({ position, className = '' }: DynamicBann
 
   useEffect(() => {
     fetchBanners()
+    const interval = setInterval(fetchBanners, 3000)
+    return () => clearInterval(interval)
   }, [position])
 
   const fetchBanners = async () => {
-    let activeList: BannerItem[] = []
     const todayStr = new Date().toISOString().split('T')[0]
 
-    // 1. Fetch live directly from Supabase DB (100% direct connection)
+    // 100% Direct Supabase PostgreSQL DB Fetching
     try {
       const supabase = createClient()
       const { data, error } = await supabase
@@ -53,42 +54,23 @@ export default function DynamicBanners({ position, className = '' }: DynamicBann
         .eq('display_position', position)
         .order('priority', { ascending: true })
 
-      if (!error && data && data.length > 0) {
-        activeList = data.filter(b => {
+      if (!error && data) {
+        const activeList = data.filter(b => {
           if (b.start_date && b.start_date > todayStr) return false
           if (b.end_date && b.end_date < todayStr) return false
           return true
         })
-      }
-    } catch (err) {}
+        setBanners(activeList)
 
-    // 2. Fallback to local persistent cache if network unavailable
-    if (activeList.length === 0) {
-      try {
-        const saved = localStorage.getItem('phulwari_banners')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          activeList = parsed.filter((b: any) => {
-            if (b.status !== 'active') return false
-            if (b.display_position !== position) return false
-            if (b.start_date && b.start_date > todayStr) return false
-            if (b.end_date && b.end_date < todayStr) return false
-            return true
-          }).sort((a: any, b: any) => (a.priority || 0) - (b.priority || 0))
+        // Increment impressions counter in Supabase
+        if (activeList.length > 0) {
+          activeList.forEach(b => {
+            supabase.from('banners').update({ impressions: (b.impressions || 0) + 1 }).eq('id', b.id).then(() => {})
+          })
         }
-      } catch (e) {}
-    }
-
-    setBanners(activeList)
-
-    // Increment impressions counter in Supabase
-    if (activeList.length > 0) {
-      try {
-        const supabase = createClient()
-        activeList.forEach(b => {
-          supabase.from('banners').update({ impressions: (b.impressions || 0) + 1 }).eq('id', b.id).then(() => {})
-        })
-      } catch (e) {}
+      }
+    } catch (err) {
+      console.error('Error fetching live banners from DB:', err)
     }
   }
 

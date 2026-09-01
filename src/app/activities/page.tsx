@@ -230,6 +230,8 @@ const SEO_BREADCRUMB = [
   { name: 'Activities', path: '/activities' },
 ];
 
+import DynamicBanners from '@/components/DynamicBanners';
+
 export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
   const Heading = headingLevel;
   // Composed into the homepage as an <h2> section; only the standalone
@@ -244,6 +246,7 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
 
   return (
     <>
+      <DynamicBanners position="Sidebar" className="my-4 max-w-5xl mx-auto px-4" />
       {isStandalone && <JsonLd
         id="activities-schema"
         nodes={[

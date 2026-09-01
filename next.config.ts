@@ -20,9 +20,7 @@ const CSP = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-  // 'self' plus the ERP admin so the admin's Birthday Landing Page editor can
-  // embed the live page in its preview iframe. All other origins are blocked.
-  "frame-ancestors 'self' https://admin.phulwari.co.in",
+  "frame-ancestors 'self' https://admin.phulwari.co.in http://localhost:* http://127.0.0.1:*",
   'upgrade-insecure-requests',
 ].join('; ')
 
