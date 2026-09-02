@@ -36,6 +36,8 @@ export default function StudentDashboardPage() {
   const [isDueAlertOpen, setIsDueAlertOpen] = useState<boolean>(false)
 
   useEffect(() => {
+    const supabase = createClient()
+
     const checkAuth = () => {
       const sessionStr = localStorage.getItem('phulwari_student')
       if (!sessionStr) {
@@ -67,6 +69,48 @@ export default function StudentDashboardPage() {
     }
     window.addEventListener('pageshow', handlePageShow)
 
+    // Realtime Supabase Channel Subscription for ALL parent portal tables
+    const channel = supabase
+      .channel('portal-realtime-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, () => {
+        const sessionStr = localStorage.getItem('phulwari_student')
+        if (sessionStr) {
+          try { fetchDashboardData(JSON.parse(sessionStr)) } catch(e){}
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fees' }, () => {
+        const sessionStr = localStorage.getItem('phulwari_student')
+        if (sessionStr) {
+          try { fetchDashboardData(JSON.parse(sessionStr)) } catch(e){}
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
+        const sessionStr = localStorage.getItem('phulwari_student')
+        if (sessionStr) {
+          try { fetchDashboardData(JSON.parse(sessionStr)) } catch(e){}
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'financial_ledger' }, () => {
+        const sessionStr = localStorage.getItem('phulwari_student')
+        if (sessionStr) {
+          try { fetchDashboardData(JSON.parse(sessionStr)) } catch(e){}
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
+        const sessionStr = localStorage.getItem('phulwari_student')
+        if (sessionStr) {
+          try { fetchDashboardData(JSON.parse(sessionStr)) } catch(e){}
+        }
+      })
+      .subscribe((status: string, err?: any) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('⚡ [REALTIME SYNC ALL]: Subscribed & listening live to attendance, fees, announcements, ledger & student profile updates.')
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error(`❌ [REALTIME CHANNEL ERROR - ${status}]:`, err || 'Failed to establish WebSocket connection with Supabase Realtime.')
+        }
+      })
+
+    // Smooth background refresh fallback
     const intervalId = setInterval(() => {
       const sessionStr = localStorage.getItem('phulwari_student')
       if (sessionStr) {
@@ -75,11 +119,12 @@ export default function StudentDashboardPage() {
           if (sObj) fetchDashboardData(sObj)
         } catch(e){}
       }
-    }, 3000)
+    }, 15000)
 
     return () => {
       window.removeEventListener('pageshow', handlePageShow)
       clearInterval(intervalId)
+      supabase.removeChannel(channel)
     }
   }, [router])
 
@@ -108,7 +153,6 @@ export default function StudentDashboardPage() {
     } catch (e) {}
 
     if (localFees.length > 0) setFees(localFees)
-    setAttendance([])
     setLoading(false)
 
     try {
@@ -132,13 +176,45 @@ export default function StudentDashboardPage() {
         })
       }
 
+      const isUUID = (str: any) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
+
+      let studentUuid = isUUID(studentId) ? studentId : (isUUID(currentStudentObj?.id) ? currentStudentObj.id : '')
+      
+      // If studentUuid is missing, query student record first by admission_id to retrieve the UUID
+      if (!studentUuid) {
+        const stQuery = admissionId
+          ? supabase.from('students').select('*, batches(*)').eq('admission_id', admissionId).single()
+          : (isUUID(studentId) ? supabase.from('students').select('*, batches(*)').eq('id', studentId).single() : null)
+        
+        if (stQuery) {
+          const stRes: any = await toNativePromise(stQuery)
+          if (stRes?.data) {
+            setStudent((prev: any) => ({ ...prev, ...stRes.data }))
+            if (isUUID(stRes.data.id)) studentUuid = stRes.data.id
+          }
+        }
+      }
+
+      // Build attendance, fee & ledger queries ONLY with valid UUIDs to satisfy Postgres uuid column type constraint (Error 22P02)
+      const attPromise = studentUuid
+        ? toNativePromise(supabase.from('attendance').select('*').eq('student_id', studentUuid).order('date', { ascending: false }))
+        : Promise.resolve({ data: [] })
+
+      const feePromise = studentUuid
+        ? toNativePromise(supabase.from('fees').select('*').eq('student_id', studentUuid).order('created_at', { ascending: false }))
+        : Promise.resolve({ data: [] })
+
+      const ledgerPromise = studentUuid
+        ? toNativePromise(supabase.from('financial_ledger').select('*').eq('linked_student_id', studentUuid).order('date', { ascending: false }))
+        : Promise.resolve({ data: [] })
+
       // Safe individual queries wrapped in real native promises
       const [studentRes, attRes, feeRes, annRes, ledgerRes]: any[] = await Promise.all([
-        toNativePromise(supabase.from('students').select('*, batches(*)').eq('id', studentId).single()),
-        toNativePromise(supabase.from('attendance').select('*').or(`student_id.eq.${studentId},admission_id.eq.${admissionId}`).order('date', { ascending: false })),
-        toNativePromise(supabase.from('fees').select('*').or(`student_id.eq.${studentId},admission_id.eq.${admissionId}`).order('created_at', { ascending: false })),
+        studentUuid ? toNativePromise(supabase.from('students').select('*, batches(*)').eq('id', studentUuid).single()) : Promise.resolve({ data: null }),
+        attPromise,
+        feePromise,
         toNativePromise(supabase.from('announcements').select('*').order('created_at', { ascending: false })),
-        toNativePromise(supabase.from('financial_ledger').select('*').eq('linked_student_id', studentId).order('date', { ascending: false }))
+        ledgerPromise
       ])
 
       if (studentRes?.data) {
@@ -150,7 +226,21 @@ export default function StudentDashboardPage() {
       const annData = annRes?.data || []
       const ledgerData = ledgerRes?.data || []
 
-      if (attData && attData.length > 0) setAttendance(attData)
+      // Fallback check in local storage if DB returns no attendance or for offline preview
+      let localAtt: any[] = []
+      try {
+        const savedAtt = localStorage.getItem('phulwari_admin_attendance')
+        if (savedAtt) {
+          const parsedAtt = JSON.parse(savedAtt)
+          localAtt = parsedAtt.filter((a: any) => 
+            (studentId && a.student_id === studentId) || 
+            (admissionId && (a.admission_id === admissionId || a.students?.admission_id === admissionId))
+          )
+        }
+      } catch (e) {}
+
+      const finalAtt = attData.length > 0 ? attData : localAtt
+      setAttendance(finalAtt)
 
       // Normalize financial ledger entries into fee records format
       const ledgerAsFees = ledgerData.map((lg: any) => ({
@@ -239,10 +329,13 @@ export default function StudentDashboardPage() {
   const handleDownloadReceiptFile = (receiptObj: any) => {
     if (!receiptObj) return
 
+    const receiptNo = receiptObj.receipt_no || receiptObj.id || `REC-2026-${Math.floor(1000 + Math.random() * 9000)}`
+
     const htmlContent = `<!DOCTYPE html>
 <html>
   <head>
-    <title>Phulwari_Fee_Receipt_${receiptObj.receipt_no || 'REC-2026'}</title>
+    <meta charset="utf-8">
+    <title>Phulwari_Fee_Receipt_${receiptNo}</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
       body { font-family: 'Poppins', sans-serif; margin: 0; padding: 2rem; background: #ffffff; color: #0F172A; }
@@ -259,18 +352,12 @@ export default function StudentDashboardPage() {
       .total-box { background: #ECFDF5; border: 1.5px dashed #10B981; border-radius: 16px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
       .total-title { font-size: 14px; font-weight: 800; color: #065F46; }
       .total-amount { font-size: 24px; font-weight: 900; color: #059669; font-family: monospace; }
-      .paid-stamp { position: absolute; right: 20px; top: 20px; border: 2.5px solid #ffffff; color: #ffffff; padding: 4px 12px; border-radius: 12px; font-weight: 900; font-size: 13px; text-transform: uppercase; transform: rotate(-6deg); }
       .footer { text-align: center; padding: 1.25rem; background: #F8FAFC; border-top: 1px solid #E2E8F0; font-size: 11px; color: #64748B; }
-      @media print {
-        body { padding: 0; }
-        .receipt-card { border: none; box-shadow: none; max-width: 100%; }
-      }
     </style>
   </head>
   <body>
     <div class="receipt-card">
       <div class="header">
-        <div class="paid-stamp">OFFICIAL PAID</div>
         <h1>PHULWARI MOTHER & CHILD CENTRE</h1>
         <p>Kidwaipuri, Boring Road, Patna, Bihar | Ph: +91 6207368839</p>
         <div class="badge">Official Fee Payment Receipt Voucher</div>
@@ -279,11 +366,11 @@ export default function StudentDashboardPage() {
         <table class="info-table">
           <tr>
             <td class="label">Receipt Number</td>
-            <td class="value" style="color: #E11D48; font-family: monospace;">${receiptObj.receipt_no || 'REC-2026-0891'}</td>
+            <td class="value" style="color: #E11D48; font-family: monospace;">${receiptNo}</td>
           </tr>
           <tr>
             <td class="label">Payment Date</td>
-            <td class="value">${receiptObj.paid_date || new Date().toISOString().split('T')[0]}</td>
+            <td class="value">${receiptObj.paid_date || receiptObj.created_at?.split('T')[0] || new Date().toISOString().split('T')[0]}</td>
           </tr>
           <tr>
             <td class="label">Student Name</td>
@@ -299,17 +386,17 @@ export default function StudentDashboardPage() {
           </tr>
           <tr>
             <td class="label">Fee Description</td>
-            <td class="value">${receiptObj.title || 'Monthly Fee'}</td>
+            <td class="value">${receiptObj.fee_head || receiptObj.title || 'Monthly Fee'}</td>
           </tr>
           <tr>
             <td class="label">Payment Method</td>
-            <td class="value" style="color: #059669;">${receiptObj.payment_method || 'UPI / Online'}</td>
+            <td class="value" style="color: #059669;">${receiptObj.mode_of_payment || receiptObj.payment_method || 'Cash / Online'}</td>
           </tr>
         </table>
 
         <div class="total-box">
           <div class="total-title">TOTAL AMOUNT RECEIVED</div>
-          <div class="total-amount">₹${receiptObj.amount || 3500}</div>
+          <div class="total-amount">₹${receiptObj.amount_paid || receiptObj.amount || 3500}</div>
         </div>
       </div>
       <div class="footer">
@@ -317,19 +404,18 @@ export default function StudentDashboardPage() {
         <p style="margin:0;">This is a computer-generated official receipt voucher. No signature required.</p>
       </div>
     </div>
-    <script>
-      window.onload = function() {
-        window.print();
-      };
-    </script>
   </body>
 </html>`
 
-    const printWin = window.open('', '_blank', 'width=700,height=800')
-    if (printWin) {
-      printWin.document.write(htmlContent)
-      printWin.document.close()
-    }
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `Phulwari_Fee_Receipt_${receiptNo}.html`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   const handleLogout = () => {
@@ -358,15 +444,21 @@ export default function StudentDashboardPage() {
     if (st.start_time && st.end_time) return `${st.start_time} - ${st.end_time}`
     return '10:30 AM - 11:30 AM'
   }
-
-  const presentCount = attendance.filter((a: any) => {
+  // Exclude 'holiday' & 'unmarked' records from session count denominator
+  const validSessions = attendance.filter((a: any) => {
     const st = String(a.status || '').toLowerCase()
-    return st === 'present' || st === 'late' || st === 'p'
+    return st !== 'holiday' && st !== 'unmarked'
+  })
+
+  const presentCount = validSessions.filter((a: any) => {
+    const st = String(a.status || '').toLowerCase()
+    return st === 'present' || st === 'late' || st === 'p' || st === 'halfday' || st === 'hd'
   }).length
 
-  const calculatedAttendanceRate = attendance.length > 0 
-    ? Math.round((presentCount / attendance.length) * 100) 
-    : 100
+  const hasAttendanceRecords = validSessions.length > 0
+  const calculatedAttendanceRate = hasAttendanceRecords 
+    ? Math.round((presentCount / validSessions.length) * 100) 
+    : 0
 
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #FFF0F5 0%, #F8FAFC 100%)', fontFamily: "'Poppins', sans-serif", paddingBottom: '3rem' }}>
@@ -485,11 +577,13 @@ export default function StudentDashboardPage() {
           <div style={{ background: '#ffffff', border: '1px solid #FFE4E6', borderRadius: '24px', padding: '1.25rem 1.5rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '4px' }}>
               <span>Attendance Rate</span>
-              <Calendar size={18} color="#10B981" />
+              <Calendar size={18} color={hasAttendanceRecords ? "#10B981" : "#64748B"} />
             </div>
-            <p style={{ fontSize: '24px', fontWeight: 900, color: '#10B981', margin: 0 }}>{calculatedAttendanceRate}%</p>
+            <p style={{ fontSize: '24px', fontWeight: 900, color: hasAttendanceRecords ? '#10B981' : '#64748B', margin: 0 }}>
+              {hasAttendanceRecords ? `${calculatedAttendanceRate}%` : 'N/A'}
+            </p>
             <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>
-              {attendance.length > 0 ? `${presentCount} of ${attendance.length} sessions attended` : 'Regular attendance record'}
+              {hasAttendanceRecords ? `${presentCount} of ${validSessions.length} sessions attended` : 'No attendance marked yet'}
             </p>
           </div>
 
