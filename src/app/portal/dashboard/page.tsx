@@ -108,32 +108,77 @@ export default function StudentDashboardPage() {
     } catch (e) {}
 
     if (localFees.length > 0) setFees(localFees)
-    if (localNotices.length > 0) setAnnouncements(localNotices)
     setAttendance([])
     setLoading(false)
 
     try {
       const supabase = createClient()
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+      const studentNameStr = currentStudentObj?.full_name || ''
 
-      const fetchPromise = Promise.all([
-        supabase.from('attendance').select('*').eq('student_id', studentId).order('date', { ascending: false }).then(res => res, () => ({ data: null })),
-        supabase.from('fees').select('*').eq('student_id', studentId).order('due_date', { ascending: false }).then(res => res, () => ({ data: null })),
-        supabase.from('announcements').select('*').order('created_at', { ascending: false }).then(res => res, () => ({ data: null }))
+      const toNativePromise = (builder: any) => {
+        return new Promise((resolve) => {
+          try {
+            if (builder && typeof builder.then === 'function') {
+              builder.then(
+                (res: any) => resolve(res || { data: null }),
+                () => resolve({ data: null })
+              )
+            } else {
+              resolve({ data: null })
+            }
+          } catch (e) {
+            resolve({ data: null })
+          }
+        })
+      }
+
+      // Safe individual queries wrapped in real native promises
+      const [studentRes, attRes, feeRes, annRes, ledgerRes]: any[] = await Promise.all([
+        toNativePromise(supabase.from('students').select('*, batches(*)').eq('id', studentId).single()),
+        toNativePromise(supabase.from('attendance').select('*').or(`student_id.eq.${studentId},admission_id.eq.${admissionId}`).order('date', { ascending: false })),
+        toNativePromise(supabase.from('fees').select('*').or(`student_id.eq.${studentId},admission_id.eq.${admissionId}`).order('created_at', { ascending: false })),
+        toNativePromise(supabase.from('announcements').select('*').order('created_at', { ascending: false })),
+        toNativePromise(supabase.from('financial_ledger').select('*').eq('linked_student_id', studentId).order('date', { ascending: false }))
       ])
 
-      const res: any = await Promise.race([fetchPromise, timeoutPromise])
-      const [{ data: attData }, { data: feeData }, { data: annData }] = res
+      if (studentRes?.data) {
+        setStudent((prev: any) => ({ ...prev, ...studentRes.data }))
+      }
+
+      const attData = attRes?.data || []
+      const feeData = feeRes?.data || []
+      const annData = annRes?.data || []
+      const ledgerData = ledgerRes?.data || []
 
       if (attData && attData.length > 0) setAttendance(attData)
 
-      const mergedFees = [...(feeData || []), ...localFees]
+      // Normalize financial ledger entries into fee records format
+      const ledgerAsFees = ledgerData.map((lg: any) => ({
+        id: lg.id,
+        fee_head: lg.fee_head || lg.category_name || 'Monthly Fee',
+        title: lg.fee_head || lg.category_name || 'Monthly Fee',
+        month: lg.date ? new Date(lg.date).toLocaleString('default', { month: 'long', year: 'numeric' }) : 'One Time',
+        collected_for: lg.date ? new Date(lg.date).toLocaleString('default', { month: 'long', year: 'numeric' }) : 'One Time',
+        amount: lg.amount || 0,
+        discount: 0,
+        amount_paid: lg.amount || 0,
+        net_amount: lg.amount || 0,
+        pending_amount: 0,
+        status: (lg.status || 'Completed').toLowerCase() === 'completed' ? 'paid' : 'pending',
+        mode_of_payment: lg.payment_mode || 'Cash',
+        payment_method: lg.payment_mode || 'Cash',
+        receipt_no: lg.receipt_no || `RCPT-${lg.id ? lg.id.slice(0, 6) : '2026'}`,
+        created_at: lg.created_at || lg.date,
+        paid_date: lg.date
+      }))
+
+      const mergedFees = [...feeData, ...ledgerAsFees, ...localFees]
       const uniqueFees = mergedFees.filter((f, idx, self) => 
-        idx === self.findIndex(t => t.id === f.id || (t.month === f.month && t.status === f.status))
+        idx === self.findIndex(t => (t.id && t.id === f.id) || (t.month === f.month && t.fee_head === f.fee_head && t.amount === f.amount))
       )
       if (uniqueFees.length > 0) setFees(uniqueFees)
 
-      if (annData) {
+      if (annData && annData.length > 0) {
         setAnnouncements(annData)
         try { localStorage.setItem('phulwari_announcements', JSON.stringify(annData)) } catch (e) {}
       }
@@ -150,7 +195,7 @@ export default function StudentDashboardPage() {
       }
 
     } catch (err) {
-      // Non-blocking catch
+      console.error('Dashboard data fetch error:', err)
     } finally {
       setLoading(false)
     }
@@ -303,6 +348,25 @@ export default function StudentDashboardPage() {
       </div>
     )
   }
+  const getBatchTimingString = (st: any) => {
+    if (!st) return '10:30 AM - 11:30 AM'
+    if (st.batches?.batch_time) return st.batches.batch_time
+    if (st.batches?.start_time && st.batches?.end_time) return `${st.batches.start_time} - ${st.batches.end_time}`
+    if (st.preferred_time_slot && st.preferred_time_slot !== 'N/A') return st.preferred_time_slot
+    if (st.batch_time) return st.batch_time
+    if (st.batch_timing) return st.batch_timing
+    if (st.start_time && st.end_time) return `${st.start_time} - ${st.end_time}`
+    return '10:30 AM - 11:30 AM'
+  }
+
+  const presentCount = attendance.filter((a: any) => {
+    const st = String(a.status || '').toLowerCase()
+    return st === 'present' || st === 'late' || st === 'p'
+  }).length
+
+  const calculatedAttendanceRate = attendance.length > 0 
+    ? Math.round((presentCount / attendance.length) * 100) 
+    : 100
 
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #FFF0F5 0%, #F8FAFC 100%)', fontFamily: "'Poppins', sans-serif", paddingBottom: '3rem' }}>
@@ -408,10 +472,10 @@ export default function StudentDashboardPage() {
               <BookOpen size={18} color="#FF4D8D" />
             </div>
             <p style={{ fontSize: '15px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-              {student.batches?.name || student.batches?.batch_name || student.batch_name || 'Not Assigned'}
+              {student.batches?.name || student.batches?.batch_name || student.batch_name || student.program_interested || 'Not Assigned'}
             </p>
             <p style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace', margin: '4px 0 0 0' }}>
-              {student.batches?.start_time || 'N/A'} - {student.batches?.end_time || 'N/A'}
+              {getBatchTimingString(student)}
             </p>
             <div style={{ fontSize: '10px', color: '#FF4D8D', fontWeight: 700, marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               Click to view details <ArrowRight size={12} />
@@ -423,8 +487,10 @@ export default function StudentDashboardPage() {
               <span>Attendance Rate</span>
               <Calendar size={18} color="#10B981" />
             </div>
-            <p style={{ fontSize: '24px', fontWeight: 900, color: '#10B981', margin: 0 }}>95%</p>
-            <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>Regular attendance record</p>
+            <p style={{ fontSize: '24px', fontWeight: 900, color: '#10B981', margin: 0 }}>{calculatedAttendanceRate}%</p>
+            <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>
+              {attendance.length > 0 ? `${presentCount} of ${attendance.length} sessions attended` : 'Regular attendance record'}
+            </p>
           </div>
 
           <div style={{ background: '#ffffff', border: '1px solid #FFE4E6', borderRadius: '24px', padding: '1.25rem 1.5rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)' }}>
