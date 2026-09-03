@@ -5,33 +5,7 @@ import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { appLog } from '@/lib/logger';
 
-const defaultSlides = [
-  { src: '/galary2.webp', title: 'Activity Room' },
-  { src: '/galary3.webp', title: 'Toddler Play Area' },
-  { src: '/galary4.webp', title: 'Art & Craft Workshop' },
-  { src: '/galary5.webp', title: 'Gymnastics Class' },
-  { src: '/galary6.webp', title: 'Kids Dance & Music' },
-  { src: '/galary7.webp', title: 'Roller Skating Track' },
-  { src: '/galary8.webp', title: 'MMA & Martial Arts' },
-  { src: '/galary9.webp', title: 'Birthday Celebration Hall' },
-  { src: '/galary10.webp', title: 'Summer Camp Fun' },
-  { src: '/galary11.webp', title: 'Mother Fitness Studio' },
-  { src: '/galary12.webp', title: 'Outdoor Play Garden' },
-  { src: '/galary13.webp', title: 'Storytelling Session' },
-  { src: '/galary14.webp', title: 'Phulwari Circle Time' },
-  { src: '/galary15.webp', title: 'Clay Modeling' },
-  { src: '/galary16.webp', title: 'Music & Movement' },
-  { src: '/galary17.webp', title: 'Indoor Cricket Net' },
-  { src: '/galary18.webp', title: 'Winter Camp Creative Arts' },
-  { src: '/galary19.webp', title: 'Yoga & Mindfulness' },
-  { src: '/galary20.webp', title: 'Party Decoration Setup' },
-  { src: '/galary21.webp', title: 'Preschool Learning Corner' },
-  { src: '/galary22.webp', title: 'Obstacle Course Fun' },
-  { src: '/galary23.webp', title: 'Sensory Play Table' },
-  { src: '/galary24.webp', title: 'Mini Stage Performances' },
-  { src: '/galary25.webp', title: 'Phulwari Annual Celebration' },
-  { src: '/galary26.webp', title: 'Mother & Child Bonding' }
-];
+
 
 /**
  * These sections are used two ways: as their own route (where the section
@@ -48,7 +22,22 @@ export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h
 
   useEffect(() => {
     const fetchGallery = async () => {
-      appLog('request', 'SUPABASE_CLIENT', 'Fetching gallery items from Supabase');
+      appLog('request', 'API_CLIENT', 'Fetching gallery items from /api/gallery');
+      try {
+        const res = await fetch('/api/gallery', { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data)) {
+            const dbSlides = json.data.map((item: any) => ({
+              src: item.image_url || item.url || item.src,
+              title: item.title || 'Phulwari Photo'
+            }));
+            setSlides(dbSlides);
+            return;
+          }
+        }
+      } catch (err: any) {}
+
       try {
         const supabase = createClient();
         const { data, error } = await supabase
@@ -56,25 +45,18 @@ export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) {
-          appLog('error', 'SUPABASE_CLIENT', error.message);
-          setSlides(defaultSlides);
+        if (error || !data) {
+          setSlides([]);
           return;
         }
 
-        if (data && data.length > 0) {
-          appLog('success', 'SUPABASE_CLIENT', `Received ${data.length} gallery images from Supabase DB`);
-          const dbSlides = data.map((item: any) => ({
-            src: item.image_url || item.url || item.src,
-            title: item.title || 'Phulwari Photo'
-          }));
-          setSlides(dbSlides);
-        } else {
-          setSlides(defaultSlides);
-        }
+        const dbSlides = data.map((item: any) => ({
+          src: item.image_url || item.url || item.src,
+          title: item.title || 'Phulwari Photo'
+        }));
+        setSlides(dbSlides);
       } catch (err: any) {
-        appLog('error', 'SUPABASE_CLIENT', err.message || 'Client Exception');
-        setSlides(defaultSlides);
+        setSlides([]);
       }
     };
     fetchGallery();
@@ -321,6 +303,9 @@ export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h
           <span className="gl-badge">Gallery</span>
           <Heading className="gl-title">Moments of <span>Joy &amp; Growth</span></Heading>
           <p className="gl-sub">Explore photos from activities, celebrations and camps at Phulwari.</p>
+          <div className="mt-4 p-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-bold font-mono inline-block">
+            ⚡ LIVE SUPABASE DB SYNC: {slides.length} Photos Loaded from Database
+          </div>
         </header>
 
           {slides.length > 0 ? (

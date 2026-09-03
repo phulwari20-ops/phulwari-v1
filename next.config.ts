@@ -100,6 +100,11 @@ const nextConfig: NextConfig = {
         destination: '/kids-and-child-birthday-party',
         permanent: true,
       },
+      {
+        source: '/events/birthday',
+        destination: '/kids-and-child-birthday-party',
+        permanent: true,
+      },
       // These segments exist only as layout fragments reused by the homepage;
       // they are not pages and must not be linkable or indexable.
       { source: '/footer', destination: '/', permanent: true },
