@@ -7,4 +7,6 @@ export const metadata = buildMetadata({
   path: '/kids-and-child-birthday-party',
 })
 
+export const dynamic = 'force-dynamic'
+
 export { default } from '../../birthdays/page'

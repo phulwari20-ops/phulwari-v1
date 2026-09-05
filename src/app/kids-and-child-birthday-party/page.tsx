@@ -24,4 +24,6 @@ export const metadata = buildMetadata({
   ],
 })
 
+export const dynamic = 'force-dynamic'
+
 export { default } from '../birthdays/page'
