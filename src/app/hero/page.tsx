@@ -75,19 +75,7 @@ export default function HeroPage() {
           background-color: #FFF7EC;
           background-image: radial-gradient(#EADFC8 1.4px, transparent 1.4px);
           background-size: 26px 26px;
-          padding-bottom: 40px; /* room for the scalloped edge */
-        }
-
-        /* Signature detail: a soft scalloped edge, like a torn-paper cloud,
-           closing out the section instead of a flat line. */
-        .hero-container::after {
-          content: '';
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          height: 40px;
-          background: #ffffff;
+          padding-bottom: 0;
         }
 
         /* ---------- Floating decoration ---------- */

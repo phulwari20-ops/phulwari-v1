@@ -246,7 +246,7 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
 
   return (
     <>
-      <DynamicBanners position="Sidebar" className="my-4 max-w-5xl mx-auto px-4" />
+      {isStandalone && <DynamicBanners position="Sidebar" className="my-4 max-w-5xl mx-auto px-4" />}
       {isStandalone && <JsonLd
         id="activities-schema"
         nodes={[
@@ -283,17 +283,9 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
         .act-hero {
           position: relative;
           background-color: #FFF7EC;
-          padding: 4.5rem 1.25rem 5.5rem;
+          padding: 4rem 1.25rem 3.5rem;
           text-align: center;
           overflow: hidden;
-        }
-        .act-hero::after {
-          content: '';
-          position: absolute;
-          left: 0; right: 0; bottom: 0; height: 36px;
-          background: radial-gradient(circle at 18px 0, transparent 19px, #ffffff 20px);
-          background-size: 36px 36px;
-          background-repeat: repeat-x;
         }
         .act-float {
           position: absolute;
