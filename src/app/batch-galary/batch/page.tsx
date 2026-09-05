@@ -32,13 +32,89 @@ const faqs = [
 ];
 
 const DAY_ORDER: Record<string, number> = {
-  monday: 1, mon: 1,
-  tuesday: 2, tue: 2, tues: 2,
-  wednesday: 3, wed: 3,
-  thursday: 4, thu: 4, thur: 4, thurs: 4,
-  friday: 5, fri: 5,
-  saturday: 6, sat: 6,
-  sunday: 7, sun: 7,
+  sunday: 1, sun: 1,
+  monday: 2, mon: 2,
+  tuesday: 3, tue: 3, tues: 3,
+  wednesday: 4, wed: 4,
+  thursday: 5, thu: 5, thur: 5, thurs: 5,
+  friday: 6, fri: 6,
+  saturday: 7, sat: 7,
+};
+
+const DAY_NAMES = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+];
+
+/**
+ * Normalizes and sorts any days string into ascending order starting from Sunday:
+ * Sunday -> Monday -> Tuesday -> Wednesday -> Thursday -> Friday -> Saturday
+ * Handles comma-separated lists, day ranges ("Wed to Sun"), or schedules directly from backend.
+ */
+const sortDaysString = (daysStr: string, schedules?: any[]): string => {
+  // If the batch has explicit schedules from backend, derive unique days in ascending order:
+  if (schedules && schedules.length > 0) {
+    const daySet = new Set<string>();
+    schedules.forEach((s) => {
+      const d = String(s.day_of_week || '').trim();
+      if (d) daySet.add(d);
+    });
+
+    if (daySet.size > 0) {
+      const sorted = Array.from(daySet).sort((a, b) => {
+        const orderA = DAY_ORDER[a.toLowerCase()] ?? 99;
+        const orderB = DAY_ORDER[b.toLowerCase()] ?? 99;
+        return orderA - orderB;
+      });
+      return sorted.join(', ');
+    }
+  }
+
+  if (!daysStr || daysStr.trim() === '' || daysStr === '—') return '—';
+
+  // Handle comma or slash separated day lists: e.g. "Wednesday, Thursday, Friday, Saturday, Sunday"
+  const tokens = daysStr.split(/[,/]+/).map((t) => t.trim()).filter(Boolean);
+  if (tokens.length > 1) {
+    const allKnown = tokens.every((t) => DAY_ORDER[t.toLowerCase()] !== undefined);
+    if (allKnown) {
+      return tokens
+        .sort((a, b) => {
+          const orderA = DAY_ORDER[a.toLowerCase()] ?? 99;
+          const orderB = DAY_ORDER[b.toLowerCase()] ?? 99;
+          return orderA - orderB;
+        })
+        .join(', ');
+    }
+  }
+
+  // Handle "X to Y" or "X - Y" ranges e.g. "Wednesday to Sunday" or "Monday to Friday"
+  const rangeMatch = daysStr.match(/^([a-z]+)\s*(?:to|-|–)\s*([a-z]+)$/i);
+  if (rangeMatch) {
+    const startDay = rangeMatch[1].toLowerCase();
+    const endDay = rangeMatch[2].toLowerCase();
+    const startIndex = DAY_ORDER[startDay] ? DAY_ORDER[startDay] - 1 : -1;
+    const endIndex = DAY_ORDER[endDay] ? DAY_ORDER[endDay] - 1 : -1;
+
+    if (startIndex !== -1 && endIndex !== -1) {
+      const includedDays: string[] = [];
+      let cur = startIndex;
+      while (true) {
+        includedDays.push(DAY_NAMES[cur]);
+        if (cur === endIndex) break;
+        cur = (cur + 1) % 7;
+      }
+      return includedDays
+        .sort((a, b) => (DAY_ORDER[a.toLowerCase()] ?? 99) - (DAY_ORDER[b.toLowerCase()] ?? 99))
+        .join(', ');
+    }
+  }
+
+  return daysStr;
 };
 
 const parseTimeToMinutes = (timeStr: string): number => {
@@ -69,6 +145,8 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
   const [batchesLoading, setBatchesLoading] = useState(true);
 
   useEffect(() => {
+    let channel: any = null;
+
     const fetchBatchesFromDb = async () => {
       try {
         const { createClient } = await import('@/lib/supabase/client');
@@ -80,8 +158,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
         if (!error && data && data.length > 0) {
           console.log('✅ Dynamic Batches fetched from DB:', data);
           setDynamicBatches(data);
-          // Set first batch as selected by default for immediate clear view
-          setSelectedBatchId(data[0].id?.toString());
+          setSelectedBatchId((prev) => (prev && data.some((b: any) => b.id?.toString() === prev) ? prev : data[0].id?.toString()));
         }
         if (schData) setDynamicSchedules(schData);
       } catch (e) {
@@ -90,11 +167,43 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
         setBatchesLoading(false);
       }
     };
+
     fetchBatchesFromDb();
+
+    // Realtime listener for immediate sync whenever new data is added or modified in backend
+    (async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        channel = supabase
+          .channel('batches-realtime-listener')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'batches' }, () => {
+            fetchBatchesFromDb();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'batch_schedules' }, () => {
+            fetchBatchesFromDb();
+          })
+          .subscribe();
+      } catch (subErr) {
+        console.warn('Realtime subscription skipped:', subErr);
+      }
+    })();
+
+    // Polling fallback to guarantee new backend data is reflected
+    const pollInterval = setInterval(fetchBatchesFromDb, 10000);
+
+    return () => {
+      clearInterval(pollInterval);
+      if (channel) {
+        import('@/lib/supabase/client').then(({ createClient }) => {
+          createClient().removeChannel(channel);
+        }).catch(() => {});
+      }
+    };
   }, []);
 
-  // Group a batch's schedules by day so the detail view reads in strictly ASCENDING order:
-  // Monday -> Tuesday -> Wednesday -> Thursday -> Friday -> Saturday -> Sunday
+  // Group and sort schedules in strict ASCENDING chronological order starting with Sunday:
+  // Sunday (1) -> Monday (2) -> Tuesday (3) -> Wednesday (4) -> Thursday (5) -> Friday (6) -> Saturday (7)
   const schedulesFor = (batchId: any) =>
     dynamicSchedules
       .filter((s) => String(s.batch_id) === String(batchId))
@@ -114,20 +223,23 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
   const bgs    = ['#FFE6EF', '#EFE7FE', '#FFF3D9', '#ECFDF5', '#EFF6FF', '#FFF7ED'];
 
   const computeTiming = (b: any) => {
-    const start = b.start_time || '';
-    const end   = b.end_time   || '';
+    const start = (b.start_time || '').trim();
+    const end   = (b.end_time   || '').trim();
     if (isBlankTime(start) && isBlankTime(end)) {
-      return schedulesFor(b.id).length > 0 ? 'As per schedule' : '—';
+      const sch = schedulesFor(b.id);
+      return sch.length > 0 ? 'As per schedule' : 'Flexible Timings';
     }
-    return start && end ? `${start} – ${end}` : start || end || '—';
+    return start && end ? `${start} – ${end}` : start || end || 'Flexible Timings';
   };
 
   const activeTableData = dynamicBatches.map((b, idx) => {
+    const sch = schedulesFor(b.id);
+    const sortedDays = sortDaysString(b.days || '', sch);
     return {
       batch: b.batch_name,
       age: b.age_group || '—',
       timing: computeTiming(b),
-      days: b.days || '—',
+      days: sortedDays,
       color: colors[idx % colors.length],
       bg:    bgs[idx % bgs.length]
     };
@@ -137,8 +249,10 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
     const timing = computeTiming(b);
     const color = colors[idx % colors.length];
     const bg = bgs[idx % bgs.length];
+    const sch = schedulesFor(b.id);
+    const sortedDays = sortDaysString(b.days || '', sch);
 
-    // Determine icon based on name
+    // Dynamic icon based on name
     let Icon = Users2;
     const lower = (b.batch_name || '').toLowerCase();
     if (lower.includes('toddler')) Icon = Baby;
@@ -147,17 +261,53 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
     else if (lower.includes('yoga')) Icon = Brain;
     else if (lower.includes('zumba')) Icon = Dumbbell;
 
-    // 100% Genuine database arrays without fake fallbacks
-    const includes = Array.isArray(b.includes) ? b.includes.filter(Boolean) : [];
-    const childBenefits = Array.isArray(b.child_benefits) ? b.child_benefits.filter(Boolean) : [];
-    const motherBenefits = Array.isArray(b.mother_benefits) ? b.mother_benefits.filter(Boolean) : [];
+    // Robust parsing for new data from backend (handles Array, JSON string, or comma-separated)
+    let includes: string[] = [];
+    if (Array.isArray(b.includes)) {
+      includes = b.includes.map((item: any) => typeof item === 'object' && item !== null ? item.text : String(item)).filter(Boolean);
+    } else if (typeof b.includes === 'string' && b.includes.trim()) {
+      try {
+        const parsed = JSON.parse(b.includes);
+        if (Array.isArray(parsed)) {
+          includes = parsed.map((item: any) => typeof item === 'object' && item !== null ? item.text : String(item)).filter(Boolean);
+        } else {
+          includes = [b.includes.trim()];
+        }
+      } catch (e) {
+        includes = b.includes.split(',').map((s: string) => s.trim()).filter(Boolean);
+      }
+    }
+
+    let childBenefits: string[] = [];
+    if (Array.isArray(b.child_benefits)) {
+      childBenefits = b.child_benefits.map((s: any) => String(s)).filter(Boolean);
+    } else if (typeof b.child_benefits === 'string' && b.child_benefits.trim()) {
+      try {
+        const parsed = JSON.parse(b.child_benefits);
+        if (Array.isArray(parsed)) childBenefits = parsed.map((s: any) => String(s)).filter(Boolean);
+      } catch (e) {
+        childBenefits = b.child_benefits.split(',').map((s: string) => s.trim()).filter(Boolean);
+      }
+    }
+
+    let motherBenefits: string[] = [];
+    if (Array.isArray(b.mother_benefits)) {
+      motherBenefits = b.mother_benefits.map((s: any) => String(s)).filter(Boolean);
+    } else if (typeof b.mother_benefits === 'string' && b.mother_benefits.trim()) {
+      try {
+        const parsed = JSON.parse(b.mother_benefits);
+        if (Array.isArray(parsed)) motherBenefits = parsed.map((s: any) => String(s)).filter(Boolean);
+      } catch (e) {
+        motherBenefits = b.mother_benefits.split(',').map((s: string) => s.trim()).filter(Boolean);
+      }
+    }
 
     return {
       id: b.id?.toString() || `batch-${idx}`,
       badge: b.batch_name,
       emoji: b.emoji || '⚡',
       timing,
-      days: b.days || '—',
+      days: sortedDays,
       age: b.age_group || '—',
       color,
       bg,
@@ -168,7 +318,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
       childBenefits,
       motherBenefits,
       bestFor: b.best_for || '',
-      schedules: schedulesFor(b.id)
+      schedules: sch
     };
   });
 
