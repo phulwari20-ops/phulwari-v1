@@ -6,7 +6,6 @@ import {
   Calendar, User, ArrowLeft, Clock, Home, ChevronRight,
   Mail, GraduationCap, Users, Scissors, Brain, Heart, ArrowRight
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 
 // Inline SVG icons for social sharing
 const FacebookIcon = () => (
@@ -49,15 +48,11 @@ interface BlogDetailClientProps {
 export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClientProps) {
   useEffect(() => {
     if (blog?.id) {
-      const supabase = createClient();
-      const incrementViews = async () => {
-        try {
-          await supabase.rpc('increment_blog_views', { blog_id: blog.id });
-        } catch (e) {
-          console.error('Error incrementing views:', e);
-        }
-      };
-      incrementViews();
+      fetch('/api/blogs/views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blog_id: blog.id }),
+      }).catch((e) => console.error('Error incrementing views via API:', e));
     }
   }, [blog]);
 

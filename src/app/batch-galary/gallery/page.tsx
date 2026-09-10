@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { appLog } from '@/lib/logger';
 
 
@@ -36,28 +35,10 @@ export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h
             return;
           }
         }
-      } catch (err: any) {}
-
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('gallery')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error || !data) {
-          setSlides([]);
-          return;
-        }
-
-        const dbSlides = data.map((item: any) => ({
-          src: item.image_url || item.url || item.src,
-          title: item.title || 'Phulwari Photo'
-        }));
-        setSlides(dbSlides);
       } catch (err: any) {
-        setSlides([]);
+        console.error('Failed to fetch gallery via API:', err);
       }
+      setSlides([]);
     };
     fetchGallery();
   }, []);

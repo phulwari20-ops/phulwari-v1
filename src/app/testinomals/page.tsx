@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Phone, MessageCircle, Star, Quote, ThumbsUp, ExternalLink, Send, X, CheckCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 
 const GOOGLE_REVIEW_URL =
   'https://www.google.com/search?q=phulwari+mother+and+child+activity+centre&oq=&gs_lcrp=EgZjaHJvbWUqBggBEEUYOzIGCAAQRRg5MgYIARBFGDsyBwgCEAAYgAQyBwgDEAAYgAQyBwgEEAAYgAQyBwgFEAAYgAQyBwgGEAAYgAQyBwgHEAAYgAQyBwgIEAAYgAQyBggJEEUYPDIHCAoQLhiABDIHCAsQABiABDIHCAwQABiABDIHCA0QABiABDIGCA4QRRg80gEINTQ5MGowajSoAgGwAgE&client=ms-android-motorola-rvo3&sourceid=chrome-mobile&ie=UTF-8&zx=1782149690079#sv=CAESzQEKuQEStgEKd0FJaVQ0dEpoZ3V3V1MyRnR5TWM1Z0dzbjlxLXBSZWpFWmZVeTlhRUNtRTFQQ1hVS0w0SWFrbUZDNS1uenpVaks4dWkyUFdCZVNzR01uX3ZSeC1NUkJZVGt4SklLelVZMmNqaVRpeFlRTE85TTRRcDVuaHpPWk5FEhdQSEk1YW9yVkRKS1RzZU1QMlp5NTZRRRoiQURzcjlmUmhsY2d1bFJRZWJvdzliRnhteVMxcmh5QVAwZxIEODA1MRoBMyoAMAA4AUAAGAAg9pm1jgxKAhAC';
@@ -177,18 +176,19 @@ export default function TestimonialsPage({ headingLevel = 'h1' }: { headingLevel
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('reviews')
-          .select('*')
-          .order('created_at', { ascending: false });
-        if (data && data.length > 0) {
-          setReviewsList(data);
+        const res = await fetch('/api/reviews', { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && json.data.length > 0) {
+            setReviewsList(json.data);
+          } else {
+            setReviewsList([]);
+          }
         } else {
           setReviewsList([]);
         }
       } catch (err) {
-        console.error('Failed to fetch reviews:', err);
+        console.error('Failed to fetch reviews via API:', err);
         setReviewsList([]);
       } finally {
         setLoading(false);
@@ -252,19 +252,20 @@ export default function TestimonialsPage({ headingLevel = 'h1' }: { headingLevel
     if (!form.name.trim() || !form.message.trim() || form.rating === 0) return;
 
     if (form.rating >= 4) {
-      // Save directly to reviews table in Supabase
       try {
-        const supabase = createClient();
-        await supabase.from('reviews').insert([{
-          author_name: form.name,
-          review_date: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
-          rating: form.rating,
-          content: form.message,
-          program_tag: form.program || 'Phulwari Premium Circle',
-          is_verified: true
-        }]);
+        await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            author_name: form.name,
+            review_date: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+            rating: form.rating,
+            content: form.message,
+            program_tag: form.program || 'Phulwari Premium Circle',
+          }),
+        });
       } catch (e) {
-        console.error('Failed to post review:', e);
+        console.error('Failed to post review via API:', e);
       }
 
       const text = `${form.message}`;

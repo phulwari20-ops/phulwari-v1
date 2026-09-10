@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Sparkles, ArrowRight, X } from 'lucide-react'
 
 export interface BannerItem {
@@ -42,42 +41,35 @@ export default function DynamicBanners({ position, className = '' }: DynamicBann
   }, [position])
 
   const fetchBanners = async () => {
-    const todayStr = new Date().toISOString().split('T')[0]
-
-    // 100% Direct Supabase PostgreSQL DB Fetching
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('banners')
-        .select('*')
-        .eq('status', 'active')
-        .eq('display_position', position)
-        .order('priority', { ascending: true })
-
-      if (!error && data) {
-        const activeList = data.filter(b => {
-          if (b.start_date && b.start_date > todayStr) return false
-          if (b.end_date && b.end_date < todayStr) return false
-          return true
-        })
-        setBanners(activeList)
-
-        // Increment impressions counter in Supabase
-        if (activeList.length > 0) {
-          activeList.forEach(b => {
-            supabase.from('banners').update({ impressions: (b.impressions || 0) + 1 }).eq('id', b.id).then(() => {})
-          })
+      const res = await fetch(`/api/banners?position=${encodeURIComponent(position)}`, { cache: 'no-store' })
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && Array.isArray(json.data)) {
+          setBanners(json.data)
+          if (json.data.length > 0) {
+            json.data.forEach((b: BannerItem) => {
+              fetch('/api/banners', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'impression', id: b.id }),
+              }).catch(() => {})
+            })
+          }
         }
       }
     } catch (err) {
-      console.error('Error fetching live banners from DB:', err)
+      console.error('Error fetching live banners via API:', err)
     }
   }
 
   const handleBannerClick = async (banner: BannerItem) => {
     try {
-      const supabase = createClient()
-      await supabase.from('banners').update({ clicks: (banner.clicks || 0) + 1 }).eq('id', banner.id)
+      fetch('/api/banners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'click', id: banner.id }),
+      }).catch(() => {})
     } catch (e) {}
 
     if (banner.cta_url) {

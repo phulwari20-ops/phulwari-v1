@@ -148,21 +148,28 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
     let channel: any = null;
 
     const fetchBatchesFromDb = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const supabase = createClient();
-        const [{ data, error }, { data: schData }] = await Promise.all([
-          supabase.from('batches').select('*').neq('is_visible', false).order('created_at', { ascending: true }),
-          supabase.from('batch_schedules').select('*'),
-        ]);
-        if (!error && data && data.length > 0) {
-          console.log('✅ Dynamic Batches fetched from DB:', data);
-          setDynamicBatches(data);
-          setSelectedBatchId((prev) => (prev && data.some((b: any) => b.id?.toString() === prev) ? prev : data[0].id?.toString()));
+        const res = await fetch('/api/batches', {
+          signal: controller.signal,
+          cache: 'no-store'
+        });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && json.data.length > 0) {
+            console.log('✅ Dynamic Batches fetched via API:', json.data);
+            setDynamicBatches(json.data);
+            setSelectedBatchId((prev) => (prev && json.data.some((b: any) => b.id?.toString() === prev) ? prev : json.data[0].id?.toString()));
+          }
+          if (json.schedules) {
+            setDynamicSchedules(json.schedules);
+          }
         }
-        if (schData) setDynamicSchedules(schData);
       } catch (e) {
-        console.error('❌ Batch fetch error:', e);
+        console.error('❌ Batch API fetch error:', e);
       } finally {
         setBatchesLoading(false);
       }
@@ -170,7 +177,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
 
     fetchBatchesFromDb();
 
-    // Realtime listener for immediate sync whenever new data is added or modified in backend
+    // Try optional realtime subscription if accessible, otherwise fail gracefully
     (async () => {
       try {
         const { createClient } = await import('@/lib/supabase/client');
@@ -185,11 +192,11 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
           })
           .subscribe();
       } catch (subErr) {
-        console.warn('Realtime subscription skipped:', subErr);
+        // Suppress expected error on restricted networks
       }
     })();
 
-    // Polling fallback to guarantee new backend data is reflected
+    // Polling fallback every 10s to guarantee new backend data is reflected via /api/batches
     const pollInterval = setInterval(fetchBatchesFromDb, 10000);
 
     return () => {

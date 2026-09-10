@@ -21,7 +21,6 @@ import {
   Video,
   Star,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 
 const PHONE_NUMBER = '+916207368839';
 const WHATSAPP_NUMBER = '916207368839';
@@ -157,27 +156,29 @@ export default function ContactPage({ headingLevel = 'h1' }: { headingLevel?: 'h
     setStatus('submitting');
     
     try {
-      const supabase = createClient();
-      const newEnq = {
-        child_name: form.childName,
-        parent_name: form.parentName,
-        phone: form.mobile,
-        email: form.email,
-        program_interested: resolveProgram(form),
-        message: form.message,
-        source: 'Website / Home Page',
-        status: 'New'
-      };
-      
-      const { error } = await supabase.from('enquiries').insert([newEnq]);
-      
-      if (error) {
-        console.error('Failed to submit enquiry:', error);
+      const res = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          childName: form.childName,
+          parentName: form.parentName,
+          phone: form.mobile,
+          email: form.email,
+          program: resolveProgram(form),
+          message: form.message,
+          source: 'Website / Home Page',
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        console.error('Failed to submit enquiry via API:', json.error);
         setStatus('idle');
         alert('There was a problem sending your message. Please try again.');
         return;
       }
-      
+
       setStatus('success');
       setForm(initialForm);
     } catch (err) {
