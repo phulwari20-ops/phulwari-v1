@@ -24,91 +24,160 @@ import {
   Heart,
   ArrowUp,
   CalendarDays,
+  Shield,
+  FileText,
+  Star
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
-/* -------------------------------------------------------------------------- */
-/*  Section metadata — drives the sidebar, the mobile chip nav, and the       */
-/*  icon/number header rendered above each section's content.                */
-/* -------------------------------------------------------------------------- */
+const ICON_MAP: Record<string, React.ComponentType<{ style?: React.CSSProperties; size?: number }>> = {
+  Sparkles,
+  UserCheck,
+  ClipboardList,
+  Wallet,
+  RotateCcw,
+  Clock,
+  HeartPulse,
+  Camera,
+  Users,
+  Copyright,
+  Scale,
+  Gavel,
+  RefreshCw,
+  Mail,
+  MapPin,
+  Phone,
+  CheckCircle2,
+  Info,
+  MessageCircle,
+  Heart,
+  CalendarDays,
+  Shield,
+  FileText,
+  Star
+};
 
-interface SectionMeta {
-  id: string;
-  num: string;
-  label: string;
-  icon: React.ComponentType<{ style?: React.CSSProperties; size?: number }>;
-  color: string;
-  bg: string;
-}
-
-const sectionsMeta: SectionMeta[] = [
-  { id: 'about', num: '01', label: 'About Phulwari', icon: Sparkles, color: '#FF4D8D', bg: '#FFE6EF' },
-  { id: 'eligibility', num: '02', label: 'Eligibility', icon: UserCheck, color: '#3D8BFF', bg: '#E5EFFF' },
-  { id: 'registration', num: '03', label: 'Registration & Enrollment', icon: ClipboardList, color: '#34B36B', bg: '#E3F7EA' },
-  { id: 'fees', num: '04', label: 'Fees & Payments', icon: Wallet, color: '#E8A621', bg: '#FFF3D9' },
-  { id: 'cancellation', num: '05', label: 'Cancellation & Refunds', icon: RotateCcw, color: '#8B5CF6', bg: '#EFE7FE' },
-  { id: 'attendance', num: '06', label: 'Attendance & Punctuality', icon: Clock, color: '#FF8A3D', bg: '#FFEADB' },
-  { id: 'health-safety', num: '07', label: 'Health & Safety', icon: HeartPulse, color: '#14B8A6', bg: '#DFF7F1' },
-  { id: 'media-consent', num: '08', label: 'Photography & Media', icon: Camera, color: '#F43F5E', bg: '#FFE1E6' },
-  { id: 'conduct', num: '09', label: 'Code of Conduct', icon: Users, color: '#3D8BFF', bg: '#E5EFFF' },
-  { id: 'ip', num: '10', label: 'Intellectual Property', icon: Copyright, color: '#34B36B', bg: '#E3F7EA' },
-  { id: 'liability', num: '11', label: 'Limitation of Liability', icon: Scale, color: '#E8A621', bg: '#FFF3D9' },
-  { id: 'governing-law', num: '12', label: 'Governing Law', icon: Gavel, color: '#8B5CF6', bg: '#EFE7FE' },
-  { id: 'changes', num: '13', label: 'Changes to Terms', icon: RefreshCw, color: '#FF8A3D', bg: '#FFEADB' },
-  { id: 'contact', num: '14', label: 'Contact Us', icon: Mail, color: '#FF4D8D', bg: '#FFE6EF' },
+const DEFAULT_TERMS_SECTIONS = [
+  { id: 'about', num: '01', label: 'About Phulwari', icon: 'Sparkles', color: '#FF4D8D', bg: '#FFE6EF', content: 'Phulwari – Mother & Child Activity Centre is dedicated to providing educational, recreational, fitness, creative, and developmental programs for children and parents.' },
+  { id: 'eligibility', num: '02', label: 'Eligibility', icon: 'UserCheck', color: '#3D8BFF', bg: '#E5EFFF', content: 'Children must be enrolled by a parent or legal guardian who is at least 18 years of age.\nParents and guardians are responsible for providing accurate, complete, and up-to-date information during registration and enrollment.' },
+  { id: 'registration', num: '03', label: 'Registration & Enrollment', icon: 'ClipboardList', color: '#34B36B', bg: '#E3F7EA', content: 'Admission to any program is subject to seat availability.\nEnrollment will be confirmed only after successful fee payment, submission of documents, and verification.', bullets: ['Successful payment of applicable fees', 'Submission of required documents', 'Verification of registration details'] },
+  { id: 'fees', num: '04', label: 'Fees & Payments', icon: 'Wallet', color: '#E8A621', bg: '#FFF3D9', content: 'All program fees must be paid in advance unless otherwise specified.\nParents are responsible for ensuring timely payment of all applicable charges.', notes: ['Fees once paid are generally non-transferable.', 'Promotional offers and discounts may be subject to separate terms.', 'Prices and fee structures may be revised from time to time without prior notice.'] },
+  { id: 'cancellation', num: '05', label: 'Cancellation & Refunds', icon: 'RotateCcw', color: '#8B5CF6', bg: '#EFE7FE', content: 'Registration fees, admission fees, and booking fees are generally non-refundable.\nMissed classes, camps, workshops, or activities are not eligible for refunds, transfers, or compensation.\nAny refund request will be reviewed solely at the discretion of the management.' },
+  { id: 'attendance', num: '06', label: 'Attendance & Punctuality', icon: 'Clock', color: '#FF8A3D', bg: '#FFEADB', content: 'Parents and guardians are responsible for ensuring timely arrival and pick-up of children.\nRepeated delays in pick-up may result in administrative action or additional charges where applicable.\nChildren arriving excessively late may not be permitted to participate for safety reasons.' },
+  { id: 'health-safety', num: '07', label: 'Health & Safety', icon: 'HeartPulse', color: '#14B8A6', bg: '#DFF7F1', content: 'The safety and well-being of every child is our highest priority.\nParents must disclose medical conditions, allergies, special needs, and dietary restrictions before joining.', bullets: ['Medical conditions', 'Allergies', 'Special needs', 'Dietary restrictions', 'Emergency contact information'] },
+  { id: 'media-consent', num: '08', label: 'Photography & Media', icon: 'Camera', color: '#F43F5E', bg: '#FFE1E6', content: 'Photographs and videos may be taken during classes, camps, events, birthday celebrations, and activities for promotional purposes.', bullets: ['Promotional purposes', 'Social media content', 'Website galleries', 'Marketing materials', 'Event highlights'] },
+  { id: 'conduct', num: '09', label: 'Code of Conduct', icon: 'Users', color: '#3D8BFF', bg: '#E5EFFF', content: 'To ensure a positive environment for all participants, children and parents must maintain respectful communication and behavior.', bullets: ['Children must behave respectfully toward instructors and fellow participants.', 'Parents and guardians must maintain respectful communication with staff and other families.', 'Any behavior that disrupts activities or compromises safety may result in removal from the program.'] },
+  { id: 'ip', num: '10', label: 'Intellectual Property', icon: 'Copyright', color: '#34B36B', bg: '#E3F7EA', content: 'All content available through Phulwari (logos, website content, graphics, videos, designs) is the intellectual property of Phulwari.', bullets: ['Logos', 'Website content', 'Graphics & Illustrations', 'Photographs & Videos', 'Designs & Written materials'] },
+  { id: 'liability', num: '11', label: 'Limitation of Liability', icon: 'Scale', color: '#E8A621', bg: '#FFF3D9', content: 'While Phulwari takes reasonable precautions to provide a safe environment, participation in physical activities carries inherent risks.', bullets: ['Personal injuries', 'Loss of personal belongings', 'Property damage', 'Indirect or consequential losses'] },
+  { id: 'governing-law', num: '12', label: 'Governing Law', icon: 'Gavel', color: '#8B5CF6', bg: '#EFE7FE', content: 'These Terms & Conditions shall be governed and interpreted in accordance with the laws of India.\nAny disputes shall be subject to the exclusive jurisdiction of the courts located in Patna, Bihar.' },
+  { id: 'changes', num: '13', label: 'Changes to Terms', icon: 'RefreshCw', color: '#FF8A3D', bg: '#FFEADB', content: 'Phulwari reserves the right to update, revise, or modify these Terms & Conditions at any time without prior notice.\nUpdated versions will be published on our website and will become effective immediately upon publication.' },
+  { id: 'contact', num: '14', label: 'Contact Us', icon: 'Mail', color: '#FF4D8D', bg: '#FFE6EF', content: 'If you have any questions regarding these Terms & Conditions, please contact us.' },
 ];
 
-/* -------------------------------------------------------------------------- */
-/*  Small reusable pieces                                                     */
-/* -------------------------------------------------------------------------- */
+function ContactCard({ contactInfo }: { contactInfo?: any }) {
+  const address = contactInfo?.address || 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road, Patna, Bihar – 800001';
+  const phone = contactInfo?.phone || '+91 6207368839';
+  const email = contactInfo?.email || 'phulwari02@gmail.com';
 
-function ContactCard() {
   return (
     <div className="tc-contact-card">
       <div className="tc-contact-row">
         <MapPin size={16} />
-        <span>M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road, Patna, Bihar – 800001</span>
+        <span>{address}</span>
       </div>
       <div className="tc-contact-row">
         <Phone size={16} />
-        <a href="tel:+916207368839">+91 6207368839</a>
+        <a href={`tel:${phone.replace(/\s+/g, '')}`}>{phone}</a>
       </div>
       <div className="tc-contact-row">
         <Mail size={16} />
-        <a href="mailto:phulwari02@gmail.com">phulwari02@gmail.com</a>
+        <a href={`mailto:${email}`}>{email}</a>
       </div>
     </div>
   );
 }
 
-function TermsSection({ id, children }: { id: string; children: React.ReactNode }) {
-  const meta = sectionsMeta.find((s) => s.id === id);
-  if (!meta) return null;
-  const Icon = meta.icon;
-  return (
-    <section id={meta.id} className="tc-section" style={{ ['--accent' as any]: meta.color }}>
-      <div className="tc-section-head">
-        <span className="tc-section-icon" style={{ backgroundColor: meta.bg }}>
-          <Icon style={{ stroke: meta.color }} />
-        </span>
-        <div>
-          <span className="tc-section-num">{meta.num}</span>
-          <h2 className="tc-section-title">{meta.label}</h2>
-        </div>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Page                                                                      */
-/* -------------------------------------------------------------------------- */
-
 export default function TermsPage() {
-  const [activeId, setActiveId] = useState(sectionsMeta[0].id);
+  const [pageConfig, setPageConfig] = useState<any>({
+    badge_text: 'Legal',
+    last_updated: 'June 2026',
+    title_part1: 'Terms &',
+    title_highlight: 'Conditions',
+    intro_text: 'Welcome to Phulwari – Mother & Child Activity Centre. By enrolling in our programs, participating in activities, using our website, or accessing our services, you agree to comply with the terms laid out below. Please read them carefully.',
+    sections: DEFAULT_TERMS_SECTIONS,
+    contact_info: {
+      address: 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road, Patna, Bihar – 800001',
+      phone: '+91 6207368839',
+      email: 'phulwari02@gmail.com'
+    }
+  });
+
+  const [activeId, setActiveId] = useState<string>(DEFAULT_TERMS_SECTIONS[0].id);
   const [showTop, setShowTop] = useState(false);
 
-  // Scroll-spy: highlight whichever section is currently nearest the top of the viewport.
+  useEffect(() => {
+    const fetchTerms = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('terms_page_config')
+          .select('*')
+          .eq('id', 1)
+          .single();
+
+        if (data && !error) {
+          setPageConfig({
+            badge_text: data.badge_text || 'Legal',
+            last_updated: data.last_updated || 'June 2026',
+            title_part1: data.title_part1 || 'Terms &',
+            title_highlight: data.title_highlight || 'Conditions',
+            intro_text: data.intro_text || pageConfig.intro_text,
+            sections: data.sections && data.sections.length > 0 ? data.sections : DEFAULT_TERMS_SECTIONS,
+            contact_info: data.contact_info || pageConfig.contact_info
+          });
+        }
+      } catch (e) {
+        // Fallback gracefully
+      }
+    };
+
+    fetchTerms();
+
+    let channel: any = null;
+    try {
+      const supabase = createClient();
+      channel = supabase
+        .channel('terms-realtime-channel')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'terms_page_config' }, () => {
+          fetchTerms();
+        })
+        .subscribe();
+    } catch (e) {}
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_TERMS_UPDATE' && event.data?.config) {
+        setPageConfig(event.data.config);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+
+    // 3s polling fallback for instant refresh
+    const interval = setInterval(fetchTerms, 3000);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('message', handleMessage);
+      if (channel) {
+        try {
+          const supabase = createClient();
+          supabase.removeChannel(channel);
+        } catch (e) {}
+      }
+    };
+  }, []);
+
+  const sections = pageConfig.sections || DEFAULT_TERMS_SECTIONS;
+
+  // Scroll-spy
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -118,12 +187,12 @@ export default function TermsPage() {
       },
       { rootMargin: '-110px 0px -65% 0px', threshold: 0 }
     );
-    sectionsMeta.forEach((s) => {
+    sections.forEach((s: any) => {
       const el = document.getElementById(s.id);
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-  }, []);
+  }, [sections]);
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 700);
@@ -232,7 +301,7 @@ export default function TermsPage() {
         .tc-section-num { display: block; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 0.74rem; color: #C9C2D6; margin-bottom: 0.1rem; }
         .tc-section-title { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.2rem; color: #3F3A52; line-height: 1.25; }
 
-        .tc-section p { font-size: 0.93rem; line-height: 1.75; color: #5B5570; margin-bottom: 0.85rem; }
+        .tc-section p { font-size: 0.93rem; line-height: 1.75; color: #5B5570; margin-bottom: 0.85rem; white-space: pre-line; }
         .tc-section p:last-child { margin-bottom: 0; }
         .tc-section ul { list-style: none; margin: 0 0 0.85rem; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
         .tc-section ul:last-child { margin-bottom: 0; }
@@ -281,29 +350,26 @@ export default function TermsPage() {
         }
         .tc-top-btn.is-visible { opacity: 1; visibility: visible; transform: translateY(0); }
         .tc-top-btn svg { width: 19px; height: 19px; }
-        .tc-top-btn:focus-visible { outline: 3px solid #FF4D8D; outline-offset: 3px; }
       `}</style>
 
       <div className="tc-page">
         {/* Hero */}
         <header className="tc-hero">
-          <span className="tc-badge">Legal</span>
+          <span className="tc-badge">{pageConfig.badge_text || 'Legal'}</span>
           <div>
             <span className="tc-updated">
               <CalendarDays />
-              Last Updated: June 2026
+              Last Updated: {pageConfig.last_updated || 'June 2026'}
             </span>
           </div>
           <h1 className="tc-title">
-            Terms &amp; <span>Conditions</span>
+            {pageConfig.title_part1 || 'Terms &'} <span>{pageConfig.title_highlight || 'Conditions'}</span>
           </h1>
           <p className="tc-intro-text">
-            Welcome to Phulwari – Mother &amp; Child Activity Centre. By enrolling in our programs,
-            participating in activities, using our website, or accessing our services, you agree to
-            comply with the terms laid out below. Please read them carefully.
+            {pageConfig.intro_text}
           </p>
           <div className="tc-quick-contact">
-            <a className="tc-quick-pill" href="tel:+916207368839">
+            <a className="tc-quick-pill" href={`tel:${pageConfig.contact_info?.phone?.replace(/\s+/g, '') || '+916207368839'}`}>
               <Phone size={15} /> Call Us
             </a>
             <a
@@ -314,7 +380,7 @@ export default function TermsPage() {
             >
               <MessageCircle size={15} /> WhatsApp Us
             </a>
-            <a className="tc-quick-pill" href="mailto:phulwari02@gmail.com">
+            <a className="tc-quick-pill" href={`mailto:${pageConfig.contact_info?.email || 'phulwari02@gmail.com'}`}>
               <Mail size={15} /> Email Us
             </a>
           </div>
@@ -322,8 +388,8 @@ export default function TermsPage() {
 
         {/* Mobile chip nav */}
         <nav className="tc-chip-nav" aria-label="Jump to section">
-          {sectionsMeta.map((s) => {
-            const Icon = s.icon;
+          {sections.map((s: any) => {
+            const Icon = ICON_MAP[s.icon] || Sparkles;
             const active = activeId === s.id;
             return (
               <a
@@ -331,11 +397,11 @@ export default function TermsPage() {
                 href={`#${s.id}`}
                 onClick={jumpTo(s.id)}
                 className={`tc-chip ${active ? 'active' : ''}`}
-                style={{ ['--accent' as any]: s.color }}
+                style={{ ['--accent' as any]: s.color || '#FF4D8D' }}
                 aria-current={active}
               >
-                <span className="tc-chip-icon" style={{ backgroundColor: s.bg }}>
-                  <Icon style={{ stroke: s.color }} />
+                <span className="tc-chip-icon" style={{ backgroundColor: s.bg || '#FFE6EF' }}>
+                  <Icon style={{ stroke: s.color || '#FF4D8D' }} />
                 </span>
                 {s.label}
               </a>
@@ -348,7 +414,7 @@ export default function TermsPage() {
           <aside className="tc-toc" aria-label="Table of contents">
             <p className="tc-toc-label">On this page</p>
             <div className="tc-toc-list">
-              {sectionsMeta.map((s) => {
+              {sections.map((s: any) => {
                 const active = activeId === s.id;
                 return (
                   <a
@@ -356,7 +422,7 @@ export default function TermsPage() {
                     href={`#${s.id}`}
                     onClick={jumpTo(s.id)}
                     className={`tc-toc-link ${active ? 'active' : ''}`}
-                    style={{ ['--accent' as any]: s.color }}
+                    style={{ ['--accent' as any]: s.color || '#FF4D8D' }}
                     aria-current={active}
                   >
                     <span className="tc-toc-num">{s.num}</span>
@@ -369,156 +435,60 @@ export default function TermsPage() {
 
           {/* Section content */}
           <main className="tc-content">
-            <TermsSection id="about">
-              <p>
-                Phulwari – Mother &amp; Child Activity Centre is dedicated to providing educational,
-                recreational, fitness, creative, and developmental programs for children and parents.
-              </p>
-              <ContactCard />
-            </TermsSection>
+            {sections.map((sec: any) => {
+              const Icon = ICON_MAP[sec.icon] || Sparkles;
+              return (
+                <section
+                  key={sec.id}
+                  id={sec.id}
+                  className="tc-section"
+                  style={{ ['--accent' as any]: sec.color || '#FF4D8D' }}
+                >
+                  <div className="tc-section-head">
+                    <span className="tc-section-icon" style={{ backgroundColor: sec.bg || '#FFE6EF' }}>
+                      <Icon style={{ stroke: sec.color || '#FF4D8D' }} />
+                    </span>
+                    <div>
+                      <span className="tc-section-num">{sec.num}</span>
+                      <h2 className="tc-section-title">{sec.label}</h2>
+                    </div>
+                  </div>
 
-            <TermsSection id="eligibility">
-              <p>Children must be enrolled by a parent or legal guardian who is at least 18 years of age.</p>
-              <p>
-                Parents and guardians are responsible for providing accurate, complete, and up-to-date
-                information during registration and enrollment.
-              </p>
-            </TermsSection>
+                  {sec.content && <p>{sec.content}</p>}
 
-            <TermsSection id="registration">
-              <p>Admission to any program is subject to seat availability.</p>
-              <p>Enrollment will be confirmed only after:</p>
-              <ul>
-                <li><CheckCircle2 /> Successful payment of applicable fees</li>
-                <li><CheckCircle2 /> Submission of required documents</li>
-                <li><CheckCircle2 /> Verification of registration details</li>
-              </ul>
-              <p>
-                Phulwari reserves the right to refuse, suspend, or cancel admission if any information
-                provided is found to be incorrect, misleading, fraudulent, or incomplete.
-              </p>
-            </TermsSection>
+                  {sec.bullets && sec.bullets.length > 0 && (
+                    <ul>
+                      {sec.bullets.map((b: string, bIdx: number) => (
+                        <li key={bIdx}>
+                          <CheckCircle2 />
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
 
-            <TermsSection id="fees">
-              <p>All program fees must be paid in advance unless otherwise specified.</p>
-              <p>Parents are responsible for ensuring timely payment of all applicable charges.</p>
-              <div className="tc-note">
-                <p className="tc-note-label">
-                  <Info /> Important Notes
-                </p>
-                <ul>
-                  <li><CheckCircle2 /> Fees once paid are generally non-transferable.</li>
-                  <li><CheckCircle2 /> Promotional offers and discounts may be subject to separate terms.</li>
-                  <li><CheckCircle2 /> Prices and fee structures may be revised from time to time without prior notice.</li>
-                </ul>
-              </div>
-            </TermsSection>
+                  {sec.notes && sec.notes.length > 0 && (
+                    <div className="tc-note">
+                      <p className="tc-note-label">
+                        <Info /> Important Notes
+                      </p>
+                      <ul>
+                        {sec.notes.map((n: string, nIdx: number) => (
+                          <li key={nIdx}>
+                            <CheckCircle2 />
+                            <span>{n}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-            <TermsSection id="cancellation">
-              <p>Registration fees, admission fees, and booking fees are generally non-refundable.</p>
-              <p>Missed classes, camps, workshops, or activities are not eligible for refunds, transfers, or compensation.</p>
-              <p>Any refund request will be reviewed solely at the discretion of the management.</p>
-              <p>Management reserves the right to make the final decision regarding refund requests.</p>
-            </TermsSection>
-
-            <TermsSection id="attendance">
-              <p>Parents and guardians are responsible for ensuring timely arrival and pick-up of children.</p>
-              <p>Repeated delays in pick-up may result in administrative action or additional charges where applicable.</p>
-              <p>Children arriving excessively late may not be permitted to participate in certain activities for safety and operational reasons.</p>
-            </TermsSection>
-
-            <TermsSection id="health-safety">
-              <p>The safety and well-being of every child is our highest priority.</p>
-              <p>Parents must disclose the following before their child participates in any program:</p>
-              <ul>
-                <li><CheckCircle2 /> Medical conditions</li>
-                <li><CheckCircle2 /> Allergies</li>
-                <li><CheckCircle2 /> Special needs</li>
-                <li><CheckCircle2 /> Dietary restrictions</li>
-                <li><CheckCircle2 /> Emergency contact information</li>
-              </ul>
-              <p>Children who are ill or suffering from contagious conditions should not attend activities until medically fit.</p>
-              <p>
-                In emergency situations, Phulwari may arrange immediate medical assistance. Any related
-                expenses shall be the responsibility of the parent or guardian.
-              </p>
-            </TermsSection>
-
-            <TermsSection id="media-consent">
-              <p>
-                Photographs and videos may be taken during classes, camps, events, birthday celebrations,
-                competitions, and activities. These materials may be used for:
-              </p>
-              <ul>
-                <li><CheckCircle2 /> Promotional purposes</li>
-                <li><CheckCircle2 /> Social media content</li>
-                <li><CheckCircle2 /> Website galleries</li>
-                <li><CheckCircle2 /> Marketing materials</li>
-                <li><CheckCircle2 /> Event highlights</li>
-              </ul>
-              <p>
-                Parents who do not wish their child to appear in photographs or videos must submit a
-                written request before participation.
-              </p>
-            </TermsSection>
-
-            <TermsSection id="conduct">
-              <p>To ensure a positive environment for all participants:</p>
-              <ul>
-                <li><CheckCircle2 /> Children must behave respectfully toward instructors and fellow participants.</li>
-                <li><CheckCircle2 /> Parents and guardians must maintain respectful communication with staff and other families.</li>
-                <li><CheckCircle2 /> Any behavior that disrupts activities or compromises safety may result in removal from the program.</li>
-              </ul>
-              <p>Phulwari reserves the right to suspend or terminate participation if conduct standards are not followed.</p>
-            </TermsSection>
-
-            <TermsSection id="ip">
-              <p>
-                All content available through Phulwari, including but not limited to the items below, is
-                the intellectual property of Phulwari – Mother &amp; Child Activity Centre:
-              </p>
-              <ul>
-                <li><CheckCircle2 /> Logos</li>
-                <li><CheckCircle2 /> Website content</li>
-                <li><CheckCircle2 /> Graphics</li>
-                <li><CheckCircle2 /> Illustrations</li>
-                <li><CheckCircle2 /> Photographs</li>
-                <li><CheckCircle2 /> Videos</li>
-                <li><CheckCircle2 /> Designs</li>
-                <li><CheckCircle2 /> Written materials</li>
-              </ul>
-              <p>Unauthorized reproduction, distribution, modification, or commercial use is strictly prohibited without prior written permission.</p>
-            </TermsSection>
-
-            <TermsSection id="liability">
-              <p>
-                While Phulwari takes reasonable precautions to provide a safe and supervised environment,
-                participation in physical and recreational activities carries inherent risks.
-              </p>
-              <p>Except where liability is required under applicable law, Phulwari shall not be liable for:</p>
-              <ul>
-                <li><CheckCircle2 /> Personal injuries</li>
-                <li><CheckCircle2 /> Loss of personal belongings</li>
-                <li><CheckCircle2 /> Property damage</li>
-                <li><CheckCircle2 /> Indirect or consequential losses</li>
-              </ul>
-            </TermsSection>
-
-            <TermsSection id="governing-law">
-              <p>These Terms &amp; Conditions shall be governed and interpreted in accordance with the laws of India.</p>
-              <p>Any disputes arising from the use of our services shall be subject to the exclusive jurisdiction of the courts located in Patna, Bihar.</p>
-            </TermsSection>
-
-            <TermsSection id="changes">
-              <p>Phulwari reserves the right to update, revise, or modify these Terms &amp; Conditions at any time without prior notice.</p>
-              <p>Updated versions will be published on our website and will become effective immediately upon publication.</p>
-              <p>Continued use of our services constitutes acceptance of the revised Terms &amp; Conditions.</p>
-            </TermsSection>
-
-            <TermsSection id="contact">
-              <p>If you have any questions regarding these Terms &amp; Conditions, please contact us.</p>
-              <ContactCard />
-            </TermsSection>
+                  {(sec.id === 'about' || sec.id === 'contact') && (
+                    <ContactCard contactInfo={pageConfig.contact_info} />
+                  )}
+                </section>
+              );
+            })}
           </main>
         </div>
 
@@ -534,7 +504,7 @@ export default function TermsPage() {
               learn, play, and grow while families build lasting memories together.
             </p>
             <div className="tc-thanks-actions">
-              <a className="tc-thanks-btn tc-thanks-btn--call" href="tel:+916207368839">
+              <a className="tc-thanks-btn tc-thanks-btn--call" href={`tel:${pageConfig.contact_info?.phone?.replace(/\s+/g, '') || '+916207368839'}`}>
                 <Phone /> Call Us
               </a>
               <a

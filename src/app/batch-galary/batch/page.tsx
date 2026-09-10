@@ -224,6 +224,27 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
         return String(a.class_name || '').localeCompare(String(b.class_name || ''));
       });
 
+  const groupSchedulesByDay = (schedules: any[]) => {
+    if (!schedules || schedules.length === 0) return [];
+    const map: Record<string, { day: string; classes: any[] }> = {};
+
+    schedules.forEach((sch) => {
+      const day = String(sch.day_of_week || '').trim();
+      if (!day) return;
+      const key = day.toLowerCase();
+      if (!map[key]) {
+        map[key] = { day, classes: [] };
+      }
+      map[key].classes.push(sch);
+    });
+
+    return Object.values(map).sort((a, b) => {
+      const orderA = DAY_ORDER[a.day.toLowerCase()] ?? 99;
+      const orderB = DAY_ORDER[b.day.toLowerCase()] ?? 99;
+      return orderA - orderB;
+    });
+  };
+
   const isBlankTime = (t: string) => !t || t === '00:00' || t === '00:00:00';
 
   const colors = ['#FF4D8D', '#8B5CF6', '#E8A621', '#10B981', '#3B82F6', '#F97316'];
@@ -348,7 +369,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
         .bt-hero-title span { color: #FF4D8D; }
         .bt-hero-sub { font-size: 0.97rem; font-weight: 600; color: #6B6480; line-height: 1.7; }
 
-        /* Batch cards grid - uniform heights, no stretching distortion */
+        /* Batch cards grid - aligned start for smooth accordion expansion */
         .bt-cards {
           max-width: 68rem;
           margin: 0 auto;
@@ -356,7 +377,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
           display: grid;
           grid-template-columns: 1fr;
           gap: 1.2rem;
-          align-items: stretch;
+          align-items: start;
         }
         @media (min-width: 640px) {
           .bt-cards { grid-template-columns: repeat(2, 1fr); }
@@ -375,7 +396,6 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
           cursor: pointer;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
           position: relative;
         }
         .bt-card:hover {
@@ -457,6 +477,14 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
           font-size: 0.82rem;
           font-weight: 700;
           transition: background-color 0.18s ease;
+        }
+
+        /* Inline Card Dropdown Details */
+        .bt-card-dropdown {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px dashed #E5E7EB;
+          animation: btFadeUp 0.3s ease both;
         }
 
         /* Detail Showcase - Smooth, dedicated full-width area */
@@ -563,44 +591,88 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
           gap: 0.5rem;
         }
 
-        /* Schedule Grid - Ascending order */
-        .bt-schedule-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 0.55rem;
-        }
-        @media (min-width: 640px) {
-          .bt-schedule-grid { grid-template-columns: repeat(2, 1fr); }
+        /* Modern Grouped Schedule by Day */
+        .bt-schedule-grouped-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.45rem;
         }
 
-        .bt-sch-card {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0.65rem 0.9rem;
+        .bt-day-group-card {
+          background: #FAFAFA;
+          border: 1px solid #F0ECE4;
           border-radius: 12px;
-          background: var(--sch-bg, #FFF3D9);
-          font-size: 0.84rem;
-          font-weight: 700;
-          color: #3F3A52;
-          gap: 0.75rem;
+          padding: 0.55rem 0.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.35rem;
+          transition: background-color 0.15s ease, border-color 0.15s ease;
         }
-        .bt-sch-day {
+        .bt-day-group-card:hover {
+          background: #FFFFFF;
+          border-color: var(--card-color, #FF4D8D);
+        }
+        @media (min-width: 640px) {
+          .bt-day-group-card {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+          }
+        }
+
+        .bt-day-badge-col {
           display: inline-flex;
           align-items: center;
           gap: 0.35rem;
           font-weight: 800;
-          min-width: 100px;
+          font-size: 0.8rem;
+          color: #3F3A52;
+          min-width: 90px;
+          flex-shrink: 0;
         }
-        .bt-sch-time {
+
+        .bt-day-classes-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.35rem;
+          flex: 1;
+        }
+        @media (min-width: 640px) {
+          .bt-day-classes-row {
+            justify-content: flex-end;
+          }
+        }
+
+        .bt-class-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.25rem 0.6rem;
+          border-radius: 8px;
+          background: var(--sch-bg, #FFF3D9);
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          font-size: 0.78rem;
+        }
+
+        .bt-class-chip-name {
+          font-weight: 800;
+          color: #3F3A52;
+        }
+
+        .bt-class-chip-dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 9999px;
+          background-color: var(--sch-color, #FF4D8D);
+          opacity: 0.6;
+        }
+
+        .bt-class-chip-time {
           font-family: 'Quicksand', monospace;
+          font-weight: 700;
+          font-size: 0.74rem;
           color: var(--sch-color, #E8A621);
-          font-weight: 800;
-          font-size: 0.82rem;
-        }
-        .bt-sch-class {
-          font-weight: 800;
-          text-align: right;
         }
 
         /* Includes list */
@@ -775,157 +847,139 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
                       color: isActive ? '#ffffff' : batch.color
                     }}
                   >
-                    <span>{isActive ? 'Viewing Details' : 'View Schedule & Details'}</span>
+                    <span>{isActive ? 'Hide Details' : 'View Schedule & Details'}</span>
                     {isActive ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </div>
+
+                  {/* Inline Dropdown Details inside Card */}
+                  {isActive && (
+                    <div className="bt-card-dropdown" onClick={(e) => e.stopPropagation()}>
+                      {batch.description && (
+                        <p className="bt-showcase-desc">{batch.description}</p>
+                      )}
+
+                      {/* Class Schedule - Clean Grouped Day Layout */}
+                      <div className="bt-section-heading">
+                        <CalendarDays size={16} style={{ color: batch.color }} />
+                        <span>Class Schedule</span>
+                      </div>
+
+                      {batch.schedules && batch.schedules.length > 0 ? (
+                        <div className="bt-schedule-grouped-list">
+                          {groupSchedulesByDay(batch.schedules).map((dayGroup: any, idx: number) => (
+                            <div key={idx} className="bt-day-group-card">
+                              <div className="bt-day-badge-col">
+                                <span>📅 {dayGroup.day}</span>
+                              </div>
+                              <div className="bt-day-classes-row">
+                                {dayGroup.classes.map((cls: any, cIdx: number) => (
+                                  <div key={cIdx} className="bt-class-chip">
+                                    <span className="bt-class-chip-name">{cls.class_name}</span>
+                                    {cls.start_time && cls.end_time && (
+                                      <>
+                                        <span className="bt-class-chip-dot" />
+                                        <span className="bt-class-chip-time">
+                                          {cls.start_time} – {cls.end_time}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ background: batch.bg, padding: '0.75rem 0.9rem', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 700, color: '#3F3A52' }}>
+                          ℹ️ Timing: {batch.timing} ({batch.days})
+                        </div>
+                      )}
+
+                      {/* What's Included */}
+                      {batch.includes && batch.includes.length > 0 && (
+                        <>
+                          <div className="bt-section-heading">
+                            <Sparkles size={16} style={{ color: batch.color }} />
+                            <span>What's Included</span>
+                          </div>
+                          <div className="bt-inc-grid">
+                            {batch.includes.map((inc: any, idx: number) => {
+                              const text = typeof inc === 'object' && inc !== null ? inc.text : inc;
+                              return (
+                                <div className="bt-inc-item" key={idx}>
+                                  <Sparkles size={13} style={{ color: batch.color, flexShrink: 0 }} />
+                                  <span>{text}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Benefits for Children */}
+                      {batch.childBenefits && batch.childBenefits.length > 0 && (
+                        <>
+                          <div className="bt-section-heading">
+                            <Star size={16} style={{ color: batch.color }} />
+                            <span>Benefits for Children</span>
+                          </div>
+                          <div className="bt-benefits-grid">
+                            {batch.childBenefits.map((b: any, idx: number) => (
+                              <div className="bt-ben-item" key={idx}>
+                                <CheckCircle2 style={{ color: batch.color }} />
+                                <span>{b}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Benefits for Mothers */}
+                      {batch.motherBenefits && batch.motherBenefits.length > 0 && (
+                        <>
+                          <div className="bt-section-heading">
+                            <Heart size={16} style={{ color: batch.color }} />
+                            <span>Benefits for Mothers</span>
+                          </div>
+                          <div className="bt-benefits-grid">
+                            {batch.motherBenefits.map((b: any, idx: number) => (
+                              <div className="bt-ben-item" key={idx}>
+                                <Heart style={{ color: batch.color }} />
+                                <span>{b}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Best For */}
+                      {batch.bestFor && (
+                        <div className="bt-best-for-box">
+                          <strong>Best For</strong>
+                          {batch.bestFor}
+                        </div>
+                      )}
+
+                      {/* WhatsApp Enquiry Button */}
+                      <div style={{ marginTop: '1.25rem' }}>
+                        <a
+                          href={`https://wa.me/916207368839?text=Hi%20Phulwari!%20I%27d%20like%20to%20know%20more%20about%20the%20*${encodeURIComponent(batch.badge)}*.%0A%0APlease%20share%20details%20about%20fees%2C%20enrollment%20and%20availability.`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bt-join-btn"
+                          style={{ backgroundColor: batch.color }}
+                        >
+                          <MessageCircle />
+                          <span>{batch.emoji} Enquire about {batch.badge}</span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })
           )}
         </div>
-
-        {/* Selected Batch Showcase - Full width, stable, zero layout distortion */}
-        {selectedBatch && (
-          <div className="bt-showcase" id="batch-showcase-anchor">
-            <div
-              className="bt-showcase-card"
-              style={{
-                ['--showcase-color' as any]: selectedBatch.color,
-                ['--sch-bg' as any]: selectedBatch.bg,
-                ['--sch-color' as any]: selectedBatch.color
-              }}
-            >
-              <div className="bt-showcase-header">
-                <div className="bt-showcase-title-area">
-                  <div className="bt-showcase-icon" style={{ backgroundColor: selectedBatch.color }}>
-                    <selectedBatch.icon />
-                  </div>
-                  <div>
-                    <div className="bt-showcase-heading">
-                      {selectedBatch.emoji} {selectedBatch.badge}
-                    </div>
-                    {selectedBatch.tagline && (
-                      <div className="bt-showcase-subtag">{selectedBatch.tagline}</div>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  className="bt-close-btn"
-                  title="Close Details"
-                  onClick={() => setSelectedBatchId(null)}
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {selectedBatch.description && (
-                <p className="bt-showcase-desc">{selectedBatch.description}</p>
-              )}
-
-              {/* Class Schedule - STRICT ASCENDING CHRONOLOGICAL ORDER (Monday -> Sunday) */}
-              <div className="bt-section-heading">
-                <CalendarDays size={18} style={{ color: selectedBatch.color }} />
-                <span>Class Schedule (Ascending Order)</span>
-              </div>
-
-              {selectedBatch.schedules && selectedBatch.schedules.length > 0 ? (
-                <div className="bt-schedule-grid">
-                  {selectedBatch.schedules.map((sch: any, idx: number) => (
-                    <div key={idx} className="bt-sch-card">
-                      <span className="bt-sch-day">📅 {sch.day_of_week}</span>
-                      <span className="bt-sch-time">{sch.start_time} – {sch.end_time}</span>
-                      <span className="bt-sch-class">{sch.class_name}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ background: selectedBatch.bg, padding: '0.85rem 1rem', borderRadius: '12px', fontSize: '0.86rem', fontWeight: 700, color: '#3F3A52' }}>
-                  ℹ️ Timing: {selectedBatch.timing} ({selectedBatch.days})
-                </div>
-              )}
-
-              {/* What's Included - 100% Genuine backend data */}
-              {selectedBatch.includes && selectedBatch.includes.length > 0 && (
-                <>
-                  <div className="bt-section-heading">
-                    <Sparkles size={18} style={{ color: selectedBatch.color }} />
-                    <span>What's Included</span>
-                  </div>
-                  <div className="bt-inc-grid">
-                    {selectedBatch.includes.map((inc: any, idx: number) => {
-                      const text = typeof inc === 'object' && inc !== null ? inc.text : inc;
-                      return (
-                        <div className="bt-inc-item" key={idx}>
-                          <Sparkles size={14} style={{ color: selectedBatch.color, flexShrink: 0 }} />
-                          <span>{text}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-
-              {/* Benefits for Children - only rendered when items exist */}
-              {selectedBatch.childBenefits && selectedBatch.childBenefits.length > 0 && (
-                <>
-                  <div className="bt-section-heading">
-                    <Star size={18} style={{ color: selectedBatch.color }} />
-                    <span>Benefits for Children</span>
-                  </div>
-                  <div className="bt-benefits-grid">
-                    {selectedBatch.childBenefits.map((b: any, idx: number) => (
-                      <div className="bt-ben-item" key={idx}>
-                        <CheckCircle2 style={{ color: selectedBatch.color }} />
-                        <span>{b}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Benefits for Mothers - only rendered when items exist */}
-              {selectedBatch.motherBenefits && selectedBatch.motherBenefits.length > 0 && (
-                <>
-                  <div className="bt-section-heading">
-                    <Heart size={18} style={{ color: selectedBatch.color }} />
-                    <span>Benefits for Mothers</span>
-                  </div>
-                  <div className="bt-benefits-grid">
-                    {selectedBatch.motherBenefits.map((b: any, idx: number) => (
-                      <div className="bt-ben-item" key={idx}>
-                        <Heart style={{ color: selectedBatch.color }} />
-                        <span>{b}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Best For - only rendered when present */}
-              {selectedBatch.bestFor && (
-                <div className="bt-best-for-box">
-                  <strong>Best For</strong>
-                  {selectedBatch.bestFor}
-                </div>
-              )}
-
-              {/* WhatsApp Enquiry Button */}
-              <div style={{ marginTop: '1.75rem' }}>
-                <a
-                  href={`https://wa.me/916207368839?text=Hi%20Phulwari!%20I%27d%20like%20to%20know%20more%20about%20the%20*${encodeURIComponent(selectedBatch.badge)}*.%0A%0APlease%20share%20details%20about%20fees%2C%20enrollment%20and%20availability.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bt-join-btn"
-                  style={{ backgroundColor: selectedBatch.color }}
-                >
-                  <MessageCircle />
-                  <span>{selectedBatch.emoji} Enquire about {selectedBatch.badge}</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Overview table */}
         <div className="bt-overview">

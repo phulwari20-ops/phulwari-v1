@@ -23,87 +23,156 @@ import {
   Heart,
   ArrowUp,
   CalendarDays,
+  Sparkles,
+  Star
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
-/* -------------------------------------------------------------------------- */
-/*  Section metadata                                                          */
-/* -------------------------------------------------------------------------- */
+const ICON_MAP: Record<string, React.ComponentType<{ style?: React.CSSProperties; size?: number }>> = {
+  Shield,
+  UserCheck,
+  Database,
+  CreditCard,
+  Share2,
+  Camera,
+  Lock,
+  Baby,
+  Cookie,
+  FileText,
+  Link,
+  RefreshCw,
+  Mail,
+  MapPin,
+  Phone,
+  CheckCircle2,
+  Info,
+  MessageCircle,
+  Heart,
+  CalendarDays,
+  Sparkles,
+  Star
+};
 
-interface SectionMeta {
-  id: string;
-  num: string;
-  label: string;
-  icon: React.ComponentType<{ style?: React.CSSProperties; size?: number }>;
-  color: string;
-  bg: string;
-}
-
-const sectionsMeta: SectionMeta[] = [
-  { id: 'intro',       num: '01', label: 'Our Commitment',       icon: Shield,      color: '#FF4D8D', bg: '#FFE6EF' },
-  { id: 'collection',  num: '02', label: 'Information We Collect', icon: Database,   color: '#3D8BFF', bg: '#E5EFFF' },
-  { id: 'usage',       num: '03', label: 'How We Use It',         icon: FileText,    color: '#34B36B', bg: '#E3F7EA' },
-  { id: 'payments',    num: '04', label: 'Payment Information',   icon: CreditCard,  color: '#E8A621', bg: '#FFF3D9' },
-  { id: 'sharing',     num: '05', label: 'Sharing of Information', icon: Share2,     color: '#8B5CF6', bg: '#EFE7FE' },
-  { id: 'media',       num: '06', label: 'Photography & Media',   icon: Camera,      color: '#FF8A3D', bg: '#FFEADB' },
-  { id: 'security',    num: '07', label: 'Data Security',         icon: Lock,        color: '#14B8A6', bg: '#DFF7F1' },
-  { id: 'children',    num: '08', label: "Children's Privacy",    icon: Baby,        color: '#F43F5E', bg: '#FFE1E6' },
-  { id: 'cookies',     num: '09', label: 'Cookies',               icon: Cookie,      color: '#3D8BFF', bg: '#E5EFFF' },
-  { id: 'rights',      num: '10', label: 'Your Rights',           icon: UserCheck,   color: '#34B36B', bg: '#E3F7EA' },
-  { id: 'third-party', num: '11', label: 'Third-Party Links',     icon: Link,        color: '#E8A621', bg: '#FFF3D9' },
-  { id: 'changes',     num: '12', label: 'Changes to Policy',     icon: RefreshCw,   color: '#8B5CF6', bg: '#EFE7FE' },
-  { id: 'contact',     num: '13', label: 'Contact Us',            icon: Mail,        color: '#FF4D8D', bg: '#FFE6EF' },
+const DEFAULT_PRIVACY_SECTIONS = [
+  { id: 'intro', num: '01', label: 'Our Commitment', icon: 'Shield', color: '#FF4D8D', bg: '#FFE6EF', content: 'Phulwari – Mother & Child Activity Centre is committed to protecting the privacy of every child, parent, and guardian who interacts with our services or visits our website.\nBy using our website or enrolling in our programs, you agree to the practices described in this Privacy Policy.' },
+  { id: 'collection', num: '02', label: 'Information We Collect', icon: 'Database', color: '#3D8BFF', bg: '#E5EFFF', content: 'We may collect personal information during registration, admissions, inquiries, event bookings, camp registrations, and website interactions.', bullets: ['Parent / Guardian: Full Name, Mobile Number, Email Address, Residential Address, Emergency Contact Details', 'Child: Name, Age & Date of Birth, Medical Info, Allergy Details, Special Needs', 'Additional: Payment Information, Event Bookings, Photo/Video Consent, Device Info'] },
+  { id: 'usage', num: '03', label: 'How We Use It', icon: 'FileText', color: '#34B36B', bg: '#E3F7EA', content: 'The information we collect is used to manage admissions, classes, event registrations, parent communications, and ensure safety.', bullets: ['Processing admissions and registrations', 'Managing classes and attendance', 'Birthday Party, Summer Camp & Winter Camp bookings', 'Parent communication and emergency alerts', 'Customer support and assistance', 'Ensuring child safety and well-being'] },
+  { id: 'payments', num: '04', label: 'Payment Information', icon: 'CreditCard', color: '#E8A621', bg: '#FFF3D9', content: 'Online payments may be processed through secure third-party payment providers.', notes: ['Phulwari does not store complete debit card, credit card, UPI, or banking information on its servers.', 'All payment transactions are handled through secure payment gateways.'] },
+  { id: 'sharing', num: '05', label: 'Sharing of Information', icon: 'Share2', color: '#8B5CF6', bg: '#EFE7FE', content: 'We respect your privacy and do not sell, rent, or trade personal information to third parties.', bullets: ['Authorized staff members', 'Payment processing partners', 'Emergency medical personnel (when necessary)', 'Law enforcement or government authorities when legally required'] },
+  { id: 'media', num: '06', label: 'Photography & Media', icon: 'Camera', color: '#FF8A3D', bg: '#FFEADB', content: 'Photographs and videos may be captured during Activity Classes, Birthday Celebrations, Summer Camps, Winter Camps, Competitions, and Events for promotional materials and galleries.\nParents may submit a written opt-out request before participation.' },
+  { id: 'security', num: '07', label: 'Data Security', icon: 'Lock', color: '#14B8A6', bg: '#DFF7F1', content: 'We implement reasonable administrative, technical, and physical safeguards to protect personal information against unauthorized access, disclosure, or loss.' },
+  { id: 'children', num: '08', label: "Children's Privacy", icon: 'Baby', color: '#F43F5E', bg: '#FFE1E6', content: 'Protecting children\'s privacy is paramount. Information is collected only with the knowledge and consent of parents or legal guardians.' },
+  { id: 'cookies', num: '09', label: 'Cookies', icon: 'Cookie', color: '#3D8BFF', bg: '#E5EFFF', content: 'Our website may use cookies to improve user experience, analyse website traffic, and enhance performance.\nUsers can manage or disable cookies through their browser settings.' },
+  { id: 'rights', num: '10', label: 'Your Rights', icon: 'UserCheck', color: '#34B36B', bg: '#E3F7EA', content: 'You have the right to request access, correction, or deletion of your personal records at any time.' },
+  { id: 'third-party', num: '11', label: 'Third-Party Links', icon: 'Link', color: '#E8A621', bg: '#FFF3D9', content: 'Our website may contain links to external platforms (social media, Google Maps). Users are encouraged to review the privacy policies of those third-party services.' },
+  { id: 'changes', num: '12', label: 'Changes to Policy', icon: 'RefreshCw', color: '#8B5CF6', bg: '#EFE7FE', content: 'Phulwari reserves the right to modify or update this Privacy Policy at any time.\nAny updates will be published on this page along with the revised Last Updated date.' },
+  { id: 'contact', num: '13', label: 'Contact Us', icon: 'Mail', color: '#FF4D8D', bg: '#FFE6EF', content: 'If you have any questions regarding this Privacy Policy or the handling of your personal information, please contact us.' },
 ];
 
-/* -------------------------------------------------------------------------- */
-/*  Small reusable pieces                                                     */
-/* -------------------------------------------------------------------------- */
+function ContactCard({ contactInfo }: { contactInfo?: any }) {
+  const address = contactInfo?.address || 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road, Patna, Bihar – 800001';
+  const phone = contactInfo?.phone || '+91 6207368839';
+  const email = contactInfo?.email || 'phulwari02@gmail.com';
 
-function ContactCard() {
   return (
     <div className="pp-contact-card">
       <div className="pp-contact-row">
         <MapPin size={16} />
-        <span>M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road, Patna, Bihar – 800001</span>
+        <span>{address}</span>
       </div>
       <div className="pp-contact-row">
         <Phone size={16} />
-        <a href="tel:+916207368839">+91 6207368839</a>
+        <a href={`tel:${phone.replace(/\s+/g, '')}`}>{phone}</a>
       </div>
       <div className="pp-contact-row">
         <Mail size={16} />
-        <a href="mailto:phulwari02@gmail.com">phulwari02@gmail.com</a>
+        <a href={`mailto:${email}`}>{email}</a>
       </div>
     </div>
   );
 }
 
-function PrivacySection({ id, children }: { id: string; children: React.ReactNode }) {
-  const meta = sectionsMeta.find((s) => s.id === id);
-  if (!meta) return null;
-  const Icon = meta.icon;
-  return (
-    <section id={meta.id} className="pp-section" style={{ ['--accent' as any]: meta.color }}>
-      <div className="pp-section-head">
-        <span className="pp-section-icon" style={{ backgroundColor: meta.bg }}>
-          <Icon style={{ stroke: meta.color }} />
-        </span>
-        <div>
-          <span className="pp-section-num">{meta.num}</span>
-          <h2 className="pp-section-title">{meta.label}</h2>
-        </div>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Page                                                                      */
-/* -------------------------------------------------------------------------- */
-
 export default function PrivacyPage() {
-  const [activeId, setActiveId] = useState(sectionsMeta[0].id);
+  const [pageConfig, setPageConfig] = useState<any>({
+    badge_text: 'Privacy Policy',
+    last_updated: 'June 2026',
+    title_part1: 'Your',
+    title_highlight: 'Privacy',
+    title_part2: 'Matters',
+    intro_text: 'At Phulwari – Mother & Child Activity Centre, we value the privacy and trust of every child, parent, guardian, and visitor. This policy explains how we collect, use, and protect your personal information.',
+    sections: DEFAULT_PRIVACY_SECTIONS,
+    contact_info: {
+      address: 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road, Patna, Bihar – 800001',
+      phone: '+91 6207368839',
+      email: 'phulwari02@gmail.com'
+    }
+  });
+
+  const [activeId, setActiveId] = useState<string>(DEFAULT_PRIVACY_SECTIONS[0].id);
   const [showTop, setShowTop] = useState(false);
+
+  useEffect(() => {
+    const fetchPrivacy = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('privacy_page_config')
+          .select('*')
+          .eq('id', 1)
+          .single();
+
+        if (data && !error) {
+          setPageConfig({
+            badge_text: data.badge_text || 'Privacy Policy',
+            last_updated: data.last_updated || 'June 2026',
+            title_part1: data.title_part1 || 'Your',
+            title_highlight: data.title_highlight || 'Privacy',
+            title_part2: data.title_part2 || 'Matters',
+            intro_text: data.intro_text || pageConfig.intro_text,
+            sections: data.sections && data.sections.length > 0 ? data.sections : DEFAULT_PRIVACY_SECTIONS,
+            contact_info: data.contact_info || pageConfig.contact_info
+          });
+        }
+      } catch (e) {
+        // Fallback gracefully
+      }
+    };
+
+    fetchPrivacy();
+
+    let channel: any = null;
+    try {
+      const supabase = createClient();
+      channel = supabase
+        .channel('privacy-realtime-channel')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'privacy_page_config' }, () => {
+          fetchPrivacy();
+        })
+        .subscribe();
+    } catch (e) {}
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_PRIVACY_UPDATE' && event.data?.config) {
+        setPageConfig(event.data.config);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+
+    // 3s polling fallback for instant refresh
+    const interval = setInterval(fetchPrivacy, 3000);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('message', handleMessage);
+      if (channel) {
+        try {
+          const supabase = createClient();
+          supabase.removeChannel(channel);
+        } catch (e) {}
+      }
+    };
+  }, []);
+
+  const sections = pageConfig.sections || DEFAULT_PRIVACY_SECTIONS;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -114,12 +183,12 @@ export default function PrivacyPage() {
       },
       { rootMargin: '-110px 0px -65% 0px', threshold: 0 }
     );
-    sectionsMeta.forEach((s) => {
+    sections.forEach((s: any) => {
       const el = document.getElementById(s.id);
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-  }, []);
+  }, [sections]);
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 700);
@@ -229,15 +298,12 @@ export default function PrivacyPage() {
         .pp-section-num { display: block; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 0.74rem; color: #C9C2D6; margin-bottom: 0.1rem; }
         .pp-section-title { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.2rem; color: #3F3A52; line-height: 1.25; }
 
-        .pp-section p { font-size: 0.93rem; line-height: 1.75; color: #5B5570; margin-bottom: 0.85rem; }
+        .pp-section p { font-size: 0.93rem; line-height: 1.75; color: #5B5570; margin-bottom: 0.85rem; white-space: pre-line; }
         .pp-section p:last-child { margin-bottom: 0; }
         .pp-section ul { list-style: none; margin: 0 0 0.85rem; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
         .pp-section ul:last-child { margin-bottom: 0; }
         .pp-section li { display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.9rem; line-height: 1.6; color: #5B5570; }
         .pp-section li svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 0.2rem; color: var(--accent); }
-
-        /* Sub-group label inside a section */
-        .pp-sub-label { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 0.9rem; color: #3F3A52; margin: 1rem 0 0.4rem; }
 
         .pp-note { background-color: #FFF7EC; border: 1.5px dashed #EADFC8; border-radius: 16px; padding: 1rem 1.1rem; margin: 0.25rem 0 0.85rem; }
         .pp-note:last-child { margin-bottom: 0; }
@@ -281,29 +347,26 @@ export default function PrivacyPage() {
         }
         .pp-top-btn.is-visible { opacity: 1; visibility: visible; transform: translateY(0); }
         .pp-top-btn svg { width: 19px; height: 19px; }
-        .pp-top-btn:focus-visible { outline: 3px solid #3D8BFF; outline-offset: 3px; }
       `}</style>
 
       <div className="pp-page">
         {/* Hero */}
         <header className="pp-hero">
-          <span className="pp-badge"><Shield size={13} /> Privacy Policy</span>
+          <span className="pp-badge"><Shield size={13} /> {pageConfig.badge_text || 'Privacy Policy'}</span>
           <div>
             <span className="pp-updated">
               <CalendarDays />
-              Last Updated: June 2026
+              Last Updated: {pageConfig.last_updated || 'June 2026'}
             </span>
           </div>
           <h1 className="pp-title">
-            Your <span>Privacy</span> Matters
+            {pageConfig.title_part1 || 'Your'} <span>{pageConfig.title_highlight || 'Privacy'}</span> {pageConfig.title_part2 || 'Matters'}
           </h1>
           <p className="pp-intro-text">
-            At Phulwari – Mother &amp; Child Activity Centre, we value the privacy and trust of every
-            child, parent, guardian, and visitor. This policy explains how we collect, use, and
-            protect your personal information.
+            {pageConfig.intro_text}
           </p>
           <div className="pp-quick-contact">
-            <a className="pp-quick-pill" href="tel:+916207368839">
+            <a className="pp-quick-pill" href={`tel:${pageConfig.contact_info?.phone?.replace(/\s+/g, '') || '+916207368839'}`}>
               <Phone size={15} /> Call Us
             </a>
             <a
@@ -314,7 +377,7 @@ export default function PrivacyPage() {
             >
               <MessageCircle size={15} /> WhatsApp Us
             </a>
-            <a className="pp-quick-pill" href="mailto:phulwari02@gmail.com">
+            <a className="pp-quick-pill" href={`mailto:${pageConfig.contact_info?.email || 'phulwari02@gmail.com'}`}>
               <Mail size={15} /> Email Us
             </a>
           </div>
@@ -322,8 +385,8 @@ export default function PrivacyPage() {
 
         {/* Mobile chip nav */}
         <nav className="pp-chip-nav" aria-label="Jump to section">
-          {sectionsMeta.map((s) => {
-            const Icon = s.icon;
+          {sections.map((s: any) => {
+            const Icon = ICON_MAP[s.icon] || Shield;
             const active = activeId === s.id;
             return (
               <a
@@ -331,11 +394,11 @@ export default function PrivacyPage() {
                 href={`#${s.id}`}
                 onClick={jumpTo(s.id)}
                 className={`pp-chip ${active ? 'active' : ''}`}
-                style={{ ['--accent' as any]: s.color }}
+                style={{ ['--accent' as any]: s.color || '#3D8BFF' }}
                 aria-current={active}
               >
-                <span className="pp-chip-icon" style={{ backgroundColor: s.bg }}>
-                  <Icon style={{ stroke: s.color }} />
+                <span className="pp-chip-icon" style={{ backgroundColor: s.bg || '#E5EFFF' }}>
+                  <Icon style={{ stroke: s.color || '#3D8BFF' }} />
                 </span>
                 {s.label}
               </a>
@@ -348,7 +411,7 @@ export default function PrivacyPage() {
           <aside className="pp-toc" aria-label="Table of contents">
             <p className="pp-toc-label">On this page</p>
             <div className="pp-toc-list">
-              {sectionsMeta.map((s) => {
+              {sections.map((s: any) => {
                 const active = activeId === s.id;
                 return (
                   <a
@@ -356,7 +419,7 @@ export default function PrivacyPage() {
                     href={`#${s.id}`}
                     onClick={jumpTo(s.id)}
                     className={`pp-toc-link ${active ? 'active' : ''}`}
-                    style={{ ['--accent' as any]: s.color }}
+                    style={{ ['--accent' as any]: s.color || '#3D8BFF' }}
                     aria-current={active}
                   >
                     <span className="pp-toc-num">{s.num}</span>
@@ -369,163 +432,58 @@ export default function PrivacyPage() {
 
           {/* Section content */}
           <main className="pp-content">
+            {sections.map((sec: any) => {
+              const Icon = ICON_MAP[sec.icon] || Shield;
+              return (
+                <section
+                  key={sec.id}
+                  id={sec.id}
+                  className="pp-section"
+                  style={{ ['--accent' as any]: sec.color || '#3D8BFF' }}
+                >
+                  <div className="pp-section-head">
+                    <span className="pp-section-icon" style={{ backgroundColor: sec.bg || '#E5EFFF' }}>
+                      <Icon style={{ stroke: sec.color || '#3D8BFF' }} />
+                    </span>
+                    <div>
+                      <span className="pp-section-num">{sec.num}</span>
+                      <h2 className="pp-section-title">{sec.label}</h2>
+                    </div>
+                  </div>
 
-            <PrivacySection id="intro">
-              <p>
-                Phulwari – Mother &amp; Child Activity Centre is committed to protecting the privacy of
-                every child, parent, and guardian who interacts with our services or visits our website.
-              </p>
-              <p>
-                By using our website or enrolling in our programs, you agree to the practices described
-                in this Privacy Policy.
-              </p>
-              <ContactCard />
-            </PrivacySection>
+                  {sec.content && <p>{sec.content}</p>}
 
-            <PrivacySection id="collection">
-              <p>We may collect personal information during registration, admissions, inquiries, event bookings, camp registrations, and website interactions.</p>
+                  {sec.bullets && sec.bullets.length > 0 && (
+                    <ul>
+                      {sec.bullets.map((b: string, bIdx: number) => (
+                        <li key={bIdx}>
+                          <CheckCircle2 />
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
 
-              <p className="pp-sub-label">Parent / Guardian Information</p>
-              <ul>
-                <li><CheckCircle2 /> Full Name</li>
-                <li><CheckCircle2 /> Mobile Number</li>
-                <li><CheckCircle2 /> Email Address</li>
-                <li><CheckCircle2 /> Residential Address</li>
-                <li><CheckCircle2 /> Emergency Contact Details</li>
-              </ul>
+                  {sec.notes && sec.notes.length > 0 && (
+                    <div className="pp-note">
+                      <p className="pp-note-label"><Info /> Important</p>
+                      <ul>
+                        {sec.notes.map((n: string, nIdx: number) => (
+                          <li key={nIdx}>
+                            <CheckCircle2 />
+                            <span>{n}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-              <p className="pp-sub-label">Child Information</p>
-              <ul>
-                <li><CheckCircle2 /> Child's Name</li>
-                <li><CheckCircle2 /> Age &amp; Date of Birth</li>
-                <li><CheckCircle2 /> Medical Information (voluntarily provided)</li>
-                <li><CheckCircle2 /> Allergy Information</li>
-                <li><CheckCircle2 /> Special Needs Information (if applicable)</li>
-              </ul>
-
-              <p className="pp-sub-label">Additional Information</p>
-              <ul>
-                <li><CheckCircle2 /> Payment Information</li>
-                <li><CheckCircle2 /> Event Registration Details</li>
-                <li><CheckCircle2 /> Photographs &amp; Videos (subject to consent)</li>
-                <li><CheckCircle2 /> Website Usage &amp; Device Information</li>
-              </ul>
-            </PrivacySection>
-
-            <PrivacySection id="usage">
-              <p>The information we collect may be used for:</p>
-              <ul>
-                <li><CheckCircle2 /> Processing admissions and registrations</li>
-                <li><CheckCircle2 /> Managing classes and attendance</li>
-                <li><CheckCircle2 /> Birthday Party, Summer Camp &amp; Winter Camp bookings</li>
-                <li><CheckCircle2 /> Parent communication and notifications</li>
-                <li><CheckCircle2 /> Customer support and assistance</li>
-                <li><CheckCircle2 /> Improving services and programs</li>
-                <li><CheckCircle2 /> Ensuring child safety and well-being</li>
-                <li><CheckCircle2 /> Managing events and activities</li>
-                <li><CheckCircle2 /> Sending updates, announcements, and promotional messages (with consent)</li>
-              </ul>
-            </PrivacySection>
-
-            <PrivacySection id="payments">
-              <p>Online payments may be processed through secure third-party payment providers.</p>
-              <div className="pp-note">
-                <p className="pp-note-label"><Info /> Important</p>
-                <ul>
-                  <li><CheckCircle2 /> Phulwari does not store complete debit card, credit card, UPI, or banking information on its servers.</li>
-                  <li><CheckCircle2 /> All payment transactions are handled through secure payment gateways.</li>
-                </ul>
-              </div>
-            </PrivacySection>
-
-            <PrivacySection id="sharing">
-              <p>We respect your privacy and do not sell, rent, or trade personal information to third parties.</p>
-              <p>Information may only be shared with:</p>
-              <ul>
-                <li><CheckCircle2 /> Authorized staff members</li>
-                <li><CheckCircle2 /> Payment processing partners</li>
-                <li><CheckCircle2 /> Emergency medical personnel (when necessary)</li>
-                <li><CheckCircle2 /> Government authorities when legally required</li>
-                <li><CheckCircle2 /> Law enforcement agencies as required by applicable laws</li>
-              </ul>
-            </PrivacySection>
-
-            <PrivacySection id="media">
-              <p>Photographs and videos may be captured during Activity Classes, Birthday Celebrations, Summer Camps, Winter Camps, Competitions, and Events.</p>
-              <p>These materials may be used for:</p>
-              <ul>
-                <li><CheckCircle2 /> Website galleries</li>
-                <li><CheckCircle2 /> Social media content</li>
-                <li><CheckCircle2 /> Marketing materials</li>
-                <li><CheckCircle2 /> Promotional campaigns</li>
-              </ul>
-              <p>Parents who do not wish their child to appear in photographs or videos may submit a written request before participation.</p>
-            </PrivacySection>
-
-            <PrivacySection id="security">
-              <p>
-                We implement reasonable administrative, technical, and physical safeguards to protect
-                personal information against unauthorized access, disclosure, misuse, alteration, loss,
-                or destruction.
-              </p>
-              <p>
-                While we strive to maintain strong security standards, no online system can guarantee
-                absolute security.
-              </p>
-            </PrivacySection>
-
-            <PrivacySection id="children">
-              <p>Protecting children's privacy is extremely important to us.</p>
-              <ul>
-                <li><CheckCircle2 /> Information relating to children is collected only with the knowledge and consent of parents or legal guardians.</li>
-                <li><CheckCircle2 /> We take appropriate measures to safeguard children's information and use it only for legitimate operational purposes.</li>
-              </ul>
-            </PrivacySection>
-
-            <PrivacySection id="cookies">
-              <p>Our website may use cookies and similar technologies to improve user experience, analyse website traffic, and enhance functionality.</p>
-              <div className="pp-note">
-                <p className="pp-note-label"><Info /> Please Note</p>
-                <ul>
-                  <li><CheckCircle2 /> Users can manage or disable cookies through their browser settings.</li>
-                  <li><CheckCircle2 /> Some website features may not function properly if cookies are disabled.</li>
-                </ul>
-              </div>
-            </PrivacySection>
-
-            <PrivacySection id="rights">
-              <p>You have the right to:</p>
-              <ul>
-                <li><CheckCircle2 /> Request access to your personal information</li>
-                <li><CheckCircle2 /> Request correction of inaccurate information</li>
-                <li><CheckCircle2 /> Request deletion of personal information (subject to legal obligations)</li>
-                <li><CheckCircle2 /> Withdraw consent for marketing communications</li>
-                <li><CheckCircle2 /> Request updates to personal records</li>
-              </ul>
-              <p>To exercise any of these rights, please contact us using the details below.</p>
-              <ContactCard />
-            </PrivacySection>
-
-            <PrivacySection id="third-party">
-              <p>Our website may contain links to third-party platforms including Facebook, Instagram, YouTube, Google Maps, and Payment Providers.</p>
-              <p>
-                We are not responsible for the privacy practices, policies, or content of external
-                websites. Users are encouraged to review the privacy policies of those services
-                separately.
-              </p>
-            </PrivacySection>
-
-            <PrivacySection id="changes">
-              <p>Phulwari reserves the right to modify or update this Privacy Policy at any time.</p>
-              <p>Any updates will be published on this page along with the revised "Last Updated" date.</p>
-              <p>Continued use of our services after changes are posted constitutes acceptance of the updated Privacy Policy.</p>
-            </PrivacySection>
-
-            <PrivacySection id="contact">
-              <p>If you have any questions regarding this Privacy Policy or the handling of your personal information, please contact us.</p>
-              <ContactCard />
-            </PrivacySection>
-
+                  {(sec.id === 'intro' || sec.id === 'rights' || sec.id === 'contact') && (
+                    <ContactCard contactInfo={pageConfig.contact_info} />
+                  )}
+                </section>
+              );
+            })}
           </main>
         </div>
 
@@ -541,7 +499,7 @@ export default function PrivacyPage() {
               child and family who becomes part of our community.
             </p>
             <div className="pp-thanks-actions">
-              <a className="pp-thanks-btn pp-thanks-btn--call" href="tel:+916207368839">
+              <a className="pp-thanks-btn pp-thanks-btn--call" href={`tel:${pageConfig.contact_info?.phone?.replace(/\s+/g, '') || '+916207368839'}`}>
                 <Phone /> Call Us
               </a>
               <a

@@ -284,9 +284,6 @@ export default function GalleryPage({ headingLevel = 'h1' }: { headingLevel?: 'h
           <span className="gl-badge">Gallery</span>
           <Heading className="gl-title">Moments of <span>Joy &amp; Growth</span></Heading>
           <p className="gl-sub">Explore photos from activities, celebrations and camps at Phulwari.</p>
-          <div className="mt-4 p-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-bold font-mono inline-block">
-            ⚡ LIVE SUPABASE DB SYNC: {slides.length} Photos Loaded from Database
-          </div>
         </header>
 
           {slides.length > 0 ? (
