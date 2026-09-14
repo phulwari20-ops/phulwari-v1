@@ -26,7 +26,15 @@ import {
   Sparkles,
   Star
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+
+function resolveIcon(name?: string): React.ComponentType<any> {
+  if (!name) return Shield;
+  const clean = name.trim();
+  const pascal = clean.replace(/(^|[-_ ])(\w)/g, (_, __, c) => c.toUpperCase());
+  return (LucideIcons as any)[pascal] || (LucideIcons as any)[clean] || ICON_MAP[clean] || Shield;
+}
 
 const ICON_MAP: Record<string, React.ComponentType<{ style?: React.CSSProperties; size?: number }>> = {
   Shield,
@@ -360,7 +368,20 @@ export default function PrivacyPage() {
             </span>
           </div>
           <h1 className="pp-title">
-            {pageConfig.title_part1 || 'Your'} <span>{pageConfig.title_highlight || 'Privacy'}</span> {pageConfig.title_part2 || 'Matters'}
+            {(() => {
+              const p1 = (pageConfig.title_part1 || '').trim();
+              const hl = (pageConfig.title_highlight || 'Privacy').trim();
+              const p2 = (pageConfig.title_part2 || '').trim();
+              if (!p1 && !p2) return <span>{hl}</span>;
+              if (hl.toLowerCase().includes(p1.toLowerCase()) && p1 !== '') {
+                return <span>{hl}</span>;
+              }
+              return (
+                <>
+                  {p1 ? `${p1} ` : ''}<span>{hl}</span>{p2 ? ` ${p2}` : ''}
+                </>
+              );
+            })()}
           </h1>
           <p className="pp-intro-text">
             {pageConfig.intro_text}
@@ -386,7 +407,7 @@ export default function PrivacyPage() {
         {/* Mobile chip nav */}
         <nav className="pp-chip-nav" aria-label="Jump to section">
           {sections.map((s: any) => {
-            const Icon = ICON_MAP[s.icon] || Shield;
+            const Icon = resolveIcon(s.icon);
             const active = activeId === s.id;
             return (
               <a
@@ -398,7 +419,7 @@ export default function PrivacyPage() {
                 aria-current={active}
               >
                 <span className="pp-chip-icon" style={{ backgroundColor: s.bg || '#E5EFFF' }}>
-                  <Icon style={{ stroke: s.color || '#3D8BFF' }} />
+                  <Icon style={{ stroke: s.color || '#3D8BFF', color: s.color || '#3D8BFF' }} />
                 </span>
                 {s.label}
               </a>
@@ -433,7 +454,7 @@ export default function PrivacyPage() {
           {/* Section content */}
           <main className="pp-content">
             {sections.map((sec: any) => {
-              const Icon = ICON_MAP[sec.icon] || Shield;
+              const Icon = resolveIcon(sec.icon);
               return (
                 <section
                   key={sec.id}
@@ -443,7 +464,7 @@ export default function PrivacyPage() {
                 >
                   <div className="pp-section-head">
                     <span className="pp-section-icon" style={{ backgroundColor: sec.bg || '#E5EFFF' }}>
-                      <Icon style={{ stroke: sec.color || '#3D8BFF' }} />
+                      <Icon style={{ stroke: sec.color || '#3D8BFF', color: sec.color || '#3D8BFF' }} />
                     </span>
                     <div>
                       <span className="pp-section-num">{sec.num}</span>

@@ -37,6 +37,9 @@ import {
   UserCheck,
   Star,
   Crown,
+  PersonStanding,
+  Trophy,
+  Leaf,
 } from 'lucide-react';
 
 interface SubItem {
@@ -79,13 +82,19 @@ const navItems: NavItem[] = [
     accentBg: '#E3F7EA',
     icon: Activity,
     subpages: [
-      { href: '/activities/music-dance',    label: 'Music & Dance',      icon: Music,    color: '#FF4D8D', bg: '#FFE6EF' },
-      { href: '/activities/gymnastics-mma', label: 'Gymnastics & MMA',   icon: Swords,   color: '#3D8BFF', bg: '#E5EFFF' },
-      { href: '/activities/roller-skating', label: 'Roller Skating & Karate', icon: Footprints,color: '#E8A621',bg: '#FFF3D9' },
-      { href: '/activities/art-craft',      label: 'Art & Craft',        icon: Palette,  color: '#34B36B', bg: '#E3F7EA' },
-      { href: '/activities/yoga-cricket',   label: 'Yoga & Cricket',     icon: Disc3,    color: '#8B5CF6', bg: '#EFE7FE' },
-      { href: '/activities/chess',          label: 'Chess',              icon: Crown,    color: '#6D28D9', bg: '#EDE9FE' },
-      { href: '/activities/play-zone',      label: 'Play Zone',          icon: Gamepad2, color: '#FF8A3D', bg: '#FFEADB' },
+      { href: '/activities/music-classes-patna', label: 'Music Classes', icon: Music, color: '#FF4D8D', bg: '#FFE6EF' },
+      { href: '/activities/dance-classes-patna', label: 'Dance Classes', icon: PersonStanding, color: '#8B5CF6', bg: '#EFE7FE' },
+      { href: '/activities/gymnastics-classes-for-kids-patna', label: 'Gymnastics', icon: Star, color: '#E8A621', bg: '#FFF3D9' },
+      { href: '/activities/mma-classes-patna', label: 'MMA & Self-Defense', icon: Swords, color: '#FF8A3D', bg: '#FFEADB' },
+      { href: '/activities/roller-skating', label: 'Roller Skating', icon: Footprints, color: '#3D8BFF', bg: '#E5EFFF' },
+      { href: '/activities/karate-classes-patna', label: 'Karate Training', icon: Shield, color: '#E8A621', bg: '#FFF3D9' },
+      { href: '/activities/art-craft', label: 'Art & Craft', icon: Palette, color: '#FF4D8D', bg: '#FFE6EF' },
+      { href: '/yoga-classes-patna', label: 'Yoga Classes', icon: Leaf, color: '#8B5CF6', bg: '#EFE7FE' },
+      { href: '/activities/cricket-coaching-patna', label: 'Cricket Coaching', icon: Trophy, color: '#34B36B', bg: '#E3F7EA' },
+      { href: '/activities/chess-classes-patna', label: 'Chess Coaching', icon: Crown, color: '#6D28D9', bg: '#EDE9FE' },
+      { href: '/activities/play-zone', label: 'Play Zone', icon: Gamepad2, color: '#FF8A3D', bg: '#FFEADB' },
+      { href: '/activities/mother-toddler-program', label: 'Mother & Toddler', icon: Heart, color: '#FF4D8D', bg: '#FFE6EF' },
+      { href: '/activities/mother-fitness-program', label: 'Mother Fitness', icon: Dumbbell, color: '#34B36B', bg: '#E3F7EA' },
     ],
   },
   {

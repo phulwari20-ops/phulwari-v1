@@ -25,9 +25,10 @@ import {
   ArrowUp,
   CalendarDays,
   Shield,
-  FileText,
-  Star
+  Star,
+  FileText
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const ICON_MAP: Record<string, React.ComponentType<{ style?: React.CSSProperties; size?: number }>> = {
@@ -56,6 +57,13 @@ const ICON_MAP: Record<string, React.ComponentType<{ style?: React.CSSProperties
   FileText,
   Star
 };
+
+function resolveIcon(name?: string): React.ComponentType<any> {
+  if (!name) return Sparkles;
+  const clean = name.trim();
+  const pascal = clean.replace(/(^|[-_ ])(\w)/g, (_, __, c) => c.toUpperCase());
+  return (LucideIcons as any)[pascal] || (LucideIcons as any)[clean] || ICON_MAP[clean] || Sparkles;
+}
 
 const DEFAULT_TERMS_SECTIONS = [
   { id: 'about', num: '01', label: 'About Phulwari', icon: 'Sparkles', color: '#FF4D8D', bg: '#FFE6EF', content: 'Phulwari – Mother & Child Activity Centre is dedicated to providing educational, recreational, fitness, creative, and developmental programs for children and parents.' },
@@ -363,7 +371,19 @@ export default function TermsPage() {
             </span>
           </div>
           <h1 className="tc-title">
-            {pageConfig.title_part1 || 'Terms &'} <span>{pageConfig.title_highlight || 'Conditions'}</span>
+            {(() => {
+              const p1 = (pageConfig.title_part1 || '').trim();
+              const hl = (pageConfig.title_highlight || 'Conditions').trim();
+              if (!p1) return <span>{hl}</span>;
+              if (hl.toLowerCase().startsWith(p1.toLowerCase()) || p1.toLowerCase().includes(hl.toLowerCase())) {
+                return <span>{hl}</span>;
+              }
+              return (
+                <>
+                  {p1} <span>{hl}</span>
+                </>
+              );
+            })()}
           </h1>
           <p className="tc-intro-text">
             {pageConfig.intro_text}
@@ -389,7 +409,7 @@ export default function TermsPage() {
         {/* Mobile chip nav */}
         <nav className="tc-chip-nav" aria-label="Jump to section">
           {sections.map((s: any) => {
-            const Icon = ICON_MAP[s.icon] || Sparkles;
+            const Icon = resolveIcon(s.icon);
             const active = activeId === s.id;
             return (
               <a
@@ -401,7 +421,7 @@ export default function TermsPage() {
                 aria-current={active}
               >
                 <span className="tc-chip-icon" style={{ backgroundColor: s.bg || '#FFE6EF' }}>
-                  <Icon style={{ stroke: s.color || '#FF4D8D' }} />
+                  <Icon style={{ stroke: s.color || '#FF4D8D', color: s.color || '#FF4D8D' }} />
                 </span>
                 {s.label}
               </a>
@@ -436,7 +456,7 @@ export default function TermsPage() {
           {/* Section content */}
           <main className="tc-content">
             {sections.map((sec: any) => {
-              const Icon = ICON_MAP[sec.icon] || Sparkles;
+              const Icon = resolveIcon(sec.icon);
               return (
                 <section
                   key={sec.id}
@@ -446,7 +466,7 @@ export default function TermsPage() {
                 >
                   <div className="tc-section-head">
                     <span className="tc-section-icon" style={{ backgroundColor: sec.bg || '#FFE6EF' }}>
-                      <Icon style={{ stroke: sec.color || '#FF4D8D' }} />
+                      <Icon style={{ stroke: sec.color || '#FF4D8D', color: sec.color || '#FF4D8D' }} />
                     </span>
                     <div>
                       <span className="tc-section-num">{sec.num}</span>

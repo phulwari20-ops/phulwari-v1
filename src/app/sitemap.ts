@@ -30,13 +30,6 @@ const STATIC_ROUTES: Array<{
   { path: '/mothers', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/blogs', priority: 0.8, changeFrequency: 'weekly' },
 
-  { path: '/activities/art-craft', priority: 0.7, changeFrequency: 'monthly' },
-  { path: '/activities/gymnastics-mma', priority: 0.7, changeFrequency: 'monthly' },
-  { path: '/activities/karate', priority: 0.7, changeFrequency: 'monthly' },
-  { path: '/activities/music-dance', priority: 0.7, changeFrequency: 'monthly' },
-  { path: '/activities/play-zone', priority: 0.7, changeFrequency: 'monthly' },
-  { path: '/activities/roller-skating', priority: 0.7, changeFrequency: 'monthly' },
-  { path: '/activities/yoga-cricket', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/mothers/fitness', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/mothers/toddler-program', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/events/birthday', priority: 0.7, changeFrequency: 'monthly' },
@@ -55,6 +48,33 @@ const STATIC_ROUTES: Array<{
   { path: '/legal/privacy', priority: 0.3, changeFrequency: 'yearly' },
   { path: '/legal/terms', priority: 0.3, changeFrequency: 'yearly' },
 ]
+
+/** Dynamic activity pages from Supabase */
+async function activityEntries(): Promise<Entry[]> {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('activity_pages')
+      .select('slug, updated_at')
+      .eq('is_active', true)
+
+    if (!data || data.length === 0) return []
+
+    return data
+      .filter((act) => typeof act.slug === 'string' && act.slug.trim() !== '')
+      .map((act) => {
+        const path = act.slug === 'yoga-classes-patna' ? '/yoga-classes-patna' : `/activities/${act.slug}`
+        return {
+          url: absoluteUrl(path),
+          lastModified: new Date(act.updated_at ?? Date.now()),
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+        }
+      })
+  } catch {
+    return []
+  }
+}
 
 /** Published blog posts, so new articles get discovered without a redeploy. */
 async function blogEntries(): Promise<Entry[]> {
@@ -91,5 +111,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.priority,
   }))
 
-  return [...staticEntries, ...(await blogEntries())]
+  const [activities, blogs] = await Promise.all([activityEntries(), blogEntries()])
+
+  return [...staticEntries, ...activities, ...blogs]
 }

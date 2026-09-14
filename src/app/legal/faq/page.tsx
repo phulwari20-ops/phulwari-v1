@@ -26,7 +26,15 @@ import {
   Heart,
   Star
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+
+function resolveIcon(name?: string): React.ComponentType<any> {
+  if (!name) return HelpCircle;
+  const clean = name.trim();
+  const pascal = clean.replace(/(^|[-_ ])(\w)/g, (_, __, c) => c.toUpperCase());
+  return (LucideIcons as any)[pascal] || (LucideIcons as any)[clean] || ICON_MAP[clean] || HelpCircle;
+}
 
 const ICON_MAP: Record<string, React.ElementType> = {
   HelpCircle,
@@ -366,7 +374,17 @@ export default function FAQPage() {
         <section className="faq-intro">
           <span className="faq-intro-badge">{pageConfig.badge_text || 'FAQ'}</span>
           <h1 className="faq-intro-title">
-            {pageConfig.hero_title} <span>{pageConfig.hero_highlight}</span>
+            {(() => {
+              const t = (pageConfig.hero_title || '').trim();
+              const hl = (pageConfig.hero_highlight || 'Common Questions').trim();
+              if (!t) return <span>{hl}</span>;
+              if (hl.toLowerCase().includes(t.toLowerCase())) return <span>{hl}</span>;
+              return (
+                <>
+                  {t} <span>{hl}</span>
+                </>
+              );
+            })()}
           </h1>
           <p className="faq-intro-text">
             {pageConfig.hero_subtitle}
@@ -376,7 +394,7 @@ export default function FAQPage() {
         {/* Accordion */}
         <div className="faq-list-wrap">
           {currentFaqs.map((faq: any, i: number) => {
-            const Icon = ICON_MAP[faq.icon] || HelpCircle;
+            const Icon = resolveIcon(faq.icon);
             const isOpen = openIndex === i;
             return (
               <div className={`faq-item ${isOpen ? 'open' : ''}`} key={faq.id || i}>
@@ -387,7 +405,7 @@ export default function FAQPage() {
                   aria-expanded={isOpen}
                 >
                   <span className="faq-q-icon" style={{ backgroundColor: faq.bg || '#FFE6EF' }}>
-                    <Icon style={{ color: faq.color || '#FF4D8D' }} />
+                    <Icon style={{ color: faq.color || '#FF4D8D', stroke: faq.color || '#FF4D8D' }} />
                   </span>
                   <span className="faq-question-text">{faq.question}</span>
                   <ChevronDown className="faq-chevron" />

@@ -1,192 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { JsonLd } from '@/lib/seo/JsonLd';
 import { breadcrumbSchema, webPageSchema } from '@/lib/seo/schema';
 import {
-  Music,
-  PersonStanding,
-  Dumbbell,
-  Shield,
-  Zap,
-  Palette,
-  Trophy,
-  Leaf,
-  Smile,
-  Heart,
-  Star,
   ChevronDown,
   ChevronUp,
   ArrowRight,
   Sparkles,
   Ribbon,
-  Rainbow,
+  Star,
   PartyPopper,
   Flower2,
   Medal,
   Drama,
-  Crown,
+  Heart,
+  Shield,
+  Trophy,
+  Palette,
+  Leaf,
+  Smile,
 } from 'lucide-react';
-
-const activities = [
-  {
-    icon: Music,
-    title: 'Music Classes',
-    tagline: 'Discover the Joy of Music',
-    description: 'Music helps children express themselves, improve concentration and develop creativity.',
-    benefits: ['Improves Memory & Focus', 'Enhances Creativity', 'Develops Listening Skills', 'Boosts Self-Confidence'],
-    ageLabel: '3+ Years',
-    category: 'Arts',
-    href: '/activities/music-dance',
-    color: '#FF4D8D',
-    bg: '#FFE6EF',
-  },
-  {
-    icon: PersonStanding,
-    title: 'Dance Classes',
-    tagline: 'Move, Learn & Shine',
-    description: 'Our dance classes encourage self-expression, confidence and physical fitness through fun and energetic routines.',
-    benefits: ['Improves Coordination', 'Builds Confidence', 'Enhances Flexibility', 'Encourages Creativity'],
-    ageLabel: '3+ Years',
-    category: 'Arts',
-    href: '/activities/music-dance',
-    color: '#8B5CF6',
-    bg: '#EFE7FE',
-  },
-  {
-    icon: Star,
-    title: 'Gymnastics',
-    tagline: 'Strength, Balance & Flexibility',
-    description: 'Gymnastics helps children improve physical fitness while developing discipline and body control.',
-    benefits: ['Better Balance', 'Improved Strength', 'Enhanced Flexibility', 'Increased Confidence'],
-    ageLabel: '3+ Years',
-    category: 'Sports',
-    href: '/activities/gymnastics-mma',
-    color: '#E8A621',
-    bg: '#FFF3D9',
-  },
-  {
-    icon: Shield,
-    title: 'MMA Training',
-    tagline: 'Learn Self-Defense & Discipline',
-    description: 'MMA training teaches children discipline, focus and self-defense techniques in a safe environment.',
-    benefits: ['Self-Defense Skills', 'Physical Fitness', 'Mental Discipline', 'Improved Concentration'],
-    ageLabel: '5+ Years',
-    category: 'Sports',
-    href: '/activities/gymnastics-mma',
-    color: '#FF8A3D',
-    bg: '#FFEADB',
-  },
-  {
-    icon: Zap,
-    title: 'Roller Skating & Karate',
-    tagline: 'Fun on Wheels & Martial Arts',
-    description: 'Develop balance on wheels and physical strength, self-defence skills, and discipline with our dual skating and Karate programs.',
-    benefits: ['Improves Balance', 'Enhances Coordination', 'Builds Confidence', 'Encourages Active Lifestyle'],
-    ageLabel: '4+ Years',
-    category: 'Sports',
-    href: '/activities/roller-skating',
-    color: '#3D8BFF',
-    bg: '#E5EFFF',
-  },
-  {
-    icon: Palette,
-    title: 'Art & Craft',
-    tagline: 'Unleash Creativity',
-    description: 'Creative activities help children explore their imagination and express their ideas freely.',
-    benefits: ['Boosts Creativity', 'Improves Fine Motor Skills', 'Enhances Focus', 'Encourages Self-Expression'],
-    ageLabel: '3+ Years',
-    category: 'Arts',
-    href: '/activities/art-craft',
-    color: '#FF4D8D',
-    bg: '#FFE6EF',
-  },
-  {
-    icon: Trophy,
-    title: 'Cricket Training',
-    tagline: 'Learn Teamwork Through Sports',
-    description: 'Cricket helps children develop sportsmanship, discipline and teamwork while staying physically active.',
-    benefits: ['Team Building Skills', 'Physical Fitness', 'Better Coordination', 'Improved Discipline'],
-    ageLabel: '5+ Years',
-    category: 'Sports',
-    href: '/activities/yoga-cricket',
-    color: '#34B36B',
-    bg: '#E3F7EA',
-  },
-  {
-    icon: Leaf,
-    title: 'Yoga',
-    tagline: 'Healthy Body, Calm Mind',
-    description: 'Yoga helps children develop flexibility, concentration and emotional balance.',
-    benefits: ['Better Focus', 'Improved Flexibility', 'Stress Management', 'Overall Wellness'],
-    ageLabel: '4+ Years',
-    category: 'Wellness',
-    href: '/activities/yoga-cricket',
-    color: '#8B5CF6',
-    bg: '#EFE7FE',
-  },
-  {
-    icon: Smile,
-    title: 'Play Zone',
-    tagline: 'Learn Through Play',
-    description: 'A safe and exciting indoor play area where children can explore, socialize and have fun.',
-    benefits: ['Social Development', 'Physical Activity', 'Creative Play', 'Confidence Building'],
-    ageLabel: '9+ Months',
-    category: 'Play',
-    href: '/activities/play-zone',
-    color: '#E8A621',
-    bg: '#FFF3D9',
-  },
-  {
-    icon: Heart,
-    title: 'Mother Toddler Program',
-    tagline: 'Bond, Learn & Grow Together',
-    description: 'Specially designed activities for mothers and toddlers that promote learning, interaction and emotional bonding.',
-    benefits: ['Parent-Child Bonding', 'Early Learning Development', 'Social Interaction', 'Fun Learning Experiences'],
-    ageLabel: '1.5 – 4 Years',
-    category: 'Play',
-    href: '/activities/play-zone',
-    color: '#FF4D8D',
-    bg: '#FFE6EF',
-  },
-  {
-    icon: Shield,
-    title: 'Karate Training',
-    tagline: 'Build Strength, Discipline & Confidence',
-    description: 'Karate helps children develop self-defence skills, discipline, focus and confidence.',
-    benefits: ['Self-Defence Skills', 'Strength & Fitness', 'Focus & Discipline', 'Confidence & Coordination', 'Respect & Teamwork'],
-    ageLabel: 'All Ages',
-    category: 'Sports',
-    href: '/activities/karate',
-    color: '#E8A621',
-    bg: '#FFF3D9',
-  },
-  {
-    icon: Dumbbell,
-    title: 'Fitness for Mothers',
-    tagline: 'Stay Active, Healthy & Energetic',
-    description: 'A dedicated fitness program designed specifically for mothers to focus on their health and well-being.',
-    benefits: ['Improved Fitness', 'Better Energy Levels', 'Stress Relief', 'Healthy Lifestyle', 'Community Engagement'],
-    ageLabel: 'All Mothers',
-    category: 'Wellness',
-    href: '/activities/play-zone',
-    color: '#34B36B',
-    bg: '#E3F7EA',
-  },
-  {
-    icon: Crown,
-    title: 'Chess',
-    tagline: 'Think, Plan & Win',
-    description: 'A structured chess programme that builds focus, patience and strategic thinking — from first moves to tournament play.',
-    benefits: ['Sharpens Focus & Memory', 'Strategic Thinking', 'Patience & Calm', 'Problem-Solving Skills'],
-    ageLabel: '5+ Years',
-    category: 'Sports',
-    href: '/activities/chess',
-    color: '#6D28D9',
-    bg: '#EDE9FE',
-  },
-];
+import { createClient } from '@/lib/supabase/client';
+import { ActivityPageData, DEFAULT_ACTIVITIES } from '@/lib/activitiesFallback';
+import { resolveLucideIcon } from '@/lib/icons';
+import DynamicBanners from '@/components/DynamicBanners';
 
 const filters = ['All', 'Arts', 'Sports', 'Wellness', 'Play'];
 
@@ -198,7 +37,7 @@ const filterIcons: Record<string, React.ElementType> = {
   Play: Smile,
 };
 
-const floatingIcons: { icon: React.ElementType; color: string; size: number }[] = [
+const floatingIcons = [
   { icon: Sparkles,   color: '#FF4D8D', size: 22 },
   { icon: Ribbon,     color: '#8B5CF6', size: 18 },
   { icon: Star,       color: '#E8A621', size: 20 },
@@ -210,19 +49,11 @@ const floatingIcons: { icon: React.ElementType; color: string; size: number }[] 
 ];
 
 const stats = [
-  { num: '11+', label: 'Activities',      color: '#FF4D8D', icon: Sparkles },
+  { num: '13+', label: 'Dynamic Programs', color: '#FF4D8D', icon: Sparkles },
   { num: '1.5+', label: 'Age Start (yrs)', color: '#3D8BFF', icon: Star },
-  { num: '100%', label: 'Safe & Fun',      color: '#34B36B', icon: Shield },
+  { num: '100%', label: 'Safe & Verified',  color: '#34B36B', icon: Shield },
   { num: '5★',   label: 'Expert Trainers', color: '#E8A621', icon: Trophy },
 ];
-
-/**
- * These sections are used two ways: as their own route (where the section
- * heading is the page's single <h1>) and composed into the homepage (where the
- * hero already owns the <h1>, so they must step down to <h2>).
- * `headingLevel` lets the homepage demote them and keeps exactly one <h1> per
- * page, which is what both the accessibility tree and Google expect.
- */
 
 const SEO_PATH = '/activities';
 const SEO_BREADCRUMB = [
@@ -230,38 +61,65 @@ const SEO_BREADCRUMB = [
   { name: 'Activities', path: '/activities' },
 ];
 
-import DynamicBanners from '@/components/DynamicBanners';
+function getCategoryForActivity(slug: string): string {
+  const s = slug.toLowerCase();
+  if (s.includes('music') || s.includes('dance') || s.includes('art')) return 'Arts';
+  if (s.includes('gymnastics') || s.includes('mma') || s.includes('skating') || s.includes('karate') || s.includes('cricket') || s.includes('chess')) return 'Sports';
+  if (s.includes('yoga') || s.includes('fitness')) return 'Wellness';
+  return 'Play';
+}
 
 export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
   const Heading = headingLevel;
-  // Composed into the homepage as an <h2> section; only the standalone
-  // route should emit this page's structured data.
   const isStandalone = headingLevel === 'h1';
   const [activeFilter, setActiveFilter] = useState('All');
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [activitiesList, setActivitiesList] = useState<ActivityPageData[]>(DEFAULT_ACTIVITIES);
+
+  useEffect(() => {
+    async function loadActivities() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('activity_pages')
+          .select('*')
+          .eq('is_active', true)
+          .order('order_index', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+          setActivitiesList(data as ActivityPageData[]);
+        }
+      } catch (err) {
+        console.error('Error fetching activities:', err);
+      }
+    }
+    loadActivities();
+  }, []);
 
   const filtered = activeFilter === 'All'
-    ? activities
-    : activities.filter(a => a.category === activeFilter);
+    ? activitiesList
+    : activitiesList.filter(a => getCategoryForActivity(a.slug) === activeFilter);
 
   return (
     <>
       {isStandalone && <DynamicBanners position="Sidebar" className="my-4 max-w-5xl mx-auto px-4" />}
-      {isStandalone && <JsonLd
-        id="activities-schema"
-        nodes={[
-          webPageSchema({
-            path: SEO_PATH,
-            name: 'Kids Activities & Classes in Patna',
-            description:
-              'Every activity Phulwari runs in Patna — music, dance, gymnastics, MMA, roller skating, karate, art & craft, yoga, cricket and an indoor play zone.',
-            type: 'CollectionPage',
-            breadcrumb: SEO_BREADCRUMB,
-          }),
-          breadcrumbSchema(SEO_PATH, SEO_BREADCRUMB),
-        ]}
-      />}
-    <>
+      {isStandalone && (
+        <JsonLd
+          id="activities-schema"
+          nodes={[
+            webPageSchema({
+              path: SEO_PATH,
+              name: 'Kids Activities & Classes in Patna',
+              description:
+                'Every activity Phulwari runs in Patna — music, dance, gymnastics, MMA, roller skating, karate, art & craft, yoga, cricket, chess, play zone, and mother wellness.',
+              type: 'CollectionPage',
+              breadcrumb: SEO_BREADCRUMB,
+            }),
+            breadcrumbSchema(SEO_PATH, SEO_BREADCRUMB),
+          ]}
+        />
+      )}
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
@@ -270,7 +128,7 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
           50%       { transform: translateY(-18px) rotate(12deg); opacity: 0.9; }
         }
         @keyframes popIn {
-          0%   { transform: scale(0.88) translateY(10px); opacity: 0; }
+          0%   { transform: scale(0.92) translateY(10px); opacity: 0; }
           100% { transform: scale(1) translateY(0); opacity: 1; }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -279,7 +137,6 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
 
         .act-page { width: 100%; background-color: #ffffff; }
 
-        /* Hero */
         .act-hero {
           position: relative;
           background-color: #FFF7EC;
@@ -302,19 +159,18 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
           background-color: #FFE6EF;
           border-radius: 9999px;
           font-family: 'Quicksand', sans-serif;
-          font-size: 0.72rem;
+          font-size: 0.75rem;
           font-weight: 700;
           color: #FF4D8D;
           letter-spacing: 0.06em;
           text-transform: uppercase;
-          transform: rotate(-1.5deg);
         }
         .act-hero-title {
           font-family: 'Baloo 2', sans-serif;
           font-weight: 800;
           font-size: 2.5rem;
           color: #3F3A52;
-          line-height: 1.1;
+          line-height: 1.15;
           margin-bottom: 1rem;
         }
         .act-hero-title span { color: #FF4D8D; }
@@ -323,20 +179,19 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
           font-weight: 600;
           font-size: 1.05rem;
           color: #6B6480;
-          max-width: 40rem;
+          max-width: 42rem;
           margin: 0 auto 2rem;
           line-height: 1.7;
         }
 
-        /* Stats */
         .act-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; }
         .act-stat {
           background: #ffffff;
           border-radius: 16px;
           padding: 0.75rem 1.5rem;
-          box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+          box-shadow: 0 4px 14px rgba(0,0,0,0.06);
           text-align: center;
-          min-width: 90px;
+          min-width: 100px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -361,7 +216,6 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
           color: #6B6480;
         }
 
-        /* Filters */
         .act-filters {
           display: flex;
           flex-wrap: wrap;
@@ -392,23 +246,20 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
           transform: translateY(-2px);
           box-shadow: 0 4px 14px rgba(255,77,141,0.3);
         }
-        .act-filter-btn.active svg { stroke: #ffffff; }
 
-        /* Body + Grid */
         .act-body { padding: 2rem 1.25rem 5rem; }
         .act-grid {
-          max-width: 72rem;
+          max-width: 76rem;
           margin: 0 auto;
           display: grid;
           grid-template-columns: 1fr;
-          gap: 1.25rem;
+          gap: 1.5rem;
         }
 
-        /* Card */
         .act-card {
           background-color: #FFF7EC;
           border-radius: 24px;
-          padding: 1.5rem;
+          padding: 1.75rem;
           display: flex;
           flex-direction: column;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -417,7 +268,7 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
         }
         .act-card:hover {
           transform: translateY(-6px);
-          box-shadow: 0 14px 36px rgba(0,0,0,0.09);
+          box-shadow: 0 16px 36px rgba(0,0,0,0.08);
         }
         .act-card-top {
           display: flex;
@@ -434,49 +285,43 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
         }
         .act-category-tag {
           font-family: 'Quicksand', sans-serif;
-          font-size: 0.65rem;
+          font-size: 0.7rem;
           font-weight: 700;
-          padding: 0.2rem 0.65rem;
-          border-radius: 6px;
+          padding: 0.25rem 0.75rem;
+          border-radius: 8px;
           background: rgba(0,0,0,0.06);
           color: #6B6480;
         }
         .act-age-pill {
           font-family: 'Quicksand', sans-serif;
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           font-weight: 700;
           padding: 0.3rem 0.85rem;
           border-radius: 9999px;
           white-space: nowrap;
         }
 
-        .act-card-icon-large {
-          width: 40px; height: 40px;
-          border-radius: 14px;
-          display: flex; align-items: center; justify-content: center;
-          margin-bottom: 0.75rem;
-        }
-
         .act-title {
           font-family: 'Baloo 2', sans-serif;
           font-weight: 700;
-          font-size: 1.1rem;
+          font-size: 1.25rem;
           color: #3F3A52;
-          margin-bottom: 0.2rem;
+          margin-bottom: 0.25rem;
         }
         .act-tagline {
           font-family: 'Quicksand', sans-serif;
           font-weight: 700;
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           margin-bottom: 0.6rem;
+          line-height: 1.3;
         }
         .act-desc {
           font-family: 'Quicksand', sans-serif;
           font-weight: 600;
-          font-size: 0.9rem;
+          font-size: 0.92rem;
           line-height: 1.55;
           color: #6B6480;
-          margin-bottom: 0.75rem;
+          margin-bottom: 1rem;
           flex: 1;
         }
         .act-toggle {
@@ -494,7 +339,7 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
         }
         .act-benefits {
           list-style: none;
-          padding: 0; margin: 0 0 1rem;
+          padding: 0; margin: 0 0 1.2rem;
           display: flex; flex-direction: column; gap: 0.4rem;
         }
         .act-benefit {
@@ -511,11 +356,11 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 0.6rem 1.15rem;
+          padding: 0.65rem 1.35rem;
           border-radius: 9999px;
           font-family: 'Quicksand', sans-serif;
           font-weight: 700;
-          font-size: 0.82rem;
+          font-size: 0.85rem;
           color: #ffffff;
           text-decoration: none;
           margin-top: auto;
@@ -523,7 +368,6 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
           transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
         .act-cta:hover { transform: translateX(4px); box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
-        .act-cta svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 2.5; }
 
         @media (min-width: 640px) {
           .act-hero-title { font-size: 3rem; }
@@ -537,7 +381,6 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
       `}</style>
 
       <div className="act-page">
-
         {/* Hero */}
         <div className="act-hero">
           {floatingIcons.map((item, i) => {
@@ -562,14 +405,14 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
 
           <div className="act-hero-badge">
             <Sparkles style={{ width: 13, height: 13, stroke: '#FF4D8D', strokeWidth: 2.5 }} />
-            Activities & Programs
+            Dynamic Activities & Programs
           </div>
           <Heading className="act-hero-title">
             Where Kids <span>Learn, Play</span><br />& Grow Every Day
           </Heading>
           <p className="act-hero-sub">
-            11 carefully designed activities to support every child's physical, mental,
-            emotional and social development — while mothers stay active and supported too.
+            {activitiesList.length} specialized programs to support every child&apos;s physical, mental,
+            emotional and social development — plus dedicated mother wellness at Kidwaipuri, Patna.
           </p>
 
           <div className="act-stats">
@@ -609,72 +452,85 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
         <div className="act-body">
           <div className="act-grid">
             {filtered.map((activity, index) => {
-              const Icon = activity.icon;
+              const Icon = resolveLucideIcon(activity.icon);
               const isExpanded = expanded === index;
+              const category = getCategoryForActivity(activity.slug);
+              const ageLabel = activity.programs?.[0]?.age_bracket || 'All Ages';
+              const targetHref = activity.slug === 'yoga-classes-patna'
+                ? '/yoga-classes-patna'
+                : `/activities/${activity.slug}`;
+
               return (
                 <div
-                  key={index}
+                  key={activity.id || index}
                   className="act-card"
                   style={{
-                    animationDelay: `${index * 0.06}s`,
+                    animationDelay: `${index * 0.05}s`,
                     borderColor: isExpanded ? activity.color + '55' : 'transparent',
                   }}
                 >
                   <div className="act-card-top">
                     <div className="act-card-left">
-                      <div className="act-icon-wrap" style={{ backgroundColor: activity.bg }}>
-                        <Icon style={{ stroke: activity.color, width: 24, height: 24, strokeWidth: 2.25 }} />
+                      <div className="act-icon-wrap" style={{ backgroundColor: activity.bg || '#FFF' }}>
+                        <Icon style={{ stroke: activity.color, width: 24, height: 24 }} />
                       </div>
-                      <span className="act-category-tag">{activity.category}</span>
+                      <span className="act-category-tag">{category}</span>
                     </div>
-                    <div className="act-age-pill" style={{ backgroundColor: activity.bg, color: activity.color }}>
-                      {activity.ageLabel}
+                    <div className="act-age-pill" style={{ backgroundColor: activity.bg || '#FFE6EF', color: activity.color }}>
+                      {ageLabel}
                     </div>
                   </div>
 
-              
+                  <h3 className="act-title">{activity.badge_text || activity.h1}</h3>
+                  <p className="act-tagline" style={{ color: activity.color }}>
+                    {activity.h1.length > 60 ? activity.h1.slice(0, 57) + '...' : activity.h1}
+                  </p>
+                  <p className="act-desc">
+                    {activity.intro_p1.length > 130
+                      ? activity.intro_p1.slice(0, 127) + '...'
+                      : activity.intro_p1}
+                  </p>
 
-                  <h3 className="act-title">{activity.title}</h3>
-                  <p className="act-tagline" style={{ color: activity.color }}>{activity.tagline}</p>
-                  <p className="act-desc">{activity.description}</p>
+                  {activity.benefits && activity.benefits.length > 0 && (
+                    <>
+                      <button
+                        className="act-toggle"
+                        onClick={() => setExpanded(isExpanded ? null : index)}
+                        style={{ color: activity.color }}
+                      >
+                        {isExpanded ? 'Hide benefits' : 'See benefits'}
+                        {isExpanded
+                          ? <ChevronUp style={{ width: 14, height: 14, strokeWidth: 2.5 }} />
+                          : <ChevronDown style={{ width: 14, height: 14, strokeWidth: 2.5 }} />}
+                      </button>
 
-                  <button
-                    className="act-toggle"
-                    onClick={() => setExpanded(isExpanded ? null : index)}
-                    style={{ color: activity.color }}
-                  >
-                    {isExpanded ? 'Hide benefits' : 'See benefits'}
-                    {isExpanded
-                      ? <ChevronUp style={{ width: 14, height: 14, strokeWidth: 2.5 }} />
-                      : <ChevronDown style={{ width: 14, height: 14, strokeWidth: 2.5 }} />}
-                  </button>
-
-                  {isExpanded && (
-                    <ul className="act-benefits">
-                      {activity.benefits.map((b, bi) => (
-                        <li key={bi} className="act-benefit">
-                          <span className="act-benefit-dot" style={{ backgroundColor: activity.color }} />
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
+                      {isExpanded && (
+                        <ul className="act-benefits">
+                          {activity.benefits.map((b, bi) => (
+                            <li key={bi} className="act-benefit">
+                              <span className="act-benefit-dot" style={{ backgroundColor: activity.color }} />
+                              {b.title}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
                   )}
 
                   <Link
-                    href={activity.href}
+                    href={targetHref}
                     className="act-cta"
                     style={{ backgroundColor: activity.color }}
                   >
-                    Learn More <ArrowRight />
+                    <span>Explore Program</span>
+                    <ArrowRight className="w-4 h-4 ml-1" />
                   </Link>
                 </div>
               );
             })}
           </div>
         </div>
-
       </div>
-    </>
     </>
   );
 }
