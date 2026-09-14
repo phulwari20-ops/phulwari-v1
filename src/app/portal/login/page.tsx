@@ -20,7 +20,7 @@ export default function StudentLoginPage() {
       if (savedSt) {
         const parsed = JSON.parse(savedSt)
         if (parsed && (parsed.id || parsed.admission_id)) {
-          router.replace('/portal/dashboard')
+          setTimeout(() => router.replace('/portal/dashboard'), 0)
         }
       }
     } catch (e) {}
@@ -99,7 +99,7 @@ export default function StudentLoginPage() {
       }
 
       localStorage.setItem('phulwari_student', JSON.stringify(matchedStudent))
-      router.push('/portal/dashboard')
+      setTimeout(() => router.push('/portal/dashboard'), 0)
     } catch (err: any) {
       setError(err?.message || 'Login failed. Please try again.')
     } finally {

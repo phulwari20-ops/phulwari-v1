@@ -41,7 +41,7 @@ export default function StudentDashboardPage() {
     const checkAuth = () => {
       const sessionStr = localStorage.getItem('phulwari_student')
       if (!sessionStr) {
-        router.replace('/portal/login')
+        setTimeout(() => router.replace('/portal/login'), 0)
         return
       }
 
@@ -49,14 +49,14 @@ export default function StudentDashboardPage() {
         const studentData = JSON.parse(sessionStr)
         if (!studentData || (!studentData.id && !studentData.admission_id)) {
           localStorage.removeItem('phulwari_student')
-          router.replace('/portal/login')
+          setTimeout(() => router.replace('/portal/login'), 0)
           return
         }
         setStudent(studentData)
         fetchDashboardData(studentData)
       } catch {
         localStorage.removeItem('phulwari_student')
-        router.replace('/portal/login')
+        setTimeout(() => router.replace('/portal/login'), 0)
       }
     }
 
@@ -421,7 +421,7 @@ export default function StudentDashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem('phulwari_student')
     try { sessionStorage.clear() } catch (e) {}
-    router.replace('/portal/login')
+    setTimeout(() => router.replace('/portal/login'), 0)
   }
 
   if (loading || !student) {
