@@ -56,11 +56,13 @@ export interface ActivityPageData {
   testimonials: Array<{ quote: string; author: string; locality: string }>;
   faqs: ActivityFaq[];
   schema_json: any;
+  content_color?: string;
   cta?: {
     phone: string;
     whatsapp: string;
     address: string;
     button_text: string;
+    content_color?: string;
   };
   order_index: number;
   is_active: boolean;

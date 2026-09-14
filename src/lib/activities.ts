@@ -26,8 +26,13 @@ export async function getActivityBySlug(slug: string): Promise<ActivityPageData 
       .eq('slug', cleanSlug)
       .maybeSingle();
 
+    const formatActivity = (item: any): ActivityPageData => ({
+      ...item,
+      content_color: item.content_color || item.cta?.content_color || undefined,
+    });
+
     if (!directErr && directMatch) {
-      return directMatch as ActivityPageData;
+      return formatActivity(directMatch);
     }
 
     // 2. Alias match (if slug changed or compound URL used)
@@ -44,7 +49,7 @@ export async function getActivityBySlug(slug: string): Promise<ActivityPageData 
         }
         return false;
       });
-      if (aliasMatch) return aliasMatch as ActivityPageData;
+      if (aliasMatch) return formatActivity(aliasMatch);
     }
   } catch (err) {
     console.error('Error fetching activity from Supabase:', err);
@@ -73,7 +78,10 @@ export async function getAllActivities(): Promise<ActivityPageData[]> {
       .order('order_index', { ascending: true });
 
     if (!error && data && data.length > 0) {
-      return data as ActivityPageData[];
+      return data.map((item: any) => ({
+        ...item,
+        content_color: item.content_color || item.cta?.content_color || undefined,
+      })) as ActivityPageData[];
     }
   } catch (err) {
     console.error('Error fetching all activities from Supabase:', err);

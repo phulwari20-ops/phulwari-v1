@@ -33,7 +33,12 @@ function resolveIcon(name?: string): React.ComponentType<any> {
   if (!name) return HelpCircle;
   const clean = name.trim();
   const pascal = clean.replace(/(^|[-_ ])(\w)/g, (_, __, c) => c.toUpperCase());
-  return (LucideIcons as any)[pascal] || (LucideIcons as any)[clean] || ICON_MAP[clean] || HelpCircle;
+  if ((LucideIcons as any)[pascal]) return (LucideIcons as any)[pascal];
+  if ((LucideIcons as any)[clean]) return (LucideIcons as any)[clean];
+  const lower = clean.toLowerCase().replace(/[-_ ]/g, '');
+  const foundKey = Object.keys(LucideIcons).find(k => k.toLowerCase() === lower);
+  if (foundKey) return (LucideIcons as any)[foundKey];
+  return ((ICON_MAP as any)[clean] || HelpCircle) as React.ComponentType<any>;
 }
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -218,10 +223,12 @@ export default function FAQPage() {
           .single();
 
         if (data && !error) {
+          const highlightColor = data.cta_section?.hero_highlight_color || data.hero_highlight_color || '#FF4D8D';
           setPageConfig({
             badge_text: data.badge_text || 'FAQ',
             hero_title: data.hero_title || 'Find Answers to',
             hero_highlight: data.hero_highlight || 'Common Questions',
+            hero_highlight_color: highlightColor,
             hero_subtitle: data.hero_subtitle || 'We understand parents may have questions before enrolling their child or joining our programs — here are answers to the most frequently asked ones.',
             faqs: data.faqs && data.faqs.length > 0 ? data.faqs : DEFAULT_FAQS
           });
@@ -377,11 +384,12 @@ export default function FAQPage() {
             {(() => {
               const t = (pageConfig.hero_title || '').trim();
               const hl = (pageConfig.hero_highlight || 'Common Questions').trim();
-              if (!t) return <span>{hl}</span>;
-              if (hl.toLowerCase().includes(t.toLowerCase())) return <span>{hl}</span>;
+              const hlColor = pageConfig.hero_highlight_color || pageConfig.cta_section?.hero_highlight_color || '#FF4D8D';
+              if (!t) return <span style={{ color: hlColor }}>{hl}</span>;
+              if (hl.toLowerCase() === t.toLowerCase()) return <span style={{ color: hlColor }}>{hl}</span>;
               return (
                 <>
-                  {t} <span>{hl}</span>
+                  {t} <span style={{ color: hlColor }}>{hl}</span>
                 </>
               );
             })()}

@@ -455,6 +455,17 @@ export default function StudentDashboardPage() {
     return st === 'present' || st === 'late' || st === 'p' || st === 'halfday' || st === 'hd'
   }).length
 
+  const absentCount = validSessions.filter((a: any) => {
+    const st = String(a.status || '').toLowerCase()
+    return st === 'absent' || st === 'a'
+  }).length
+
+  // Both present and absent sessions count towards consumed classes
+  const consumedFromAttendance = presentCount + absentCount
+  const totalClasses = Number(student.classes_total || 12)
+  const consumedClasses = Math.max(Number(student.classes_consumed || 0), consumedFromAttendance)
+  const remainingClasses = Math.max(0, totalClasses - consumedClasses)
+
   const hasAttendanceRecords = validSessions.length > 0
   const calculatedAttendanceRate = hasAttendanceRecords 
     ? Math.round((presentCount / validSessions.length) * 100) 
@@ -576,14 +587,19 @@ export default function StudentDashboardPage() {
 
           <div style={{ background: '#ffffff', border: '1px solid #FFE4E6', borderRadius: '24px', padding: '1.25rem 1.5rem', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#64748B', marginBottom: '4px' }}>
-              <span>Attendance Rate</span>
-              <Calendar size={18} color={hasAttendanceRecords ? "#10B981" : "#64748B"} />
+              <span>Classes Left & Attendance</span>
+              <Calendar size={18} color={remainingClasses <= 3 ? "#EF4444" : "#10B981"} />
             </div>
-            <p style={{ fontSize: '24px', fontWeight: 900, color: hasAttendanceRecords ? '#10B981' : '#64748B', margin: 0 }}>
-              {hasAttendanceRecords ? `${calculatedAttendanceRate}%` : 'N/A'}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+              <p style={{ fontSize: '24px', fontWeight: 900, color: remainingClasses <= 3 ? '#EF4444' : '#10B981', margin: 0 }}>
+                {remainingClasses}
+              </p>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>
+                / {totalClasses} Left ({calculatedAttendanceRate}% Present)
+              </span>
+            </div>
             <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>
-              {hasAttendanceRecords ? `${presentCount} of ${validSessions.length} sessions attended` : 'No attendance marked yet'}
+              {consumedClasses} classes consumed ({presentCount} present{absentCount > 0 ? `, ${absentCount} absent` : ''})
             </p>
           </div>
 
@@ -716,6 +732,7 @@ export default function StudentDashboardPage() {
                   <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Programs Active:</strong> {student.program_interested || 'General Activity'}</p>
                   <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Time Slot:</strong> {student.preferred_time_slot || 'Morning'}</p>
                   <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>End Date:</strong> {student.validity_end_date || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Classes Status:</strong> <span style={{ fontWeight: 800, color: remainingClasses <= 3 ? '#EF4444' : '#16A34A' }}>{remainingClasses} Remaining</span> of {totalClasses} ({consumedClasses} consumed)</p>
                 </div>
               </div>
 

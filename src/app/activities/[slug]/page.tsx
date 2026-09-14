@@ -99,6 +99,7 @@ export default async function ActivityDynamicPage({ params }: PageProps) {
 
   const color = activity.color || '#FF4D8D';
   const bg = activity.bg || '#FFE6EF';
+  const contentColor = activity.content_color;
   const ctaPhone = activity.cta?.phone || '+91 62073 68839';
   const ctaWhatsapp = activity.cta?.whatsapp || '+916207368839';
   const ctaAddress =
@@ -176,7 +177,10 @@ export default async function ActivityDynamicPage({ params }: PageProps) {
               </h1>
 
               {/* Intro Paragraphs */}
-              <div className="space-y-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
+              <div
+                className="space-y-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal"
+                style={contentColor ? { color: contentColor } : undefined}
+              >
                 <p>{activity.intro_p1}</p>
                 {activity.intro_p2 && <p>{activity.intro_p2}</p>}
               </div>
@@ -250,7 +254,10 @@ export default async function ActivityDynamicPage({ params }: PageProps) {
                 className="w-2 h-full absolute left-0 top-0 rounded-l-3xl"
                 style={{ backgroundColor: color }}
               />
-              <p className="text-base sm:text-lg text-gray-700 leading-relaxed pl-2 sm:pl-4">
+              <p
+                className="text-base sm:text-lg text-gray-700 leading-relaxed pl-2 sm:pl-4"
+                style={contentColor ? { color: contentColor } : undefined}
+              >
                 {activity.why_matters_content}
               </p>
             </div>

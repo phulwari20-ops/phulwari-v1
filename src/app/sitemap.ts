@@ -34,6 +34,7 @@ const STATIC_ROUTES: Array<{
   { path: '/mothers/toddler-program', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/events/birthday', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/events/summer', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/events/summer-camp-kids-patna', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/events/winter', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/batch-galary/batch', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/batch-galary/gallery', priority: 0.7, changeFrequency: 'weekly' },

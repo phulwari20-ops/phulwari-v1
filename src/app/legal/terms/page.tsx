@@ -62,7 +62,12 @@ function resolveIcon(name?: string): React.ComponentType<any> {
   if (!name) return Sparkles;
   const clean = name.trim();
   const pascal = clean.replace(/(^|[-_ ])(\w)/g, (_, __, c) => c.toUpperCase());
-  return (LucideIcons as any)[pascal] || (LucideIcons as any)[clean] || ICON_MAP[clean] || Sparkles;
+  if ((LucideIcons as any)[pascal]) return (LucideIcons as any)[pascal];
+  if ((LucideIcons as any)[clean]) return (LucideIcons as any)[clean];
+  const lower = clean.toLowerCase().replace(/[-_ ]/g, '');
+  const foundKey = Object.keys(LucideIcons).find(k => k.toLowerCase() === lower);
+  if (foundKey) return (LucideIcons as any)[foundKey];
+  return ICON_MAP[clean] || Sparkles;
 }
 
 const DEFAULT_TERMS_SECTIONS = [
@@ -134,11 +139,13 @@ export default function TermsPage() {
           .single();
 
         if (data && !error) {
+          const highlightColor = data.contact_info?.title_highlight_color || data.title_highlight_color || '#FF4D8D';
           setPageConfig({
             badge_text: data.badge_text || 'Legal',
             last_updated: data.last_updated || 'June 2026',
             title_part1: data.title_part1 || 'Terms &',
             title_highlight: data.title_highlight || 'Conditions',
+            title_highlight_color: highlightColor,
             intro_text: data.intro_text || pageConfig.intro_text,
             sections: data.sections && data.sections.length > 0 ? data.sections : DEFAULT_TERMS_SECTIONS,
             contact_info: data.contact_info || pageConfig.contact_info
@@ -374,13 +381,14 @@ export default function TermsPage() {
             {(() => {
               const p1 = (pageConfig.title_part1 || '').trim();
               const hl = (pageConfig.title_highlight || 'Conditions').trim();
-              if (!p1) return <span>{hl}</span>;
-              if (hl.toLowerCase().startsWith(p1.toLowerCase()) || p1.toLowerCase().includes(hl.toLowerCase())) {
-                return <span>{hl}</span>;
+              const hlColor = pageConfig.title_highlight_color || pageConfig.contact_info?.title_highlight_color || '#FF4D8D';
+              if (!p1) return <span style={{ color: hlColor }}>{hl}</span>;
+              if (hl.toLowerCase() === p1.toLowerCase()) {
+                return <span style={{ color: hlColor }}>{hl}</span>;
               }
               return (
                 <>
-                  {p1} <span>{hl}</span>
+                  {p1} <span style={{ color: hlColor }}>{hl}</span>
                 </>
               );
             })()}

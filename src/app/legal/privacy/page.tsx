@@ -29,13 +29,6 @@ import {
 import * as LucideIcons from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
-function resolveIcon(name?: string): React.ComponentType<any> {
-  if (!name) return Shield;
-  const clean = name.trim();
-  const pascal = clean.replace(/(^|[-_ ])(\w)/g, (_, __, c) => c.toUpperCase());
-  return (LucideIcons as any)[pascal] || (LucideIcons as any)[clean] || ICON_MAP[clean] || Shield;
-}
-
 const ICON_MAP: Record<string, React.ComponentType<{ style?: React.CSSProperties; size?: number }>> = {
   Shield,
   UserCheck,
@@ -57,9 +50,20 @@ const ICON_MAP: Record<string, React.ComponentType<{ style?: React.CSSProperties
   MessageCircle,
   Heart,
   CalendarDays,
-  Sparkles,
-  Star
+  Sparkles
 };
+
+function resolveIcon(name?: string): React.ComponentType<any> {
+  if (!name) return Shield;
+  const clean = name.trim();
+  const pascal = clean.replace(/(^|[-_ ])(\w)/g, (_, __, c) => c.toUpperCase());
+  if ((LucideIcons as any)[pascal]) return (LucideIcons as any)[pascal];
+  if ((LucideIcons as any)[clean]) return (LucideIcons as any)[clean];
+  const lower = clean.toLowerCase().replace(/[-_ ]/g, '');
+  const foundKey = Object.keys(LucideIcons).find(k => k.toLowerCase() === lower);
+  if (foundKey) return (LucideIcons as any)[foundKey];
+  return ICON_MAP[clean] || Shield;
+}
 
 const DEFAULT_PRIVACY_SECTIONS = [
   { id: 'intro', num: '01', label: 'Our Commitment', icon: 'Shield', color: '#FF4D8D', bg: '#FFE6EF', content: 'Phulwari – Mother & Child Activity Centre is committed to protecting the privacy of every child, parent, and guardian who interacts with our services or visits our website.\nBy using our website or enrolling in our programs, you agree to the practices described in this Privacy Policy.' },
@@ -130,12 +134,14 @@ export default function PrivacyPage() {
           .single();
 
         if (data && !error) {
+          const highlightColor = data.contact_info?.title_highlight_color || data.title_highlight_color || '#3D8BFF';
           setPageConfig({
             badge_text: data.badge_text || 'Privacy Policy',
             last_updated: data.last_updated || 'June 2026',
             title_part1: data.title_part1 || 'Your',
             title_highlight: data.title_highlight || 'Privacy',
             title_part2: data.title_part2 || 'Matters',
+            title_highlight_color: highlightColor,
             intro_text: data.intro_text || pageConfig.intro_text,
             sections: data.sections && data.sections.length > 0 ? data.sections : DEFAULT_PRIVACY_SECTIONS,
             contact_info: data.contact_info || pageConfig.contact_info
@@ -372,13 +378,14 @@ export default function PrivacyPage() {
               const p1 = (pageConfig.title_part1 || '').trim();
               const hl = (pageConfig.title_highlight || 'Privacy').trim();
               const p2 = (pageConfig.title_part2 || '').trim();
-              if (!p1 && !p2) return <span>{hl}</span>;
-              if (hl.toLowerCase().includes(p1.toLowerCase()) && p1 !== '') {
-                return <span>{hl}</span>;
+              const hlColor = pageConfig.title_highlight_color || pageConfig.contact_info?.title_highlight_color || '#3D8BFF';
+              if (!p1 && !p2) return <span style={{ color: hlColor }}>{hl}</span>;
+              if (hl.toLowerCase() === p1.toLowerCase()) {
+                return <span style={{ color: hlColor }}>{hl}</span>;
               }
               return (
                 <>
-                  {p1 ? `${p1} ` : ''}<span>{hl}</span>{p2 ? ` ${p2}` : ''}
+                  {p1 ? `${p1} ` : ''}<span style={{ color: hlColor }}>{hl}</span>{p2 ? ` ${p2}` : ''}
                 </>
               );
             })()}
