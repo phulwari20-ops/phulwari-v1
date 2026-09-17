@@ -42,6 +42,9 @@ import {
   Leaf,
 } from 'lucide-react';
 
+import { createClient } from '@/lib/supabase/client';
+import { resolveLucideIcon } from '@/lib/icons';
+
 interface SubItem {
   href: string;
   label: string;
@@ -59,7 +62,7 @@ interface NavItem {
   subpages?: SubItem[];
 }
 
-const navItems: NavItem[] = [
+const defaultNavItems: NavItem[] = [
   { label: 'Home', href: '/', accent: '#FF4D8D', accentBg: '#FFE6EF', icon: House },
   {
     label: 'About Us',
@@ -93,8 +96,6 @@ const navItems: NavItem[] = [
       { href: '/activities/cricket-coaching-patna', label: 'Cricket Coaching', icon: Trophy, color: '#34B36B', bg: '#E3F7EA' },
       { href: '/activities/chess-classes-patna', label: 'Chess Coaching', icon: Crown, color: '#6D28D9', bg: '#EDE9FE' },
       { href: '/activities/play-zone', label: 'Play Zone', icon: Gamepad2, color: '#FF8A3D', bg: '#FFEADB' },
-      { href: '/activities/mother-toddler-program', label: 'Mother & Toddler', icon: Heart, color: '#FF4D8D', bg: '#FFE6EF' },
-      { href: '/activities/mother-fitness-program', label: 'Mother Fitness', icon: Dumbbell, color: '#34B36B', bg: '#E3F7EA' },
     ],
   },
   {
@@ -113,8 +114,9 @@ const navItems: NavItem[] = [
     accentBg: '#EFE7FE',
     icon: Dumbbell,
     subpages: [
-      { href: '/mothers/fitness',         label: 'Mother Fitness Program',    icon: Dumbbell, color: '#34B36B', bg: '#E3F7EA' },
-      { href: '/mothers/toddler-program', label: 'Mother & Toddler Program',  icon: Baby,     color: '#FF4D8D', bg: '#FFE6EF' },
+      { href: '/activities/mother-toddler-program', label: 'Mother & Toddler Program',  icon: Heart,    color: '#FF4D8D', bg: '#FFE6EF' },
+      { href: '/activities/mother-fitness-program', label: 'Mother Fitness Program',    icon: Dumbbell, color: '#34B36B', bg: '#E3F7EA' },
+      { href: '/mothers',                           label: 'All Mother Programs',       icon: Baby,     color: '#8B5CF6', bg: '#EFE7FE' },
     ],
   },
   {
@@ -193,6 +195,7 @@ const socialLinks = [
 ];
 
 const Navbar: React.FC = () => {
+  const [navItems, setNavItems]       = useState<NavItem[]>(defaultNavItems);
   const [mobileOpen, setMobileOpen]   = useState(false);
   const [openDesktop, setOpenDesktop] = useState<string | null>(null);
   const [openMobile, setOpenMobile]   = useState<string | null>(null);
@@ -200,6 +203,81 @@ const Navbar: React.FC = () => {
   const navRef      = useRef<HTMLDivElement>(null);
   const closeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname    = usePathname();
+
+  useEffect(() => {
+    async function syncDynamicActivities() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('activity_pages')
+          .select('*')
+          .eq('is_active', true)
+          .order('order_index', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+          const childActivities: SubItem[] = [];
+          const motherPrograms: SubItem[] = [];
+
+          data.forEach((act: any) => {
+            const slugLower = (act.slug || '').toLowerCase();
+            const badgeLower = (act.badge_text || '').toLowerCase();
+            const h1Lower = (act.h1 || '').toLowerCase();
+
+            const isMother = slugLower.includes('mother') || 
+                             badgeLower.includes('mother') || 
+                             h1Lower.includes('mother') ||
+                             slugLower.includes('toddler');
+
+            const href = act.slug === 'yoga-classes-patna'
+              ? '/yoga-classes-patna'
+              : `/activities/${act.slug}`;
+
+            const label = act.badge_text || act.h1;
+            const iconComponent = resolveLucideIcon(act.icon, isMother ? Dumbbell : Activity);
+
+            const subItem: SubItem = {
+              href,
+              label,
+              icon: iconComponent,
+              color: act.color || (isMother ? '#8B5CF6' : '#FF4D8D'),
+              bg: act.bg || (isMother ? '#EFE7FE' : '#FFE6EF'),
+            };
+
+            if (isMother) {
+              motherPrograms.push(subItem);
+            } else {
+              childActivities.push(subItem);
+            }
+          });
+
+          // Also keep dedicated /mothers landing page in mother programs list if not already present
+          if (!motherPrograms.some(m => m.href === '/mothers')) {
+            motherPrograms.push({
+              href: '/mothers',
+              label: 'Programs Overview',
+              icon: Baby,
+              color: '#8B5CF6',
+              bg: '#EFE7FE'
+            });
+          }
+
+          setNavItems(prev => prev.map(item => {
+            if (item.label === 'Activities' && childActivities.length > 0) {
+              return { ...item, subpages: childActivities };
+            }
+            if (item.label === 'Programs for Mothers' && motherPrograms.length > 0) {
+              return { ...item, subpages: motherPrograms };
+            }
+            return item;
+          }));
+        }
+      } catch (e) {
+        console.warn('Navbar dynamic activities sync exception:', e);
+      }
+    }
+
+    syncDynamicActivities();
+  }, []);
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname?.startsWith(`${href}/`);

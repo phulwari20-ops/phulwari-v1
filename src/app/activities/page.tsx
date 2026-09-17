@@ -27,14 +27,13 @@ import { ActivityPageData, DEFAULT_ACTIVITIES } from '@/lib/activitiesFallback';
 import { resolveLucideIcon } from '@/lib/icons';
 import DynamicBanners from '@/components/DynamicBanners';
 
-const filters = ['All', 'Arts', 'Sports', 'Wellness', 'Play'];
-
 const filterIcons: Record<string, React.ElementType> = {
   All: Sparkles,
-  Arts: Palette,
-  Sports: Medal,
-  Wellness: Leaf,
-  Play: Smile,
+  'Mother & Toddler': Heart,
+  'Arts & Creative': Palette,
+  'Sports & Martial Arts': Medal,
+  'Wellness & Fitness': Leaf,
+  'Early Play & Learning': Smile,
 };
 
 const floatingIcons = [
@@ -61,12 +60,13 @@ const SEO_BREADCRUMB = [
   { name: 'Activities', path: '/activities' },
 ];
 
-function getCategoryForActivity(slug: string): string {
-  const s = slug.toLowerCase();
-  if (s.includes('music') || s.includes('dance') || s.includes('art')) return 'Arts';
-  if (s.includes('gymnastics') || s.includes('mma') || s.includes('skating') || s.includes('karate') || s.includes('cricket') || s.includes('chess')) return 'Sports';
-  if (s.includes('yoga') || s.includes('fitness')) return 'Wellness';
-  return 'Play';
+function getCategoryForActivity(slug: string, badge?: string): string {
+  const s = `${slug || ''} ${badge || ''}`.toLowerCase();
+  if (s.includes('mother') || s.includes('toddler')) return 'Mother & Toddler';
+  if (s.includes('music') || s.includes('dance') || s.includes('art') || s.includes('craft')) return 'Arts & Creative';
+  if (s.includes('gymnastics') || s.includes('mma') || s.includes('skating') || s.includes('karate') || s.includes('cricket') || s.includes('chess') || s.includes('sports')) return 'Sports & Martial Arts';
+  if (s.includes('yoga') || s.includes('wellness') || s.includes('fitness')) return 'Wellness & Fitness';
+  return 'Early Play & Learning';
 }
 
 export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
@@ -96,9 +96,17 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
     loadActivities();
   }, []);
 
+  const dynamicFilters = React.useMemo(() => {
+    const cats = new Set<string>();
+    activitiesList.forEach(a => {
+      cats.add(getCategoryForActivity(a.slug, a.badge_text));
+    });
+    return ['All', ...Array.from(cats)];
+  }, [activitiesList]);
+
   const filtered = activeFilter === 'All'
     ? activitiesList
-    : activitiesList.filter(a => getCategoryForActivity(a.slug) === activeFilter);
+    : activitiesList.filter(a => getCategoryForActivity(a.slug, a.badge_text) === activeFilter);
 
   return (
     <>
@@ -433,8 +441,8 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
 
         {/* Filters */}
         <div className="act-filters">
-          {filters.map(f => {
-            const FIcon = filterIcons[f];
+          {dynamicFilters.map(f => {
+            const FIcon = filterIcons[f] || Sparkles;
             return (
               <button
                 key={f}
@@ -454,7 +462,7 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
             {filtered.map((activity, index) => {
               const Icon = resolveLucideIcon(activity.icon);
               const isExpanded = expanded === index;
-              const category = getCategoryForActivity(activity.slug);
+              const category = getCategoryForActivity(activity.slug, activity.badge_text);
               const ageLabel = activity.programs?.[0]?.age_bracket || 'All Ages';
               const targetHref = activity.slug === 'yoga-classes-patna'
                 ? '/yoga-classes-patna'
