@@ -31,11 +31,13 @@ const STATIC_ROUTES: Array<{
   { path: '/blogs', priority: 0.8, changeFrequency: 'weekly' },
 
   { path: '/mothers/fitness', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/mothers-fitness-zumba-patna', priority: 0.9, changeFrequency: 'weekly' },
   { path: '/mothers/toddler-program', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/mothers-toddler-program-patna', priority: 0.9, changeFrequency: 'weekly' },
   { path: '/events/birthday', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/events/summer', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/events/summer-camp-kids-patna', priority: 0.8, changeFrequency: 'weekly' },
-  { path: '/events/winter', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/events/winter', priority: 0.9, changeFrequency: 'weekly' },
   { path: '/batch-galary/batch', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/batch-galary/gallery', priority: 0.7, changeFrequency: 'weekly' },
 

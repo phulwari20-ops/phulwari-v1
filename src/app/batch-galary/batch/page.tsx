@@ -162,7 +162,8 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
           if (json.data && json.data.length > 0) {
             console.log('✅ Dynamic Batches fetched via API:', json.data);
             setDynamicBatches(json.data);
-            setSelectedBatchId((prev) => (prev && json.data.some((b: any) => b.id?.toString() === prev) ? prev : json.data[0].id?.toString()));
+            // Keep collapsed by default so user can choose which batch to expand
+            setSelectedBatchId((prev) => (prev && json.data.some((b: any) => b.id?.toString() === prev) ? prev : null));
           }
           if (json.schedules) {
             setDynamicSchedules(json.schedules);

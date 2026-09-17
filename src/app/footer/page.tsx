@@ -48,8 +48,8 @@ const quickLinks: LinkItem[] = [
   { label: 'About Us',               href: '/about' },
   { label: 'Activities',             href: '/activities' },
   { label: 'Programs for Mothers',   href: '/mothers' },
-  { label: 'Birthday Parties',       href: '/events/birthday' },
-  { label: 'Summer Camp',            href: '/events/summer' },
+  { label: 'Birthday Parties',       href: '/kids-and-child-birthday-party' },
+  { label: 'Summer Camp',            href: '/events/summer-camp-kids-patna' },
   { label: 'Winter Camp',            href: '/events/winter' },
   { label: 'Batch & Timings',        href: '/batch-galary/batch' },
   { label: 'Gallery',                href: '/batch-galary/gallery' },
@@ -75,16 +75,16 @@ const activities = [
   { icon: Target,      label: 'Cricket Coaching',            color: '#34B36B', href: '/activities/cricket-coaching-patna' },
   { icon: Puzzle,      label: 'Chess Coaching',              color: '#6D28D9', href: '/activities/chess-classes-patna' },
   { icon: Blocks,      label: 'Play Zone',                   color: '#FF8A3D', href: '/activities/play-zone' },
-  { icon: Baby,        label: 'Mother & Toddler Program',    color: '#FF4D8D', href: '/activities/mother-toddler-program' },
-  { icon: Dumbbell,    label: 'Mother Fitness Program',      color: '#34B36B', href: '/activities/mother-fitness-program' },
+  { icon: Baby,        label: 'Mother & Toddler Program',    color: '#FF4D8D', href: '/mothers-toddler-program-patna' },
+  { icon: Dumbbell,    label: 'Mother Fitness Program',      color: '#34B36B', href: '/mothers-fitness-zumba-patna' },
 ];
 
 const programs = [
-  { icon: Users,        label: 'Mother & Toddler Program', color: '#3D8BFF', href: '/mothers/toddler-program' },
-  { icon: Dumbbell,     label: 'Mother Fitness Program',   color: '#34B36B', href: '/mothers/fitness' },
-  { icon: Tent,         label: 'Summer Camp',              color: '#34B36B', href: '/events/summer' },
-  { icon: Snowflake,    label: 'Winter Camp',              color: '#3D8BFF', href: '/events/winter' },
-  { icon: Cake,         label: 'Birthday Celebrations',    color: '#FF8A3D', href: '/events/birthday' },
+  { icon: Users,        label: 'Mother & Toddler Program', color: '#3D8BFF', href: '/mothers-toddler-program-patna' },
+  { icon: Dumbbell,     label: 'Mother Fitness Program',   color: '#34B36B', href: '/mothers-fitness-zumba-patna' },
+  { icon: Tent,         label: 'Summer Camp 2026',         color: '#34B36B', href: '/events/summer-camp-kids-patna' },
+  { icon: Snowflake,    label: 'Winter Camp & Carnival',   color: '#3D8BFF', href: '/events/winter' },
+  { icon: Cake,         label: 'Birthday Celebrations',    color: '#FF8A3D', href: '/kids-and-child-birthday-party' },
   { icon: CalendarDays, label: 'Batch & Timings',          color: '#14B8A6', href: '/batch-galary/batch' },
   { icon: Camera,       label: 'Gallery',                  color: '#8B5CF6', href: '/batch-galary/gallery' },
 ];
@@ -113,9 +113,9 @@ const faqs = [
 const quickActions = [
   { icon: Phone,         label: 'Call Now',            bg: '#FF4D8D', href: 'tel:+916207368839',          external: true  },
   { icon: MessageCircle, label: 'WhatsApp Now',        bg: '#34B36B', href: 'https://wa.me/916207368839?text=Hello%20Phulwari!%20I%20need%20support.', external: true  },
-  { icon: Cake,          label: 'Book Birthday Party', bg: '#FF8A3D', href: '/events/birthday',            external: false },
-  { icon: Tent,          label: 'Join Summer Camp',    bg: '#3D8BFF', href: '/events/summer',              external: false },
-  { icon: Snowflake,     label: 'Join Winter Camp',    bg: '#8B5CF6', href: '/events/winter',              external: false },
+  { icon: Cake,          label: 'Book Birthday Party', bg: '#FF8A3D', href: '/kids-and-child-birthday-party', external: false },
+  { icon: Tent,          label: 'Join Summer Camp',    bg: '#3D8BFF', href: '/events/summer-camp-kids-patna',   external: false },
+  { icon: Snowflake,     label: 'Join Winter Camp',    bg: '#8B5CF6', href: '/events/winter',                  external: false },
 ];
 
 const socialLinks = [
@@ -446,6 +446,29 @@ const Footer: React.FC = () => {
                   </span>
                 </a>
               ))}
+              <a
+                href="https://www.google.com/preferences/source?q=www.phulwari.co.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-social-card"
+                style={{ background: '#ffffff', color: '#1E293B', border: '2px solid #E2E8F0' }}
+                title="Google Search Preferences - Preferred on Google"
+              >
+                <span className="footer-social-card-icon" style={{ background: '#F8FAFC' }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                </span>
+                <span className="footer-social-card-info">
+                  <div className="footer-social-card-name" style={{ color: '#1E293B', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>Preferred on</span> <strong style={{ color: '#4285F4' }}>Google</strong>
+                  </div>
+                  <div className="footer-social-card-handle" style={{ color: '#64748B' }}>phulwari.co.in</div>
+                </span>
+              </a>
             </div>
           </div>
 

@@ -2,13 +2,11 @@
  * Single source of truth for every fact the SEO layer needs about Phulwari.
  *
  * IMPORTANT — canonical host:
- * `https://www.phulwari.co.in` issues a 307 to `https://phulwari.co.in`, so the
- * apex domain is the canonical one. Metadata, canonicals, sitemap, robots and
- * JSON-LD @ids must all agree on it; when they disagreed, every sitemap URL and
- * every canonical pointed at a redirect.
+ * `https://www.phulwari.co.in` is the canonical host. Metadata, canonicals, sitemap,
+ * robots and JSON-LD @ids all agree on it; non-WWW traffic is 301 permanently redirected to WWW.
  */
 
-export const SITE_URL = 'https://phulwari.co.in'
+export const SITE_URL = 'https://www.phulwari.co.in'
 
 export const SITE_NAME = 'Phulwari Mother & Child Activity Centre'
 export const SITE_SHORT_NAME = 'Phulwari'

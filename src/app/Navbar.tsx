@@ -429,8 +429,8 @@ const Navbar: React.FC = () => {
         .nav-mobile-link-icon { width: 30px; height: 30px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .nav-mobile-link-icon svg { width: 14px; height: 14px; stroke-width: 2.4; }
 
-        .nav-mobile-sub { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; padding-left: 0.5rem; }
-        .nav-mobile-sub.is-open { max-height: 32rem; }
+        .nav-mobile-sub { overflow: hidden; max-height: 0; transition: max-height 0.35s ease; padding-left: 0.5rem; }
+        .nav-mobile-sub.is-open { max-height: 80rem; }
 
         .nav-mobile-sub-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.7rem; margin-bottom: 0.25rem; border-radius: 14px; text-decoration: none; }
         .nav-mobile-sub-item:hover, .nav-mobile-sub-item.is-active { background-color: #ffffff; }
