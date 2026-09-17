@@ -94,12 +94,6 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'phulwari.co.in' }],
-        destination: 'https://www.phulwari.co.in/:path*',
-        permanent: true,
-      },
       { source: '/faq', destination: '/legal/faq', permanent: true },
       {
         source: '/birthdays',
