@@ -112,7 +112,7 @@ export default function BirthdayGallery() {
       {viewMode === 'video' ? (
         <div className="space-y-3">
           <ActivityVideoPlayer
-            src="/videos/birthday_party.mov"
+            src="/videos/birthday_party.mp4"
             poster="/birthday_party/image.png"
             title="Real Birthday Party Celebrations at Phulwari Activity Centre"
             accentColor="#FF4D8D"

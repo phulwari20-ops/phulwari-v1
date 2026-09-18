@@ -650,15 +650,16 @@ const Navbar: React.FC = () => {
                   onMouseEnter={() => { cancelClose(); setOpenDesktop(item.label); }}
                   onMouseLeave={scheduleClose}
                 >
-                  <button
+                  <Link
+                    href={item.href}
                     className={`nav-link ${isOpen ? 'is-open' : ''} ${active ? 'is-active' : ''}`}
                     style={styleVars}
                     aria-expanded={isOpen}
-                    onClick={() => setOpenDesktop(isOpen ? null : item.label)}
+                    onClick={() => setOpenDesktop(null)}
                   >
                     {item.label}
                     <ChevronDown className="nav-chevron" />
-                  </button>
+                  </Link>
                   <div className={`nav-dropdown ${isOpen ? 'is-open' : ''} ${item.subpages.length > 4 ? 'has-many' : 'has-few'}`}>
                     {item.subpages.map((sub) => {
                       const Icon = sub.icon;

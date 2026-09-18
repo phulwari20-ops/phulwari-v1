@@ -134,9 +134,12 @@ export default function EventsHubPage() {
           .eq('is_active', true)
           .order('order_index', { ascending: true });
 
-        if (!error && data && data.length > 0) {
-          const cmsCamps: EventItem[] = [];
+        if (!error && Array.isArray(data) && data.length > 0) {
+          // Clone default events as base so the 3 core items are always preserved
+          const updatedEvents = [...defaultEvents];
+
           data.forEach((item: any) => {
+            if (!item || !item.slug) return;
             const slugLower = (item.slug || '').toLowerCase();
             const badgeLower = (item.badge_text || '').toLowerCase();
             const h1Lower = (item.h1 || '').toLowerCase();
@@ -152,38 +155,78 @@ export default function EventsHubPage() {
                            h1Lower.includes('camp') ||
                            h1Lower.includes('birthday');
 
-            if (isCamp) {
-              let href = `/events/${item.slug}`;
-              if (slugLower.includes('summer')) href = '/events/summer-camp-kids-patna';
-              if (slugLower.includes('winter')) href = '/events/winter';
-              if (slugLower.includes('birthday')) href = '/kids-and-child-birthday-party';
+            if (!isCamp) return;
 
-              cmsCamps.push({
-                id: item.slug || item.id,
-                badge: item.badge_text || (slugLower.includes('winter') ? 'Winter Camp 2026' : (slugLower.includes('summer') ? 'Summer Camp 2026' : 'Special Event')),
-                badgeColor: item.color || '#FF4D8D',
-                badgeBg: item.bg || '#FFE6EF',
-                title: item.h1 || 'Exciting Camp & Event',
-                titleAccent: item.h1_highlight || 'at Phulwari',
-                accentColor: item.color || '#3D8BFF',
-                description: item.meta_desc || item.hero_desc || 'Join our engaging camp and event activities designed for maximum joy, creativity and holistic development.',
-                timing: item.overview_points?.[0] || 'Flexible Seasonal Batches',
-                ageGroup: item.overview_points?.[1] || '2 to 14 Years',
-                season: slugLower.includes('winter') ? 'Winter 2026' : (slugLower.includes('summer') ? 'Summer 2026' : 'Year-Round'),
-                highlights: Array.isArray(item.benefits) ? item.benefits.slice(0, 5) : ['Interactive Group Activities', 'Certified Trainers', 'Safe & Hygienic Facilities', 'Certificates & Gifts'],
-                image: item.hero_image || (slugLower.includes('winter') ? '/wintercamp.webp' : (slugLower.includes('summer') ? '/summer.webp' : '/b1.webp')),
-                href,
-                popular: slugLower.includes('summer') || slugLower.includes('birthday'),
-              });
+            // Safe parsing for benefits / highlights
+            let safeHighlights: string[] = [];
+            if (Array.isArray(item.benefits) && item.benefits.length > 0) {
+              safeHighlights = item.benefits.map((b: any) => typeof b === 'string' ? b : (b?.title || String(b))).slice(0, 5);
+            } else if (typeof item.benefits === 'string') {
+              safeHighlights = item.benefits.split(',').map((s: string) => s.trim()).filter(Boolean).slice(0, 5);
+            }
+
+            if (safeHighlights.length === 0) {
+              safeHighlights = ['Interactive Group Activities', 'Certified Trainers & Mentors', 'Safe & Hygienic Facilities', 'Certificates & Goodies'];
+            }
+
+            // Determine correct route
+            let href = `/events/${item.slug}`;
+            if (slugLower.includes('summer')) href = '/events/summer-camp-kids-patna';
+            else if (slugLower.includes('winter')) href = '/events/winter';
+            else if (slugLower.includes('birthday') || slugLower.includes('party')) href = '/kids-and-child-birthday-party';
+
+            // Check if this item updates one of the core 3 defaults
+            let targetDefaultIndex = -1;
+            if (slugLower.includes('summer')) {
+              targetDefaultIndex = updatedEvents.findIndex(e => e.id === 'summer-camp-2026');
+            } else if (slugLower.includes('winter')) {
+              targetDefaultIndex = updatedEvents.findIndex(e => e.id === 'winter-camp-2026');
+            } else if (slugLower.includes('birthday') || slugLower.includes('party')) {
+              targetDefaultIndex = updatedEvents.findIndex(e => e.id === 'birthday-parties');
+            }
+
+            const timingVal = (Array.isArray(item.overview_points) && item.overview_points[0]) || item.timing || 'Flexible Batch Timings';
+            const ageVal = (Array.isArray(item.overview_points) && item.overview_points[1]) || item.age_group || '2 to 14 Years';
+
+            const eventObj: EventItem = {
+              id: item.slug || item.id,
+              badge: item.badge_text || (slugLower.includes('winter') ? 'Winter Camp 2026' : (slugLower.includes('summer') ? 'Summer Camp 2026' : 'Special Event')),
+              badgeColor: item.color || '#FF4D8D',
+              badgeBg: item.bg || '#FFE6EF',
+              title: item.h1 || 'Exciting Camp & Event',
+              titleAccent: item.h1_highlight || 'at Phulwari',
+              accentColor: item.color || '#3D8BFF',
+              description: item.meta_desc || item.hero_desc || 'Join our engaging camp and event activities designed for maximum joy, creativity and holistic development.',
+              timing: timingVal,
+              ageGroup: ageVal,
+              season: slugLower.includes('winter') ? 'Winter 2026' : (slugLower.includes('summer') ? 'Summer 2026' : 'Year-Round'),
+              highlights: safeHighlights,
+              image: item.hero_image || (slugLower.includes('winter') ? '/wintercamp.webp' : (slugLower.includes('summer') ? '/summer.webp' : '/b1.webp')),
+              href,
+              popular: slugLower.includes('summer') || slugLower.includes('birthday'),
+            };
+
+            if (targetDefaultIndex >= 0) {
+              // Update existing default with DB values while retaining structure
+              updatedEvents[targetDefaultIndex] = {
+                ...updatedEvents[targetDefaultIndex],
+                ...eventObj,
+                id: updatedEvents[targetDefaultIndex].id,
+                href: updatedEvents[targetDefaultIndex].href,
+              };
+            } else {
+              // Append new custom camp/event
+              const exists = updatedEvents.some(e => e.id === eventObj.id || e.href === eventObj.href);
+              if (!exists) {
+                updatedEvents.push(eventObj);
+              }
             }
           });
 
-          if (cmsCamps.length > 0) {
-            setEventsList(cmsCamps);
-          }
+          setEventsList(updatedEvents);
         }
       } catch (e) {
-        console.warn('Events hub dynamic CMS fetch:', e);
+        console.warn('Events hub dynamic CMS fetch error handled gracefully:', e);
       }
     }
 

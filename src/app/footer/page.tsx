@@ -48,6 +48,7 @@ const quickLinks: LinkItem[] = [
   { label: 'About Us',               href: '/about' },
   { label: 'Activities',             href: '/activities' },
   { label: 'Programs for Mothers',   href: '/mothers' },
+  { label: 'Camps & Events Hub',     href: '/events' },
   { label: 'Birthday Parties',       href: '/kids-and-child-birthday-party' },
   { label: 'Summer Camp',            href: '/events/summer-camp-kids-patna' },
   { label: 'Winter Camp 2026',       href: '/events/winter' },
@@ -80,6 +81,7 @@ const activities = [
 ];
 
 const programs = [
+  { icon: Sparkles,     label: 'All Camps & Events Hub',   color: '#FF4D8D', href: '/events' },
   { icon: Users,        label: 'Mother & Toddler Program', color: '#3D8BFF', href: '/mothers-toddler-program-patna' },
   { icon: Dumbbell,     label: 'Mother Fitness Program',   color: '#34B36B', href: '/mothers-fitness-zumba-patna' },
   { icon: Tent,         label: 'Summer Camp 2026',         color: '#34B36B', href: '/events/summer-camp-kids-patna' },
