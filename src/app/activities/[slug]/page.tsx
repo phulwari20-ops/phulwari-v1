@@ -23,6 +23,7 @@ import {
   ActivityFaqAccordion,
   ActivityMobileStickyBar,
 } from '@/components/activities/ActivityClientViews';
+import { ActivityVideoGallery } from '@/components/activities/ActivityVideoGallery';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -261,6 +262,36 @@ export default async function ActivityDynamicPage({ params }: PageProps) {
                 {activity.why_matters_content}
               </p>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* REAL ACTION VIDEOS & SESSIONS SECTION */}
+      {activity.videos && activity.videos.length > 0 && (
+        <section className="py-16 sm:py-20 bg-slate-900 text-white relative overflow-hidden">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8">
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <span
+                className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5"
+                style={{ backgroundColor: bg, color: color }}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Action in Session</span>
+              </span>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
+                Experience Real Training & Movement
+              </h2>
+              <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+                Take a quick peek inside our live training sessions at Kidwaipuri Centre, Patna.
+              </p>
+            </div>
+
+            <ActivityVideoGallery
+              videos={activity.videos}
+              title={activity.badge_text || activity.h1}
+              accentColor={color}
+              accentBg={bg}
+            />
           </div>
         </section>
       )}

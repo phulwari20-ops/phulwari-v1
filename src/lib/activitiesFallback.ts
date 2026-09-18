@@ -28,6 +28,17 @@ export interface ActivityFaq {
   answer: string;
 }
 
+export interface ActivityVideo {
+  id: string;
+  title: string;
+  description?: string;
+  url: string;
+  poster?: string;
+  duration?: string;
+  is_featured?: boolean;
+  created_at?: string;
+}
+
 export interface ActivityPageData {
   id: string;
   slug: string;
@@ -40,6 +51,7 @@ export interface ActivityPageData {
   intro_p2?: string;
   hero_image: string;
   gallery_images: string[];
+  videos?: ActivityVideo[];
   color: string;
   bg: string;
   icon: string;
@@ -249,6 +261,17 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
     intro_p2: 'Whether you are looking for gymnastics classes in Patna or the best gymnastics academy in Patna or physical fitness programs for kids, we have the right program for you.',
     hero_image: '/Gymnastics/image.png',
     gallery_images: ['/Gymnastics/image.png', '/Gymnastics/image copy.png', '/Gymnastics/image copy 2.png', '/Gymnastics/image copy 3.png', '/Gymnastics/image copy 4.png'],
+    videos: [
+      {
+        id: 'vid-gymnastics-1',
+        title: 'Kids Gymnastics Training & Flexibility Drills',
+        description: 'Somersaults, balance beam, and agility training in our padded safety facility.',
+        url: '/videos/gymnastics.mov',
+        poster: '/Gymnastics/image.png',
+        duration: '0:30',
+        is_featured: true,
+      }
+    ],
     color: '#E8A621',
     bg: '#FFF3D9',
     icon: 'Star',
@@ -407,6 +430,17 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
     intro_p2: 'Find the best roller skating classes near Income Tax Golamber, Veer Chand Patel path, Fraser Road, and Bailey Road. The classes are suitable for kids, young people, and even adults from all around the city. Our skating instructors are professional and patient to get your kid involved in this sport.',
     hero_image: '/Roller_skating/image.png',
     gallery_images: ['/Roller_skating/image.png', '/Roller_skating/image copy.png', '/Roller_skating/image copy 2.png', '/Roller_skating/image copy 3.png', '/Roller_skating/image copy 4.png'],
+    videos: [
+      {
+        id: 'vid-skating-1',
+        title: 'Roller Skating Practice & Balance Training',
+        description: 'Kids mastering speed, smooth turns, and balance on our professional smooth skating rink.',
+        url: '/videos/skating.mov',
+        poster: '/Roller_skating/image.png',
+        duration: '0:42',
+        is_featured: true,
+      }
+    ],
     color: '#3D8BFF',
     bg: '#E5EFFF',
     icon: 'Zap',
@@ -666,6 +700,17 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
     intro_p2: 'Conveniently located in the heart of the city at Kidwaipuri, Phulwari is Patna\'s premier mother and child activity hub. Alongside our diverse developmental programs, our specialized cricket training academy provides a safe, structured, and highly encouraging environment for children to learn the fundamentals of the game, sharpen their reflexes, and grow into confident team players.',
     hero_image: '/Cricket/image.png',
     gallery_images: ['/Cricket/image.png', '/Cricket/image copy.png', '/Cricket/image copy 2.png', '/Cricket/image copy 3.png'],
+    videos: [
+      {
+        id: 'vid-cricket-1',
+        title: 'Junior Cricket Coaching & Net Practice',
+        description: 'Batting, bowling, and fielding drills guided by certified cricket coaches in Patna.',
+        url: '/videos/cricket.mov',
+        poster: '/Cricket/image.png',
+        duration: '0:28',
+        is_featured: true,
+      }
+    ],
     color: '#0EA5E9',
     bg: '#E0F2FE',
     icon: 'Trophy',

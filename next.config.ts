@@ -15,8 +15,9 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co ws: wss: https://www.google-analytics.com https://*.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://*.googletagmanager.com",
-  "frame-src 'self' https://www.google.com https://maps.google.com",
+  "media-src 'self' blob: data: https://*.r2.cloudflarestorage.com https://*.supabase.co https://*.cloudflarestream.com https://*.r2.dev https:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co ws: wss: https://*.r2.cloudflarestorage.com https://*.cloudflarestream.com https://*.r2.dev https://www.google-analytics.com https://*.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://*.googletagmanager.com",
+  "frame-src 'self' https://www.google.com https://maps.google.com https://*.youtube.com https://youtube.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -58,6 +59,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'api.dicebear.com' },
+      { protocol: 'https', hostname: '*.r2.dev' },
+      { protocol: 'https', hostname: '*.r2.cloudflarestorage.com' },
     ],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
@@ -77,6 +80,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/:file*.(jpg|jpeg|png|webp|avif|gif|svg|ico|woff|woff2)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/:file*.(mp4|mov|webm|m4v|ogg)',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],

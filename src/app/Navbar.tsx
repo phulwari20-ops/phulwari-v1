@@ -284,24 +284,39 @@ const Navbar: React.FC = () => {
             }
           });
 
-          // Keep dedicated overview pages
-          if (!motherPrograms.some(m => m.href === '/mothers')) {
-            motherPrograms.push({
-              href: '/mothers',
-              label: 'Programs Overview',
-              icon: Baby,
-              color: '#8B5CF6',
-              bg: '#EFE7FE'
-            });
-          }
+          // Build structured Camps & Events list:
+          // Guaranteed Core Pages in fixed order:
+          const coreCampsList: SubItem[] = [
+            { href: '/events/summer-camp-kids-patna', label: 'Summer Camp 2026', icon: Sun, color: '#E8A621', bg: '#FFF3D9' },
+            { href: '/events/winter', label: 'Winter Camp 2026', icon: Snowflake, color: '#3D8BFF', bg: '#E5EFFF' },
+            { href: '/kids-and-child-birthday-party', label: 'Birthday Party Celebrations', icon: Cake, color: '#FF8A3D', bg: '#FFEADB' },
+          ];
 
-          if (!campsEvents.some(c => c.href === '/events')) {
-            campsEvents.push({
+          // Additional dynamic seasonal camps from database (excluding core ones)
+          const additionalCamps = campsEvents.filter(c => 
+            !['/events/summer-camp-kids-patna', '/events/winter', '/kids-and-child-birthday-party', '/events'].includes(c.href)
+          );
+
+          const finalCampsEvents: SubItem[] = [
+            ...coreCampsList,
+            ...additionalCamps,
+            {
               href: '/events',
               label: 'All Camps & Events',
               icon: Sparkles,
               color: '#FF4D8D',
               bg: '#FFE6EF'
+            }
+          ];
+
+          // Keep dedicated overview page for Mother Programs
+          if (!motherPrograms.some(m => m.href === '/mothers')) {
+            motherPrograms.push({
+              href: '/mothers',
+              label: 'All Mother Programs',
+              icon: Baby,
+              color: '#8B5CF6',
+              bg: '#EFE7FE'
             });
           }
 
@@ -312,8 +327,8 @@ const Navbar: React.FC = () => {
             if (item.label === 'Programs for Mothers' && motherPrograms.length > 0) {
               return { ...item, subpages: motherPrograms };
             }
-            if (item.label === 'Camps & Events' && campsEvents.length > 0) {
-              return { ...item, subpages: campsEvents };
+            if (item.label === 'Camps & Events') {
+              return { ...item, subpages: finalCampsEvents };
             }
             return item;
           }));
