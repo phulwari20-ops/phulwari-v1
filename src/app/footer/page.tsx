@@ -50,7 +50,7 @@ const quickLinks: LinkItem[] = [
   { label: 'Programs for Mothers',   href: '/mothers' },
   { label: 'Birthday Parties',       href: '/kids-and-child-birthday-party' },
   { label: 'Summer Camp',            href: '/events/summer-camp-kids-patna' },
-  { label: 'Winter Camp',            href: '/events/winter' },
+  { label: 'Winter Camp 2026',       href: '/events/winter' },
   { label: 'Batch & Timings',        href: '/batch-galary/batch' },
   { label: 'Gallery',                href: '/batch-galary/gallery' },
   { label: 'FAQ',                    href: '/legal/faq' },

@@ -127,8 +127,9 @@ const defaultNavItems: NavItem[] = [
     icon: Cake,
     subpages: [
       { href: '/events/summer-camp-kids-patna', label: 'Summer Camp 2026', icon: Sun, color: '#E8A621', bg: '#FFF3D9' },
-      { href: '/events/winter',   label: 'Winter Camp',               icon: Snowflake,color: '#3D8BFF', bg: '#E5EFFF' },
+      { href: '/events/winter',   label: 'Winter Camp 2026',          icon: Snowflake,color: '#3D8BFF', bg: '#E5EFFF' },
       { href: '/kids-and-child-birthday-party', label: 'Birthday Party Celebrations',icon: Cake,    color: '#FF8A3D', bg: '#FFEADB' },
+      { href: '/events',          label: 'All Camps & Events',        icon: Sparkles, color: '#FF4D8D', bg: '#FFE6EF' },
     ],
   },
   {
@@ -217,6 +218,7 @@ const Navbar: React.FC = () => {
         if (!error && data && data.length > 0) {
           const childActivities: SubItem[] = [];
           const motherPrograms: SubItem[] = [];
+          const campsEvents: SubItem[] = [];
 
           data.forEach((act: any) => {
             const slugLower = (act.slug || '').toLowerCase();
@@ -224,33 +226,65 @@ const Navbar: React.FC = () => {
             const h1Lower = (act.h1 || '').toLowerCase();
 
             const isMother = slugLower.includes('mother') || 
+                             slugLower.includes('toddler') ||
                              badgeLower.includes('mother') || 
+                             badgeLower.includes('toddler') ||
                              h1Lower.includes('mother') ||
-                             slugLower.includes('toddler');
+                             h1Lower.includes('toddler');
 
-            const href = act.slug === 'yoga-classes-patna'
-              ? '/yoga-classes-patna'
-              : `/activities/${act.slug}`;
+            const isCampOrEvent = slugLower.includes('camp') ||
+                                 slugLower.includes('event') ||
+                                 slugLower.includes('birthday') ||
+                                 slugLower.includes('party') ||
+                                 slugLower.includes('winter') ||
+                                 slugLower.includes('summer') ||
+                                 badgeLower.includes('camp') ||
+                                 badgeLower.includes('birthday') ||
+                                 badgeLower.includes('event') ||
+                                 h1Lower.includes('camp') ||
+                                 h1Lower.includes('birthday') ||
+                                 h1Lower.includes('event');
 
-            const label = act.badge_text || act.h1;
-            const iconComponent = resolveLucideIcon(act.icon, isMother ? Dumbbell : Activity);
+            let href = `/activities/${act.slug}`;
+            if (act.slug === 'yoga-classes-patna') {
+              href = '/yoga-classes-patna';
+            } else if (act.slug === 'winter-camp' || act.slug === 'winter' || slugLower.includes('winter')) {
+              href = '/events/winter';
+            } else if (act.slug === 'summer-camp-kids-patna' || act.slug === 'summer-camp' || slugLower.includes('summer')) {
+              href = '/events/summer-camp-kids-patna';
+            } else if (act.slug === 'birthday-party' || slugLower.includes('birthday')) {
+              href = '/kids-and-child-birthday-party';
+            } else if (isCampOrEvent) {
+              href = act.slug.startsWith('events/') ? `/${act.slug}` : `/events/${act.slug}`;
+            }
+
+            let label = act.badge_text || act.h1;
+            if (slugLower.includes('winter')) {
+              label = 'Winter Camp 2026';
+            } else if (slugLower.includes('summer') && !label.includes('2026')) {
+              label = 'Summer Camp 2026';
+            }
+
+            const iconComponent = resolveLucideIcon(act.icon, isMother ? Dumbbell : (isCampOrEvent ? Cake : Activity));
 
             const subItem: SubItem = {
               href,
               label,
               icon: iconComponent,
-              color: act.color || (isMother ? '#8B5CF6' : '#FF4D8D'),
-              bg: act.bg || (isMother ? '#EFE7FE' : '#FFE6EF'),
+              color: act.color || (isMother ? '#8B5CF6' : (isCampOrEvent ? '#FF8A3D' : '#FF4D8D')),
+              bg: act.bg || (isMother ? '#EFE7FE' : (isCampOrEvent ? '#FFEADB' : '#FFE6EF')),
             };
 
             if (isMother) {
               motherPrograms.push(subItem);
+            } else if (isCampOrEvent) {
+              campsEvents.push(subItem);
             } else {
               childActivities.push(subItem);
             }
           });
 
-          // Also keep dedicated /mothers landing page in mother programs list if not already present
+          // Keep dedicated overview pages
           if (!motherPrograms.some(m => m.href === '/mothers')) {
             motherPrograms.push({
               href: '/mothers',
@@ -261,12 +295,25 @@ const Navbar: React.FC = () => {
             });
           }
 
+          if (!campsEvents.some(c => c.href === '/events')) {
+            campsEvents.push({
+              href: '/events',
+              label: 'All Camps & Events',
+              icon: Sparkles,
+              color: '#FF4D8D',
+              bg: '#FFE6EF'
+            });
+          }
+
           setNavItems(prev => prev.map(item => {
             if (item.label === 'Activities' && childActivities.length > 0) {
               return { ...item, subpages: childActivities };
             }
             if (item.label === 'Programs for Mothers' && motherPrograms.length > 0) {
               return { ...item, subpages: motherPrograms };
+            }
+            if (item.label === 'Camps & Events' && campsEvents.length > 0) {
+              return { ...item, subpages: campsEvents };
             }
             return item;
           }));

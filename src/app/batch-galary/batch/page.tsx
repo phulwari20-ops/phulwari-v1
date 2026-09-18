@@ -145,11 +145,12 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
   const [batchesLoading, setBatchesLoading] = useState(true);
 
   useEffect(() => {
-    let channel: any = null;
+    let subHandleBatches: any = null;
+    let subHandleSchedules: any = null;
 
     const fetchBatchesFromDb = async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
       try {
         const res = await fetch('/api/batches', {
@@ -160,9 +161,7 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
         if (res.ok) {
           const json = await res.json();
           if (json.data && json.data.length > 0) {
-            console.log('✅ Dynamic Batches fetched via API:', json.data);
             setDynamicBatches(json.data);
-            // Keep collapsed by default so user can choose which batch to expand
             setSelectedBatchId((prev) => (prev && json.data.some((b: any) => b.id?.toString() === prev) ? prev : null));
           }
           if (json.schedules) {
@@ -178,35 +177,38 @@ export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1'
 
     fetchBatchesFromDb();
 
-    // Try optional realtime subscription if accessible, otherwise fail gracefully
+    // Subscribe with resilient fallback (Realtime primary, HTTPS polling fallback on error/restricted network)
     (async () => {
       try {
         const { createClient } = await import('@/lib/supabase/client');
+        const { subscribeWithFallback } = await import('@/lib/supabase/realtimeFallback');
         const supabase = createClient();
-        channel = supabase
-          .channel('batches-realtime-listener')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'batches' }, () => {
-            fetchBatchesFromDb();
-          })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'batch_schedules' }, () => {
-            fetchBatchesFromDb();
-          })
-          .subscribe();
+
+        subHandleBatches = subscribeWithFallback({
+          supabase,
+          channelName: 'batches-realtime-listener',
+          table: 'batches',
+          onDataChange: () => fetchBatchesFromDb(),
+          pollFn: () => fetchBatchesFromDb(),
+          pollIntervalMs: 12000,
+        });
+
+        subHandleSchedules = subscribeWithFallback({
+          supabase,
+          channelName: 'schedules-realtime-listener',
+          table: 'batch_schedules',
+          onDataChange: () => fetchBatchesFromDb(),
+          pollFn: () => fetchBatchesFromDb(),
+          pollIntervalMs: 12000,
+        });
       } catch (subErr) {
-        // Suppress expected error on restricted networks
+        console.warn('Realtime subscription setup failed:', subErr);
       }
     })();
 
-    // Polling fallback every 10s to guarantee new backend data is reflected via /api/batches
-    const pollInterval = setInterval(fetchBatchesFromDb, 10000);
-
     return () => {
-      clearInterval(pollInterval);
-      if (channel) {
-        import('@/lib/supabase/client').then(({ createClient }) => {
-          createClient().removeChannel(channel);
-        }).catch(() => {});
-      }
+      if (subHandleBatches) subHandleBatches.unsubscribe();
+      if (subHandleSchedules) subHandleSchedules.unsubscribe();
     };
   }, []);
 
