@@ -26,10 +26,19 @@ export async function getActivityBySlug(slug: string): Promise<ActivityPageData 
       .eq('slug', cleanSlug)
       .maybeSingle();
 
-    const formatActivity = (item: any): ActivityPageData => ({
-      ...item,
-      content_color: item.content_color || item.cta?.content_color || undefined,
-    });
+    const formatActivity = (item: any): ActivityPageData => {
+      const fallback = DEFAULT_ACTIVITIES.find(
+        (a) =>
+          a.slug.toLowerCase() === item.slug?.toLowerCase() ||
+          (a.aliases && a.aliases.map((al) => al.toLowerCase()).includes(item.slug?.toLowerCase()))
+      );
+
+      return {
+        ...item,
+        content_color: item.content_color || item.cta?.content_color || undefined,
+        videos: (Array.isArray(item.videos) && item.videos.length > 0) ? item.videos : (fallback?.videos || []),
+      };
+    };
 
     if (!directErr && directMatch) {
       return formatActivity(directMatch);
@@ -78,10 +87,18 @@ export async function getAllActivities(): Promise<ActivityPageData[]> {
       .order('order_index', { ascending: true });
 
     if (!error && data && data.length > 0) {
-      return data.map((item: any) => ({
-        ...item,
-        content_color: item.content_color || item.cta?.content_color || undefined,
-      })) as ActivityPageData[];
+      return data.map((item: any) => {
+        const fallback = DEFAULT_ACTIVITIES.find(
+          (a) =>
+            a.slug.toLowerCase() === item.slug?.toLowerCase() ||
+            (a.aliases && a.aliases.map((al) => al.toLowerCase()).includes(item.slug?.toLowerCase()))
+        );
+        return {
+          ...item,
+          content_color: item.content_color || item.cta?.content_color || undefined,
+          videos: (Array.isArray(item.videos) && item.videos.length > 0) ? item.videos : (fallback?.videos || []),
+        };
+      }) as ActivityPageData[];
     }
   } catch (err) {
     console.error('Error fetching all activities from Supabase:', err);
