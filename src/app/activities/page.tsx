@@ -79,20 +79,18 @@ export default function Activities({ headingLevel = 'h1' }: { headingLevel?: 'h1
   useEffect(() => {
     async function loadActivities() {
       try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('activity_pages')
-          .select('*')
-          .eq('is_active', true)
-          .order('order_index', { ascending: true });
-
-        if (!error && data && data.length > 0) {
-          setActivitiesList(data as ActivityPageData[]);
+        const res = await fetch('/api/activities', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setActivitiesList(data as ActivityPageData[]);
+          }
         }
       } catch (err) {
         console.error('Error fetching activities:', err);
       }
     }
+
     loadActivities();
   }, []);
 

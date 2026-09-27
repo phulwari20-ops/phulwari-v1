@@ -1,27 +1,43 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
-import { getSupabaseKey, getSupabaseUrl } from '@/lib/supabase/env'
+import { createServerClient } from "@supabase/ssr";
+import { type NextRequest, NextResponse } from "next/server";
+import { getSupabaseKey, getSupabaseUrl } from "@/lib/supabase/env";
 
-export const updateSession = async (request: NextRequest) => {
-  let supabaseResponse = NextResponse.next({ request })
+export const createClient = (request: NextRequest) => {
+  let supabaseResponse = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
-  const supabase = createServerClient(getSupabaseUrl(), getSupabaseKey(), {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll()
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        supabaseResponse = NextResponse.next({ request })
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
-        )
+  const supabaseUrl = getSupabaseUrl();
+  const supabaseKey = getSupabaseKey();
+
+  const supabase = createServerClient(
+    supabaseUrl,
+    supabaseKey,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
       },
     },
-  })
+  );
 
-  // Refresh the auth token so portal sessions stay alive.
-  await supabase.auth.getUser()
+  return { supabase, supabaseResponse };
+};
 
-  return supabaseResponse
-}
+export const updateSession = async (request: NextRequest) => {
+  const { supabase, supabaseResponse } = createClient(request);
+  await supabase.auth.getUser();
+  return supabaseResponse;
+};

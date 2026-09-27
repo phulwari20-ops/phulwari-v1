@@ -1,5 +1,4 @@
-import { createBrowserClient } from '@supabase/ssr'
-import { getSupabaseKey, getSupabaseUrl } from '@/lib/supabase/env'
+import { createClient as createResilientClient } from '@/lib/supabase/client'
 
-export const createClient = () =>
-  createBrowserClient(getSupabaseUrl(), getSupabaseKey())
+export const createClient = () => createResilientClient()
+

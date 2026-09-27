@@ -246,40 +246,47 @@ export default function TestimonialsPage({ headingLevel = 'h1' }: { headingLevel
   /* ── Review form ── */
   const [form, setForm] = useState({ name: '', program: '', rating: 5, message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [lowRatingShown, setLowRatingShown] = useState(false);
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
     if (!form.name.trim() || !form.message.trim() || form.rating === 0) return;
 
-    if (form.rating >= 4) {
-      try {
-        await fetch('/api/reviews', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            author_name: form.name,
-            review_date: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
-            rating: form.rating,
-            content: form.message,
-            program_tag: form.program || 'Phulwari Premium Circle',
-          }),
-        });
-      } catch (e) {
-        console.error('Failed to post review via API:', e);
-      }
+    setIsSubmitting(true);
+    try {
+      if (form.rating >= 4) {
+        try {
+          await fetch('/api/reviews', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              author_name: form.name.trim(),
+              review_date: new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+              rating: form.rating,
+              content: form.message.trim(),
+              program_tag: form.program || 'Phulwari Premium Circle',
+            }),
+          });
+        } catch (e) {
+          console.error('Failed to post review via API:', e);
+        }
 
-      const text = `${form.message}`;
-      navigator.clipboard.writeText(text).catch(() => {});
-      window.open(GOOGLE_REVIEW_URL, '_blank');
-      setSubmitted(true);
-    } else {
-      const msg = encodeURIComponent(
-        `Hi Phulwari Team! My name is ${form.name}${
-          form.program ? ` (enrolled in ${form.program})` : ''
-        }.\n\nFeedback: ${form.message}\n\nRating: ${'⭐'.repeat(form.rating)}`
-      );
-      window.open(`${WHATSAPP_BASE}${msg}`, '_blank');
-      setLowRatingShown(true);
+        const text = `${form.message}`;
+        navigator.clipboard.writeText(text).catch(() => {});
+        window.open(GOOGLE_REVIEW_URL, '_blank');
+        setSubmitted(true);
+      } else {
+        const msg = encodeURIComponent(
+          `Hi Phulwari Team! My name is ${form.name}${
+            form.program ? ` (enrolled in ${form.program})` : ''
+          }.\n\nFeedback: ${form.message}\n\nRating: ${'⭐'.repeat(form.rating)}`
+        );
+        window.open(`${WHATSAPP_BASE}${msg}`, '_blank');
+        setLowRatingShown(true);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -587,10 +594,12 @@ export default function TestimonialsPage({ headingLevel = 'h1' }: { headingLevel
                 <button
                   className="rf-submit"
                   onClick={handleSubmit}
-                  disabled={!form.name.trim() || !form.message.trim() || form.rating === 0}
+                  disabled={isSubmitting || !form.name.trim() || !form.message.trim() || form.rating === 0}
                 >
                   <Send size={16} />
-                  {form.rating >= 4
+                  {isSubmitting
+                    ? 'Submitting...'
+                    : form.rating >= 4
                     ? 'Submit & Post on Google'
                     : form.rating > 0
                     ? 'Send Feedback on WhatsApp'

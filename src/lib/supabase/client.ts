@@ -18,27 +18,15 @@ function createResilientFetch() {
       return fetch(proxyUrl, init);
     };
 
-    // If direct fetch is known to be blocked on this network, use proxy immediately
-    if (directFetchFailedRecently) {
-      try {
-        return await forwardToProxy();
-      } catch (_) {
-        directFetchFailedRecently = false; // Reset to retry direct if proxy failed
-      }
-    }
-
+    // On restricted networks (such as Maya OS / Linux with NIC DNS 164.100.3.1),
+    // direct connection to *.supabase.co fails with net::ERR_SSL_PROTOCOL_ERROR.
+    // Always routing through /api/supabase-proxy guarantees the browser never connects
+    // directly to *.supabase.co.
     try {
-      const res = await fetch(input, init);
-      directFetchFailedRecently = false;
-      return res;
-    } catch (directErr) {
-      // Direct call failed (e.g. net::ERR_SSL_PROTOCOL_ERROR on restricted government network)
-      directFetchFailedRecently = true;
-      try {
-        return await forwardToProxy();
-      } catch (proxyErr) {
-        throw directErr;
-      }
+      return await forwardToProxy();
+    } catch (proxyErr) {
+      console.warn('Proxy fetch warning, trying direct fetch as fallback:', proxyErr);
+      return await fetch(input, init);
     }
   };
 }
@@ -50,3 +38,4 @@ export function createClient() {
     },
   });
 }
+

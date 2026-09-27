@@ -136,81 +136,115 @@ const parseTimeToMinutes = (timeStr: string): number => {
  * `headingLevel` lets the homepage demote them and keeps exactly one <h1> per
  * page, which is what both the accessibility tree and Google expect.
  */
+const DEFAULT_FALLBACK_BATCHES = [
+  {
+    id: 'batch-fallback-1',
+    batch_name: 'Mother & Toddler Program',
+    age_group: '1–3 Years',
+    start_time: '10:30 AM',
+    end_time: '11:30 AM',
+    days: 'Monday to Saturday',
+    emoji: '👶',
+    tagline: 'Bonding, Sensory Play & Early Milestones',
+    description: 'Special guided morning sessions for mothers and toddlers focusing on cognitive bonding, fine motor development, and sensory play.',
+    includes: ['Sensory Play', 'Guided Movement', 'Mother-Child Bonding', 'Early Socialization'],
+    child_benefits: ['Motor skill enhancement', 'Early speech stimulation', 'Sensory development'],
+    mother_benefits: ['Post-natal fitness exercises', 'Parenting peer community', 'Quality bonding time']
+  },
+  {
+    id: 'batch-fallback-2',
+    batch_name: 'Phulwari Premium Circle',
+    age_group: '3+ Years',
+    start_time: '05:00 PM',
+    end_time: '08:00 PM',
+    days: 'Monday to Sunday',
+    emoji: '⭐',
+    tagline: 'Multi-Activity All-Inclusive Development',
+    description: 'Comprehensive evening program covering martial arts, sports, gymnastics, dance, and arts with individual coach attention.',
+    includes: ['Gymnastics & Yoga', 'Martial Arts & Self Defense', 'Dance & Zumba', 'Art & Craft Studio'],
+    child_benefits: ['Physical fitness & flexibility', 'Discipline & self-confidence', 'Creative expression'],
+    mother_benefits: ['Concurrent mothers fitness batches', 'Complimentary waiting lounge', 'Daily progress reports']
+  },
+  {
+    id: 'batch-fallback-3',
+    batch_name: 'Phulwari Core',
+    age_group: '3+ Years',
+    start_time: '06:30 PM',
+    end_time: '08:00 PM',
+    days: 'Wednesday to Sunday',
+    emoji: '🌟',
+    tagline: 'Focused Academy Training',
+    description: 'Dedicated evening sports and physical development batches including cricket, roller skating, and specialized martial arts.',
+    includes: ['Cricket Nets Training', 'Speed Roller Skating', 'Agility & Coordination', 'Core Conditioning'],
+    child_benefits: ['Hand-eye coordination', 'Sporting stamina & team spirit', 'Stamina building'],
+    mother_benefits: ['Safe supervised facility', 'Weekend parent matches', 'Nutritional guidance']
+  }
+];
+
 export default function BatchPage({ headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = {}) {
   const Heading = headingLevel;
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [dynamicBatches, setDynamicBatches] = useState<any[]>([]);
+  const [dynamicBatches, setDynamicBatches] = useState<any[]>(DEFAULT_FALLBACK_BATCHES);
   const [dynamicSchedules, setDynamicSchedules] = useState<any[]>([]);
-  const [batchesLoading, setBatchesLoading] = useState(true);
+  const [batchesLoading, setBatchesLoading] = useState(false);
 
   useEffect(() => {
-    let subHandleBatches: any = null;
-    let subHandleSchedules: any = null;
+    let isMounted = true;
 
     const fetchBatchesFromDb = async () => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-
       try {
         const res = await fetch('/api/batches', {
-          signal: controller.signal,
           cache: 'no-store'
         });
-        clearTimeout(timeoutId);
         if (res.ok) {
           const json = await res.json();
-          if (json.data && json.data.length > 0) {
-            setDynamicBatches(json.data);
-            setSelectedBatchId((prev) => (prev && json.data.some((b: any) => b.id?.toString() === prev) ? prev : null));
-          }
-          if (json.schedules) {
-            setDynamicSchedules(json.schedules);
+          if (isMounted) {
+            if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+              setDynamicBatches(json.data);
+              setSelectedBatchId((prev) => (prev && json.data.some((b: any) => b.id?.toString() === prev) ? prev : null));
+            }
+            if (json.schedules && Array.isArray(json.schedules)) {
+              setDynamicSchedules(json.schedules);
+            }
           }
         }
       } catch (e) {
-        console.error('❌ Batch API fetch error:', e);
+        console.warn('Batch API fetch error (using fallback):', e);
       } finally {
-        setBatchesLoading(false);
+        if (isMounted) {
+          setBatchesLoading(false);
+        }
       }
     };
 
+    // Initial fetch from server-side /api/batches
     fetchBatchesFromDb();
 
-    // Subscribe with resilient fallback (Realtime primary, HTTPS polling fallback on error/restricted network)
-    (async () => {
-      try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const { subscribeWithFallback } = await import('@/lib/supabase/realtimeFallback');
-        const supabase = createClient();
+    // Pure HTTPS polling fallback under phulwari.co.in (no direct WebSocket to *.supabase.co)
+    const pollInterval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      fetchBatchesFromDb();
+    }, 20000);
 
-        subHandleBatches = subscribeWithFallback({
-          supabase,
-          channelName: 'batches-realtime-listener',
-          table: 'batches',
-          onDataChange: () => fetchBatchesFromDb(),
-          pollFn: () => fetchBatchesFromDb(),
-          pollIntervalMs: 12000,
-        });
-
-        subHandleSchedules = subscribeWithFallback({
-          supabase,
-          channelName: 'schedules-realtime-listener',
-          table: 'batch_schedules',
-          onDataChange: () => fetchBatchesFromDb(),
-          pollFn: () => fetchBatchesFromDb(),
-          pollIntervalMs: 12000,
-        });
-      } catch (subErr) {
-        console.warn('Realtime subscription setup failed:', subErr);
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        fetchBatchesFromDb();
       }
-    })();
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
 
     return () => {
-      if (subHandleBatches) subHandleBatches.unsubscribe();
-      if (subHandleSchedules) subHandleSchedules.unsubscribe();
+      isMounted = false;
+      clearInterval(pollInterval);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
     };
   }, []);
+
 
   // Group and sort schedules in strict ASCENDING chronological order starting with Sunday:
   // Sunday (1) -> Monday (2) -> Tuesday (3) -> Wednesday (4) -> Thursday (5) -> Friday (6) -> Saturday (7)

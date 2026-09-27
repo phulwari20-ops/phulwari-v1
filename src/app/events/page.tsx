@@ -127,14 +127,11 @@ export default function EventsHubPage() {
   useEffect(() => {
     async function loadCmsEvents() {
       try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('activity_pages')
-          .select('*')
-          .eq('is_active', true)
-          .order('order_index', { ascending: true });
+        const res = await fetch('/api/activities', { cache: 'no-store' });
+        const data = res.ok ? await res.json() : null;
 
-        if (!error && Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data) && data.length > 0) {
+
           // Clone default events as base so the 3 core items are always preserved
           const updatedEvents = [...defaultEvents];
 

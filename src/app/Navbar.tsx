@@ -208,15 +208,12 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     async function syncDynamicActivities() {
       try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('activity_pages')
-          .select('*')
-          .eq('is_active', true)
-          .order('order_index', { ascending: true });
+        const res = await fetch('/api/activities', { cache: 'no-store' });
+        const data = res.ok ? await res.json() : null;
 
-        if (!error && data && data.length > 0) {
+        if (Array.isArray(data) && data.length > 0) {
           const childActivities: SubItem[] = [];
+
           const motherPrograms: SubItem[] = [];
           const campsEvents: SubItem[] = [];
 

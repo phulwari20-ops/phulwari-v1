@@ -29,15 +29,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
+    const cleanAuthor = String(author_name).trim();
+    const cleanContent = String(content).trim();
+
     const supabase = await createClient();
+
+    // Check for duplicate submission with the same author and content
+    const { data: existing } = await supabase
+      .from('reviews')
+      .select('*')
+      .ilike('author_name', cleanAuthor)
+      .eq('content', cleanContent)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      return NextResponse.json({ success: true, data: existing, note: 'Review already recorded' });
+    }
+
     const { data, error } = await supabase
       .from('reviews')
       .insert([
         {
-          author_name,
+          author_name: cleanAuthor,
           review_date: review_date || new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }),
           rating: Number(rating),
-          content,
+          content: cleanContent,
           program_tag: program_tag || 'Phulwari Premium Circle',
           is_verified: true,
         },
@@ -55,3 +71,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+

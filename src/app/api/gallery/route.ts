@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
+import { getSupabaseUrl, getSupabaseKey } from '@/lib/supabase/env';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
-
   let dbItems: any[] = [];
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/gallery?select=*&order=created_at.desc`, {
+    const supabaseUrl = getSupabaseUrl().replace(/\/+$/, '');
+    const supabaseKey = getSupabaseKey();
+
+    const res = await fetch(`${supabaseUrl}/rest/v1/gallery?select=*&order=sort_order.asc,created_at.desc`, {
       headers: {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`,
@@ -17,12 +18,15 @@ export async function GET() {
     });
     if (res.ok) {
       const data = await res.json();
-      dbItems = data.map((item: any) => ({
+      dbItems = Array.isArray(data) ? data.map((item: any) => ({
         ...item,
         url: item.image_url || item.url
-      }));
+      })) : [];
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error('Error in /api/gallery GET:', err);
+  }
+
 
   return NextResponse.json({
     success: true,
