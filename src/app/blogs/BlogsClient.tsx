@@ -21,6 +21,14 @@ export default function BlogsClient({ initialBlogs }: BlogsClientProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const categories = ['All', ...Array.from(new Set(initialBlogs.map(b => b.category).filter(Boolean)))];
+  const getSafeImage = (img: string | undefined | null, title?: string) => {
+    if (!img || typeof img !== 'string' || img.trim() === '' || img.startsWith('blob:')) {
+      if (title && /brain|development|milestone|age|child/i.test(title)) return '/mind_development.jpg'
+      return '/galary4.webp'
+    }
+    return img
+  }
+
   const filteredBlogs = selectedCategory === 'All'
     ? initialBlogs
     : initialBlogs.filter(b => b.category === selectedCategory);
@@ -118,11 +126,18 @@ export default function BlogsClient({ initialBlogs }: BlogsClientProps) {
                   {/* Image */}
                   <div className="blog-card-img-wrap">
                     <img
-                      src={blog.featured_image || '/galary4.webp'}
+                      src={getSafeImage(blog.featured_image, blog.title)}
                       alt={blog.title}
                       className="blog-card-img"
-                      onError={(e: any) => { e.target.src = '/galary4.webp'; }}
-                     loading="lazy" decoding="async" />
+                      onError={(e: any) => {
+                        if (!e.currentTarget.dataset.fallback) {
+                          e.currentTarget.dataset.fallback = 'true';
+                          e.currentTarget.src = '/galary4.webp';
+                        }
+                      }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span className="blog-card-badge">{blog.category}</span>
                   </div>
 

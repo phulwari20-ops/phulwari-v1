@@ -248,11 +248,13 @@ export default function TestimonialsPage({ headingLevel = 'h1' }: { headingLevel
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lowRatingShown, setLowRatingShown] = useState(false);
+  const submitLockRef = useRef(false);
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
+    if (submitLockRef.current || isSubmitting) return;
     if (!form.name.trim() || !form.message.trim() || form.rating === 0) return;
 
+    submitLockRef.current = true;
     setIsSubmitting(true);
     try {
       if (form.rating >= 4) {

@@ -13,18 +13,41 @@ export default function StudentLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [activeSession, setActiveSession] = useState<any>(null)
+  const [logoutNotice, setLogoutNotice] = useState(false)
 
+  // Check if user came from logout or has an active session, but DO NOT auto-redirect!
+  // Always present the login screen so users have full manual control.
   useEffect(() => {
     try {
-      const savedSt = localStorage.getItem('phulwari_student')
-      if (savedSt) {
-        const parsed = JSON.parse(savedSt)
-        if (parsed && (parsed.id || parsed.admission_id)) {
-          setTimeout(() => router.replace('/portal/dashboard'), 0)
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('logout') === '1') {
+          localStorage.removeItem('phulwari_student')
+          sessionStorage.clear()
+          setLogoutNotice(true)
+          setActiveSession(null)
+          return
+        }
+
+        const savedSt = localStorage.getItem('phulwari_student')
+        if (savedSt) {
+          const parsed = JSON.parse(savedSt)
+          if (parsed && (parsed.id || parsed.admission_id)) {
+            setActiveSession(parsed)
+          }
         }
       }
     } catch (e) {}
-  }, [router])
+  }, [])
+
+  const handleClearSession = () => {
+    localStorage.removeItem('phulwari_student')
+    try { sessionStorage.clear() } catch (e) {}
+    setActiveSession(null)
+    setAdmissionId('')
+    setPassword('')
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -159,6 +182,74 @@ export default function StudentLoginPage() {
           </p>
         </div>
 
+        {logoutNotice && (
+          <div style={{
+            padding: '10px 14px',
+            background: '#F0FDF4',
+            border: '1px solid #BBF7D0',
+            borderRadius: '14px',
+            color: '#15803D',
+            fontSize: '12px',
+            fontWeight: 600,
+            marginBottom: '1rem',
+            textAlign: 'center'
+          }}>
+            ✓ You have been securely logged out. Enter credentials to sign in again.
+          </div>
+        )}
+
+        {activeSession && (
+          <div style={{
+            padding: '12px 14px',
+            background: '#EFF6FF',
+            border: '1px solid #BFDBFE',
+            borderRadius: '14px',
+            marginBottom: '1rem'
+          }}>
+            <div style={{ fontSize: '11px', color: '#1E40AF', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Previous Session Detected
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 800, color: '#1E3A8A', marginTop: '2px' }}>
+              {activeSession.name || activeSession.admission_id} <span style={{ fontSize: '12px', fontWeight: 600, color: '#3B82F6' }}>({activeSession.admission_id})</span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+              <button
+                type="button"
+                onClick={() => router.push('/portal/dashboard')}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  background: '#2563EB',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Go to Dashboard →
+              </button>
+              <button
+                type="button"
+                onClick={handleClearSession}
+                style={{
+                  padding: '8px 12px',
+                  background: '#F1F5F9',
+                  color: '#475569',
+                  border: '1px solid #CBD5E1',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Sign Out / Switch
+              </button>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div style={{
             padding: '10px 14px',
@@ -178,7 +269,7 @@ export default function StudentLoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleLogin} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
             <div style={{
               display: 'flex',

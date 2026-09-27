@@ -13,7 +13,20 @@ export async function GET() {
       return NextResponse.json({ success: false, data: [] });
     }
 
-    return NextResponse.json({ success: true, data: data || [] });
+    // Deduplicate any repeated reviews in database by author + normalized content
+    const uniqueReviews: any[] = [];
+    const seen = new Set<string>();
+    (data || []).forEach((r: any) => {
+      const author = (r.author_name || r.name || '').trim().toLowerCase();
+      const content = (r.content || r.text || '').trim().toLowerCase();
+      const key = `${author}:::${content}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueReviews.push(r);
+      }
+    });
+
+    return NextResponse.json({ success: true, data: uniqueReviews });
   } catch (err: any) {
     console.error('[api/reviews] Server exception:', err);
     return NextResponse.json({ success: false, data: [] }, { status: 500 });
@@ -34,16 +47,31 @@ export async function POST(req: Request) {
 
     const supabase = await createClient();
 
-    // Check for duplicate submission with the same author and content
+    // Check for duplicate submission with the same author or same content
     const { data: existing } = await supabase
       .from('reviews')
       .select('*')
-      .ilike('author_name', cleanAuthor)
       .eq('content', cleanContent)
       .limit(1);
 
     if (existing && existing.length > 0) {
-      return NextResponse.json({ success: true, data: existing, note: 'Review already recorded' });
+      return NextResponse.json({ success: true, data: existing, note: 'Duplicate review prevented' });
+    }
+
+    // Secondary check for same author with similar content
+    const { data: existingAuthor } = await supabase
+      .from('reviews')
+      .select('*')
+      .ilike('author_name', cleanAuthor)
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    const isDuplicateAuthor = (existingAuthor || []).some((r: any) => 
+      (r.content || '').trim().toLowerCase() === cleanContent.toLowerCase()
+    );
+
+    if (isDuplicateAuthor) {
+      return NextResponse.json({ success: true, data: existingAuthor, note: 'Duplicate review prevented' });
     }
 
     const { data, error } = await supabase

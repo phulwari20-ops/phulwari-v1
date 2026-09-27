@@ -421,7 +421,7 @@ export default function StudentDashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem('phulwari_student')
     try { sessionStorage.clear() } catch (e) {}
-    setTimeout(() => router.replace('/portal/login'), 0)
+    window.location.replace('/portal/login?logout=1')
   }
 
   if (loading || !student) {

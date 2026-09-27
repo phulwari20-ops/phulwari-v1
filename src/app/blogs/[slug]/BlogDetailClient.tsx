@@ -62,6 +62,14 @@ export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClie
   const encodedUrl = encodeURIComponent(pageUrl);
   const encodedTitle = encodeURIComponent(blog.title || '');
 
+  const getSafeImage = (img: string | undefined | null, title?: string) => {
+    if (!img || typeof img !== 'string' || img.trim() === '' || img.startsWith('blob:')) {
+      if (title && /brain|development|milestone|age|child/i.test(title)) return '/mind_development.jpg'
+      return '/galary4.webp'
+    }
+    return img
+  }
+
   return (
     <>
       <style>{`
@@ -150,15 +158,20 @@ export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClie
 
             {/* ── ARTICLE ── */}
             <article className="bd-article">
-              {blog.featured_image && (
-                <div className="bd-hero">
-                  <img
-                    src={blog.featured_image}
-                    alt={blog.title}
-                    onError={(e: any) => { e.target.src = '/galary4.webp'; }}
-                   loading="lazy" decoding="async" />
-                </div>
-              )}
+              <div className="bd-hero">
+                <img
+                  src={getSafeImage(blog.banner_image || blog.featured_image, blog.title)}
+                  alt={blog.title}
+                  onError={(e: any) => {
+                    if (!e.currentTarget.dataset.fallback) {
+                      e.currentTarget.dataset.fallback = 'true';
+                      e.currentTarget.src = '/galary4.webp';
+                    }
+                  }}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
               <div className="bd-art-body">
                 <span className="bd-cat-tag">{blog.category}</span>
                 <h1 className="bd-title bd-baloo">{blog.title}</h1>
