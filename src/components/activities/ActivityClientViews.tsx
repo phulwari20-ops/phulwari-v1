@@ -259,7 +259,7 @@ interface FaqAccordionProps {
 }
 
 export function ActivityFaqAccordion({ faqs, accentColor }: FaqAccordionProps) {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   if (!faqs || faqs.length === 0) return null;
 
