@@ -281,6 +281,12 @@ export default function WinterEventsPage() {
                 itemReviewed: {
                   '@id': 'https://www.phulwari.co.in/#organization',
                 },
+                reviewRating: {
+                  '@type': 'Rating',
+                  ratingValue: 5,
+                  bestRating: 5,
+                  worstRating: 1,
+                },
                 author: {
                   '@type': 'Person',
                   name: 'Ankita Verma',
@@ -292,6 +298,12 @@ export default function WinterEventsPage() {
                 '@type': 'Review',
                 itemReviewed: {
                   '@id': 'https://www.phulwari.co.in/#organization',
+                },
+                reviewRating: {
+                  '@type': 'Rating',
+                  ratingValue: 5,
+                  bestRating: 5,
+                  worstRating: 1,
                 },
                 author: {
                   '@type': 'Person',

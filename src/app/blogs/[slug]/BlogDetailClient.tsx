@@ -58,7 +58,7 @@ export default function BlogDetailClient({ blog, allBlogs = [] }: BlogDetailClie
 
   const relatedBlogs = allBlogs.filter(b => b.id !== blog.id && b.slug !== blog.slug).slice(0, 4);
   const readTime = blog.content ? Math.max(1, Math.ceil(blog.content.split(' ').length / 200)) : 5;
-  const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://phulwari.co.in/blogs/${blog.slug}`;
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://www.phulwari.co.in/blogs/${blog.slug}`;
   const encodedUrl = encodeURIComponent(pageUrl);
   const encodedTitle = encodeURIComponent(blog.title || '');
 

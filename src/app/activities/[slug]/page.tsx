@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const canonicalUrl = `https://phulwari.co.in/activities/${activity.slug}`;
+  const canonicalUrl = `https://www.phulwari.co.in/activities/${activity.slug}`;
 
   return {
     title: activity.title_tag,
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         {
           url: activity.hero_image?.startsWith('http')
             ? activity.hero_image
-            : `https://phulwari.co.in${activity.hero_image || '/phulwari_logo.webp'}`,
+            : `https://www.phulwari.co.in${activity.hero_image || '/phulwari_logo.webp'}`,
           width: 1200,
           height: 630,
           alt: activity.h1,
@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       images: [
         activity.hero_image?.startsWith('http')
           ? activity.hero_image
-          : `https://phulwari.co.in${activity.hero_image || '/phulwari_logo.webp'}`,
+          : `https://www.phulwari.co.in${activity.hero_image || '/phulwari_logo.webp'}`,
       ],
     },
   };

@@ -134,7 +134,7 @@ const defaultNavItems: NavItem[] = [
   },
   {
     label: 'Batch & Gallery',
-    href: '/batch-gallery',
+    href: '/batch-galary/gallery',
     accent: '#14B8A6',
     accentBg: '#DFF7F1',
     icon: CalendarDays,
@@ -145,7 +145,7 @@ const defaultNavItems: NavItem[] = [
   },
   {
     label: 'Legal',
-    href: '/legal',
+    href: '/legal/terms',
     accent: '#6B6480',
     accentBg: '#F0ECF8',
     icon: FileText,

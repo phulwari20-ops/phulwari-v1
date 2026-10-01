@@ -48,7 +48,7 @@ export default function SummerCampKidsPatnaLayout({ children }: { children: Reac
           }),
           {
             '@type': 'Event',
-            '@id': 'https://phulwari.co.in/events/summer-camp-kids-patna#event',
+            '@id': 'https://www.phulwari.co.in/events/summer-camp-kids-patna#event',
             name: 'Phulwari Kids Summer Camp Patna 2026',
             description:
               'Summer camp with 10+ activity modules including Roller Skating, Gymnastics, Dance, Art & Craft, Music and Chess for kids aged 3-14 in Kidwaipuri, Patna.',
@@ -71,14 +71,14 @@ export default function SummerCampKidsPatnaLayout({ children }: { children: Reac
             organizer: {
               '@type': 'Organization',
               name: 'Phulwari Mother & Child Activity Centre',
-              url: 'https://phulwari.co.in',
+              url: 'https://www.phulwari.co.in',
             },
             offers: {
               '@type': 'Offer',
               priceCurrency: 'INR',
               availability: 'https://schema.org/InStock',
               validFrom: '2026-03-01',
-              url: 'https://phulwari.co.in/events/summer-camp-kids-patna',
+              url: 'https://www.phulwari.co.in/events/summer-camp-kids-patna',
             },
           },
         ]}

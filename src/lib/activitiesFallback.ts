@@ -135,10 +135,10 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@graph': [
         {
           '@type': 'LocalBusiness',
-          '@id': 'https://phulwari.co.in/#localbusiness',
+          '@id': 'https://www.phulwari.co.in/#localbusiness',
           'name': 'Phulwari Mother & Child Activity Centre',
-          'url': 'https://phulwari.co.in/',
-          'logo': 'https://phulwari.co.in/phulwari_logo.webp',
+          'url': 'https://www.phulwari.co.in/',
+          'logo': 'https://www.phulwari.co.in/phulwari_logo.webp',
           'telephone': '+91-6207368839',
           'email': 'phulwari02@gmail.com',
           'address': {
@@ -157,11 +157,11 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
         },
         {
           '@type': 'EducationalOrganization',
-          '@id': 'https://phulwari.co.in/activities/music#organization',
+          '@id': 'https://www.phulwari.co.in/activities/music#organization',
           'name': 'Phulwari Music Classes for Kids',
-          'url': 'https://phulwari.co.in/activities/music-classes-patna',
+          'url': 'https://www.phulwari.co.in/activities/music-classes-patna',
           'parentOrganization': {
-            '@id': 'https://phulwari.co.in/#localbusiness'
+            '@id': 'https://www.phulwari.co.in/#localbusiness'
           },
           'description': 'Specialized kids music classes, toddler music lessons, and rhythm training in Kidwaipuri, Patna.',
           'areaServed': {
@@ -227,9 +227,9 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'image': 'https://phulwari.co.in/phulwari_logo.webp',
-      '@id': 'https://phulwari.co.in/#localbusiness',
-      'url': 'https://phulwari.co.in/activities/dance-classes-patna',
+      'image': 'https://www.phulwari.co.in/phulwari_logo.webp',
+      '@id': 'https://www.phulwari.co.in/#localbusiness',
+      'url': 'https://www.phulwari.co.in/activities/dance-classes-patna',
       'telephone': '+916207368839',
       'email': 'phulwari02@gmail.com',
       'address': {
@@ -316,9 +316,9 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'image': 'https://phulwari.co.in/phulwari_logo.webp',
-      '@id': 'https://phulwari.co.in/#localbusiness',
-      'url': 'https://phulwari.co.in/activities/gymnastics-classes-for-kids-patna',
+      'image': 'https://www.phulwari.co.in/phulwari_logo.webp',
+      '@id': 'https://www.phulwari.co.in/#localbusiness',
+      'url': 'https://www.phulwari.co.in/activities/gymnastics-classes-for-kids-patna',
       'telephone': '+91 62073 68839',
       'email': 'phulwari02@gmail.com',
       'address': {
@@ -394,9 +394,9 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@graph': [
         {
           '@type': ['LocalBusiness', 'SportsActivityLocation', 'Organization'],
-          '@id': 'https://phulwari.co.in/#organization',
+          '@id': 'https://www.phulwari.co.in/#organization',
           'name': 'Phulwari Mother & Child Activity Centre',
-          'url': 'https://phulwari.co.in/',
+          'url': 'https://www.phulwari.co.in/',
           'telephone': '+916207368839',
           'email': 'phulwari02@gmail.com',
           'address': {
@@ -481,11 +481,19 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
     schema_json: {
       '@context': 'https://schema.org',
       '@type': ['LocalBusiness', 'SportsActivityLocation'],
-      '@id': 'https://phulwari.co.in/#organization',
+      '@id': 'https://www.phulwari.co.in/#organization',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'url': 'https://phulwari.co.in/',
-      'logo': 'https://phulwari.co.in/phulwari_logo.webp',
+      'url': 'https://www.phulwari.co.in/activities/roller-skating',
+      'logo': 'https://www.phulwari.co.in/phulwari_logo.webp',
       'telephone': '+916207368839',
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        'addressLocality': 'Patna',
+        'addressRegion': 'Bihar',
+        'postalCode': '800001',
+        'addressCountry': 'IN'
+      },
       'priceRange': '₹1500'
     },
     order_index: 5,
@@ -547,10 +555,10 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@graph': [
         {
           '@type': 'LocalBusiness',
-          '@id': 'https://phulwari.co.in/#business',
+          '@id': 'https://www.phulwari.co.in/#business',
           'name': 'Phulwari Mother & Child Activity Centre',
-          'url': 'https://phulwari.co.in/',
-          'logo': 'https://phulwari.co.in/phulwari_logo.webp',
+          'url': 'https://www.phulwari.co.in/',
+          'logo': 'https://www.phulwari.co.in/phulwari_logo.webp',
           'telephone': '+91-6207368839',
           'email': 'phulwari02@gmail.com',
           'address': {
@@ -560,6 +568,43 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
             'addressRegion': 'Bihar',
             'postalCode': '800001',
             'addressCountry': 'IN'
+          },
+          'geo': {
+            '@type': 'GeoCoordinates',
+            'latitude': 25.6075,
+            'longitude': 85.1225
+          },
+          'priceRange': '₹₹'
+        },
+        {
+          '@type': 'Course',
+          '@id': 'https://www.phulwari.co.in/#karatecourse',
+          'name': 'Karate and Martial Arts Training for Kids',
+          'description': 'Professional karate classes for children focused on self-defense, discipline, physical fitness, focus, and confidence building in Kidwaipuri, Patna.',
+          'provider': {
+            '@id': 'https://www.phulwari.co.in/#business'
+          },
+          'hasCourseInstance': {
+            '@type': 'CourseInstance',
+            'courseMode': 'onsite',
+            'location': {
+              '@type': 'Place',
+              'name': 'Phulwari Mother & Child Activity Centre',
+              'address': {
+                '@type': 'PostalAddress',
+                'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+                'addressLocality': 'Patna',
+                'addressRegion': 'Bihar',
+                'postalCode': '800001',
+                'addressCountry': 'IN'
+              }
+            },
+            'offers': {
+              '@type': 'Offer',
+              'price': '3500',
+              'priceCurrency': 'INR',
+              'availability': 'https://schema.org/InStock'
+            }
           }
         }
       ]
@@ -621,9 +666,17 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'image': 'https://phulwari.co.in/phulwari_logo.webp',
-      'url': 'https://phulwari.co.in/activities/art-craft',
-      'telephone': '+91 62073 68839'
+      'image': 'https://www.phulwari.co.in/phulwari_logo.webp',
+      'url': 'https://www.phulwari.co.in/activities/art-craft',
+      'telephone': '+91 62073 68839',
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        'addressLocality': 'Patna',
+        'addressRegion': 'Bihar',
+        'postalCode': '800001',
+        'addressCountry': 'IN'
+      }
     },
     order_index: 7,
     is_active: true
@@ -681,9 +734,17 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'image': 'https://phulwari.co.in/phulwari_logo.webp',
-      'url': 'https://phulwari.co.in/yoga-classes-patna',
-      'telephone': '+91 62073 68839'
+      'image': 'https://www.phulwari.co.in/phulwari_logo.webp',
+      'url': 'https://www.phulwari.co.in/activities/yoga-classes-patna',
+      'telephone': '+91 62073 68839',
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        'addressLocality': 'Patna',
+        'addressRegion': 'Bihar',
+        'postalCode': '800001',
+        'addressCountry': 'IN'
+      }
     },
     order_index: 8,
     is_active: true
@@ -751,8 +812,16 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'url': 'https://phulwari.co.in/activities/cricket-coaching-patna',
-      'telephone': '+91 62073 68839'
+      'url': 'https://www.phulwari.co.in/activities/cricket-coaching-patna',
+      'telephone': '+91 62073 68839',
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        'addressLocality': 'Patna',
+        'addressRegion': 'Bihar',
+        'postalCode': '800001',
+        'addressCountry': 'IN'
+      }
     },
     order_index: 9,
     is_active: true
@@ -807,7 +876,16 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'url': 'https://phulwari.co.in/activities/chess-classes-patna'
+      'url': 'https://www.phulwari.co.in/activities/chess-classes-patna',
+      'telephone': '+91 62073 68839',
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        'addressLocality': 'Patna',
+        'addressRegion': 'Bihar',
+        'postalCode': '800001',
+        'addressCountry': 'IN'
+      }
     },
     order_index: 10,
     is_active: true
@@ -866,8 +944,16 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'url': 'https://phulwari.co.in/activities/play-zone',
-      'telephone': '+91 62073 68839'
+      'url': 'https://www.phulwari.co.in/activities/play-zone',
+      'telephone': '+91 62073 68839',
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        'addressLocality': 'Patna',
+        'addressRegion': 'Bihar',
+        'postalCode': '800001',
+        'addressCountry': 'IN'
+      }
     },
     order_index: 11,
     is_active: true
@@ -920,7 +1006,16 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'url': 'https://phulwari.co.in/activities/mother-toddler-program'
+      'url': 'https://www.phulwari.co.in/activities/mother-toddler-program',
+      'telephone': '+91 62073 68839',
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        'addressLocality': 'Patna',
+        'addressRegion': 'Bihar',
+        'postalCode': '800001',
+        'addressCountry': 'IN'
+      }
     },
     order_index: 12,
     is_active: true
@@ -973,7 +1068,16 @@ export const DEFAULT_ACTIVITIES: ActivityPageData[] = [
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       'name': 'Phulwari Mother & Child Activity Centre',
-      'url': 'https://phulwari.co.in/activities/mother-fitness-program'
+      'url': 'https://www.phulwari.co.in/activities/mother-fitness-program',
+      'telephone': '+91 62073 68839',
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'M/32, Road No. 25, Sri Krishna Nagar, Kidwaipuri Main Road',
+        'addressLocality': 'Patna',
+        'addressRegion': 'Bihar',
+        'postalCode': '800001',
+        'addressCountry': 'IN'
+      }
     },
     order_index: 13,
     is_active: true

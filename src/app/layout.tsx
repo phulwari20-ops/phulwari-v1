@@ -107,9 +107,9 @@ export const metadata: Metadata = {
     ],
   },
 
-  verification: {
+  verification: VERIFICATION.google ? {
     google: VERIFICATION.google,
-  },
+  } : undefined,
 
   twitter: {
     card: 'summary_large_image',
@@ -152,15 +152,19 @@ export default function RootLayout({
     <html lang="en-IN" className={`${poppins.variable} ${quicksand.variable} ${baloo2.variable} ${lora.variable} scroll-smooth`} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ApiLogger />
-        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} strategy="afterInteractive" />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
-          `}
-        </Script>
+        {GA_MEASUREMENT_ID ? (
+          <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} strategy="afterInteractive" />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        ) : null}
         {/* Site-wide graph, emitted once. Pages add their own nodes and link
             back to these by @id, so nothing is ever duplicated. */}
         <JsonLd id="site-schema" nodes={[organizationSchema(), websiteSchema()]} />

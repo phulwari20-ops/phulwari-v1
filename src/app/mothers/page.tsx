@@ -635,7 +635,7 @@ export default function MothersPage() {
                     );
                     if (isFitness) {
                       return (
-                        <a href="https://phulwari.co.in/mothers/fitness" key={i} className="inline-block transform hover:-translate-y-0.5 transition cursor-pointer">
+                        <a href="https://www.phulwari.co.in/mothers/fitness" key={i} className="inline-block transform hover:-translate-y-0.5 transition cursor-pointer">
                           <span className="pg-include-pill border-pink-400/50 bg-pink-50/50 hover:bg-pink-100/60 shadow-xs">
                             <span
                               className="pg-include-icon"
@@ -650,7 +650,7 @@ export default function MothersPage() {
                     }
                     if (isToddler) {
                       return (
-                        <a href="https://phulwari.co.in/mothers/toddler-program" key={i} className="inline-block transform hover:-translate-y-0.5 transition cursor-pointer">
+                        <a href="https://www.phulwari.co.in/mothers/toddler-program" key={i} className="inline-block transform hover:-translate-y-0.5 transition cursor-pointer">
                           <span className="pg-include-pill border-purple-400/50 bg-purple-50/50 hover:bg-purple-100/60 shadow-xs">
                             <span
                               className="pg-include-icon"

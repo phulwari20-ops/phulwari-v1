@@ -103,6 +103,16 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      {
+        source: '/batch-gallery',
+        destination: '/batch-galary/gallery',
+        permanent: true,
+      },
+      {
+        source: '/legal',
+        destination: '/legal/terms',
+        permanent: true,
+      },
       { source: '/faq', destination: '/legal/faq', permanent: true },
       {
         source: '/birthdays',
