@@ -183,8 +183,8 @@ export default function StudentDashboardPage() {
       // If studentUuid is missing, query student record first by admission_id to retrieve the UUID
       if (!studentUuid) {
         const stQuery = admissionId
-          ? supabase.from('students').select('*, batches(*)').eq('admission_id', admissionId).single()
-          : (isUUID(studentId) ? supabase.from('students').select('*, batches(*)').eq('id', studentId).single() : null)
+          ? supabase.from('students').select('*').eq('admission_id', admissionId).single()
+          : (isUUID(studentId) ? supabase.from('students').select('*').eq('id', studentId).single() : null)
         
         if (stQuery) {
           const stRes: any = await toNativePromise(stQuery)
@@ -208,17 +208,34 @@ export default function StudentDashboardPage() {
         ? toNativePromise(supabase.from('financial_ledger').select('*').eq('linked_student_id', studentUuid).order('date', { ascending: false }))
         : Promise.resolve({ data: [] })
 
-      // Safe individual queries wrapped in real native promises
-      const [studentRes, attRes, feeRes, annRes, ledgerRes]: any[] = await Promise.all([
-        studentUuid ? toNativePromise(supabase.from('students').select('*, batches(*)').eq('id', studentUuid).single()) : Promise.resolve({ data: null }),
+      // Fetch student, all batches, attendance, fees, announcements & ledger simultaneously
+      const [studentRes, batchesRes, attRes, feeRes, annRes, ledgerRes]: any[] = await Promise.all([
+        studentUuid ? toNativePromise(supabase.from('students').select('*').eq('id', studentUuid).single()) : Promise.resolve({ data: null }),
+        toNativePromise(supabase.from('batches').select('*')),
         attPromise,
         feePromise,
         toNativePromise(supabase.from('announcements').select('*').order('created_at', { ascending: false })),
         ledgerPromise
       ])
 
-      if (studentRes?.data) {
-        setStudent((prev: any) => ({ ...prev, ...studentRes.data }))
+      const batchesData: any[] = batchesRes?.data || []
+      const fetchedStudent = studentRes?.data || currentStudentObj
+
+      if (fetchedStudent) {
+        // Accurately find student's assigned batch
+        const matchedBatch = batchesData.find((b: any) => 
+          (fetchedStudent.batch_id && b.id === fetchedStudent.batch_id) ||
+          (b.batch_name && fetchedStudent.batch_name && b.batch_name.toLowerCase().trim() === fetchedStudent.batch_name.toLowerCase().trim())
+        )
+        const updatedStudent = {
+          ...fetchedStudent,
+          batches: matchedBatch || fetchedStudent.batches || null,
+          batch_name: fetchedStudent.batch_name || matchedBatch?.batch_name || matchedBatch?.name || '',
+          program_interested: fetchedStudent.program_interested || matchedBatch?.category || matchedBatch?.subcategory || fetchedStudent.category || '',
+          preferred_time_slot: fetchedStudent.preferred_time_slot || (matchedBatch?.start_time && matchedBatch?.end_time ? `${matchedBatch.start_time} - ${matchedBatch.end_time}` : (matchedBatch?.batch_time || ''))
+        }
+        setStudent(updatedStudent)
+        try { localStorage.setItem('phulwari_student', JSON.stringify(updatedStudent)) } catch (_) {}
       }
 
       const attData = attRes?.data || []
@@ -443,6 +460,16 @@ export default function StudentDashboardPage() {
     if (st.batch_timing) return st.batch_timing
     if (st.start_time && st.end_time) return `${st.start_time} - ${st.end_time}`
     return '10:30 AM - 11:30 AM'
+  }
+  const formatDateToDisplay = (dateStr: string): string => {
+    if (!dateStr) return 'N/A'
+    const clean = String(dateStr).split('T')[0]
+    const parts = clean.split('-')
+    if (parts.length === 3) {
+      const [y, m, d] = parts
+      if (y.length === 4) return `${d}/${m}/${y}`
+    }
+    return dateStr
   }
   // Exclude 'holiday' & 'unmarked' records from session count denominator
   const validSessions = attendance.filter((a: any) => {
@@ -725,14 +752,47 @@ export default function StudentDashboardPage() {
               {/* 4. PROGRAM & BATCH DETAILS */}
               <div style={{ background: '#FFF7ED', padding: '1.5rem', borderRadius: '20px', border: '1px solid #FFEDD5' }}>
                 <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#EA580C', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>🎯</span> Program & Batch
+                  <span>🎯</span> Program &amp; Batch
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#1E293B' }}>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Batch Name:</strong> {student.batch_name || 'Nursery - Afternoon'}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Programs Active:</strong> {student.program_interested || 'General Activity'}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Time Slot:</strong> {student.preferred_time_slot || 'Morning'}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>End Date:</strong> {student.validity_end_date || 'N/A'}</p>
-                  <p style={{ margin: 0 }}><strong style={{ color: '#64748B', fontWeight: 600 }}>Classes Status:</strong> <span style={{ fontWeight: 800, color: remainingClasses <= 3 ? '#EF4444' : '#16A34A' }}>{remainingClasses} Remaining</span> of {totalClasses} ({consumedClasses} consumed)</p>
+                  <p style={{ margin: 0 }}>
+                    <strong style={{ color: '#64748B', fontWeight: 600 }}>Batch Name:</strong>{' '}
+                    <span style={{ fontWeight: 700, color: '#0F172A' }}>
+                      {student.batches?.batch_name || student.batches?.name || student.batch_name || student.program_interested || 'Not Assigned'}
+                    </span>
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    <strong style={{ color: '#64748B', fontWeight: 600 }}>Programs Active:</strong>{' '}
+                    <span>{student.program_interested || student.category || student.batches?.category || 'Activity Program'}</span>
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    <strong style={{ color: '#64748B', fontWeight: 600 }}>Time Slot:</strong>{' '}
+                    <span>{getBatchTimingString(student)}</span>
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    <strong style={{ color: '#64748B', fontWeight: 600 }}>End Date:</strong>{' '}
+                    <span>{student.validity_end_date ? formatDateToDisplay(student.validity_end_date) : 'N/A'}</span>
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    <strong style={{ color: '#64748B', fontWeight: 600 }}>Classes Status:</strong>{' '}
+                    <span style={{ fontWeight: 800, color: remainingClasses <= 3 ? '#EF4444' : '#16A34A' }}>
+                      {remainingClasses <= 0 ? (remainingClasses < 0 ? `${remainingClasses} (${Math.abs(remainingClasses)} Extra Used)` : '0 Classes Left') : `${remainingClasses} Remaining`}
+                    </span>{' '}
+                    of {totalClasses} ({consumedClasses} consumed)
+                  </p>
+                  {/* Additional batches if enrolled */}
+                  {Array.isArray(student.additional_batches) && student.additional_batches.length > 0 && (
+                    <div style={{ marginTop: '6px', paddingTop: '8px', borderTop: '1px dashed #FED7AA' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#EA580C' }}>Additional Enrolled Batches:</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                        {student.additional_batches.map((ab: any, abIdx: number) => (
+                          <span key={abIdx} style={{ fontSize: '11px', fontWeight: 600, padding: '3px 8px', background: '#FFEDD5', color: '#9A3412', borderRadius: '8px' }}>
+                            {ab.batch_name || ab.name || 'Extra Batch'}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1060,6 +1120,109 @@ export default function StudentDashboardPage() {
               >
                 <Printer size={16} />
                 <span>Print Receipt</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Batch Details Modal */}
+      {isBatchModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '28px',
+            padding: '2rem',
+            maxWidth: '520px',
+            width: '100%',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.2)',
+            fontFamily: "'Poppins', sans-serif",
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #F1F5F9', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '38px', height: '38px', background: '#FFF0F5', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BookOpen size={20} color="#FF4D8D" />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0 }}>Assigned Batch Details</h3>
+                  <p style={{ fontSize: '11px', color: '#64748B', margin: 0 }}>Curriculum &amp; Timing Information</p>
+                </div>
+              </div>
+              <button onClick={() => setIsBatchModalOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '6px' }}>
+                <X size={20} color="#64748B" />
+              </button>
+            </div>
+
+            <div style={{ background: '#FFF5F7', border: '1px solid #FFE4E8', borderRadius: '20px', padding: '1.25rem', marginBottom: '1.25rem' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#FF4D8D', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Current Batch</span>
+              <h4 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: '4px 0 2px 0' }}>
+                {student.batches?.batch_name || student.batches?.name || student.batch_name || student.program_interested || 'General Activity Batch'}
+              </h4>
+              <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>
+                {student.batches?.tagline || 'Specialized child development and interactive learning sessions'}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#F8FAFC', borderRadius: '12px' }}>
+                <span style={{ color: '#64748B', fontWeight: 600 }}>Scheduled Timing:</span>
+                <strong style={{ color: '#0F172A' }}>{getBatchTimingString(student)}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#F8FAFC', borderRadius: '12px' }}>
+                <span style={{ color: '#64748B', fontWeight: 600 }}>Days / Frequency:</span>
+                <strong style={{ color: '#0F172A' }}>{student.custom_days || student.batches?.days || 'Regular Center Schedule'}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#F8FAFC', borderRadius: '12px' }}>
+                <span style={{ color: '#64748B', fontWeight: 600 }}>Age Bracket:</span>
+                <strong style={{ color: '#0F172A' }}>{student.batches?.age_group || 'Toddlers & Kids (1-8 Yrs)'}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#F8FAFC', borderRadius: '12px' }}>
+                <span style={{ color: '#64748B', fontWeight: 600 }}>Monthly Class Allowance:</span>
+                <strong style={{ color: '#0F172A' }}>{totalClasses} Classes / Month</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#F8FAFC', borderRadius: '12px' }}>
+                <span style={{ color: '#64748B', fontWeight: 600 }}>Active Valid Until:</span>
+                <strong style={{ color: '#059669' }}>{student.validity_end_date ? formatDateToDisplay(student.validity_end_date) : 'Ongoing'}</strong>
+              </div>
+            </div>
+
+            {student.batches?.description && (
+              <div style={{ marginTop: '1rem', padding: '12px', background: '#F1F5F9', borderRadius: '14px', fontSize: '12px', color: '#475569', lineHeight: 1.5 }}>
+                {student.batches.description}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+              <button
+                onClick={() => setIsBatchModalOpen(false)}
+                style={{
+                  padding: '10px 24px',
+                  background: 'linear-gradient(135deg, #FF4D8D 0%, #FF2A6D 100%)',
+                  color: '#ffffff',
+                  borderRadius: '14px',
+                  border: 'none',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(255, 77, 141, 0.3)'
+                }}
+              >
+                Close
               </button>
             </div>
           </div>

@@ -73,10 +73,10 @@ export const OG_IMAGE = {
 export const LOGO_PATH = '/phulwari_logo.webp'
 
 export const VERIFICATION = {
-  google: 'EFluuGoXog-o6hgirGHBoC97OB1zKOcoaMuLeMXte_0',
+  google: 'UePTjN8VQqCQQc2HqfOAU7JHBucd-mt_41sZMtl4KVc',
 } as const
 
-export const GA_MEASUREMENT_ID = 'G-95W6V42HK2'
+export const GA_MEASUREMENT_ID = 'G-9FVRQ77HFD'
 
 /** Build an absolute URL from a site-relative path. */
 export function absoluteUrl(path = '/'): string {
