@@ -5,9 +5,22 @@ import ActivityDynamicPage, {
 export const revalidate = 60;
 
 export async function generateMetadata() {
-  return generateDynamicMetadata({
+  const dynamicMeta = await generateDynamicMetadata({
     params: Promise.resolve({ slug: 'yoga-classes-patna' }),
   });
+
+  const canonicalUrl = 'https://www.phulwari.co.in/yoga-classes-patna';
+
+  return {
+    ...dynamicMeta,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      ...dynamicMeta.openGraph,
+      url: canonicalUrl,
+    },
+  };
 }
 
 export default async function YogaClassesPatnaPage() {

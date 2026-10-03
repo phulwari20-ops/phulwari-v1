@@ -2,6 +2,16 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseUrl, getSupabaseKey } from './supabase/env';
 import { ActivityPageData, DEFAULT_ACTIVITIES } from './activitiesFallback';
 
+export function toOptimizedMediaUrl(url: string | undefined): string {
+  if (!url || typeof url !== 'string') return '/phulwari_logo.webp';
+  // Map local PNG/JPG images in public folders to their lightweight, optimized WebP siblings
+  const match = url.match(/^(\/[^/]+\/.+)\.(png|jpg|jpeg)$/i);
+  if (match) {
+    return `${match[1]}.webp`;
+  }
+  return url;
+}
+
 // Public client for fetching activity pages
 function getPublicClient() {
   return createSupabaseClient(getSupabaseUrl(), getSupabaseKey(), {
@@ -33,8 +43,18 @@ export async function getActivityBySlug(slug: string): Promise<ActivityPageData 
           (a.aliases && a.aliases.map((al) => al.toLowerCase()).includes(item.slug?.toLowerCase()))
       );
 
+      const rawHero = item.hero_image || fallback?.hero_image || '/phulwari_logo.webp';
+      const hero = toOptimizedMediaUrl(rawHero);
+
+      const rawGallery = (Array.isArray(item.gallery_images) && item.gallery_images.length > 0)
+        ? item.gallery_images
+        : (fallback?.gallery_images || [hero]);
+      const gallery = rawGallery.map((img: string) => toOptimizedMediaUrl(img));
+
       return {
         ...item,
+        hero_image: hero,
+        gallery_images: gallery,
         content_color: item.content_color || item.cta?.content_color || undefined,
         videos: (Array.isArray(item.videos) && item.videos.length > 0) ? item.videos : (fallback?.videos || []),
       };
@@ -93,8 +113,18 @@ export async function getAllActivities(): Promise<ActivityPageData[]> {
             a.slug.toLowerCase() === item.slug?.toLowerCase() ||
             (a.aliases && a.aliases.map((al) => al.toLowerCase()).includes(item.slug?.toLowerCase()))
         );
+        const rawHero = item.hero_image || fallback?.hero_image || '/phulwari_logo.webp';
+        const hero = toOptimizedMediaUrl(rawHero);
+
+        const rawGallery = (Array.isArray(item.gallery_images) && item.gallery_images.length > 0)
+          ? item.gallery_images
+          : (fallback?.gallery_images || [hero]);
+        const gallery = rawGallery.map((img: string) => toOptimizedMediaUrl(img));
+
         return {
           ...item,
+          hero_image: hero,
+          gallery_images: gallery,
           content_color: item.content_color || item.cta?.content_color || undefined,
           videos: (Array.isArray(item.videos) && item.videos.length > 0) ? item.videos : (fallback?.videos || []),
         };

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { JsonLd } from '@/lib/seo/JsonLd';
 import { breadcrumbSchema, webPageSchema } from '@/lib/seo/schema';
 import {
@@ -87,7 +88,7 @@ const programs: ProgramData[] = [
     benefitColor: '#FF4D8D',
     bestFor:
       'Mothers who want to stay active while giving their toddlers a fun, safe and engaging learning environment.',
-    image: 'mothertod.webp',
+    image: '/mothertod.webp',
   },
   {
     badge: 'Phulwari Premium Circle',
@@ -118,7 +119,7 @@ const programs: ProgramData[] = [
     benefitColor: '#3D8BFF',
     bestFor:
       'Families seeking a comprehensive program that supports both child development and mother wellness.',
-    image: 'motherhappy.webp',
+    image: '/motherhappy.webp',
     reverse: true,
   },
   {
@@ -150,7 +151,7 @@ const programs: ProgramData[] = [
     benefitColor: '#8B5CF6',
     bestFor:
       'Children who enjoy creative and physical activities in a structured learning environment.',
-    image: 'motherfit.webp',
+    image: '/motherfit.webp',
   },
 ];
 
@@ -570,11 +571,15 @@ export default function MothersPage() {
                   className="pg-blob-ring"
                   style={{ borderColor: program.accentColor, opacity: 0.45 }}
                 />
-                <div className="pg-blob-shape">
-                  <img
-                    src={`${imageBasePath}${program.image}`}
+                <div className="pg-blob-shape relative">
+                  <Image
+                    src={program.image}
                     alt={program.badge}
-                   loading="lazy" decoding="async" />
+                    fill
+                    sizes="(max-width: 768px) 320px, 360px"
+                    priority={index === 0}
+                    className="object-cover"
+                  />
                 </div>
                 <span
                   className="pg-blob-dot pg-blob-dot-1"

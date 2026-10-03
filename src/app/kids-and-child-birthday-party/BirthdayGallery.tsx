@@ -7,25 +7,25 @@ import { ActivityVideoPlayer } from '@/components/activities/ActivityVideoPlayer
 
 const galleryImages = [
   {
-    src: '/birthday_party/image.png',
+    src: '/birthday_party/image.webp',
     title: 'Magical Theme Decoration Setup',
     caption: 'Custom balloon arches, themed backdrops, and immersive character decor',
     tag: 'Decor & Theme'
   },
   {
-    src: '/birthday_party/image copy.png',
+    src: '/birthday_party/image copy.webp',
     title: 'Indoor Soft-Play Birthday Fun',
     caption: 'Toddlers and kids safely enjoying ball pits, slides, and sensory games',
     tag: 'Play Area'
   },
   {
-    src: '/birthday_party/image copy 2.png',
+    src: '/birthday_party/image copy 2.webp',
     title: 'Cake Cutting & Celebration Stage',
     caption: 'Picture-perfect setups designed for beautiful family memories',
     tag: 'Celebration Stage'
   },
   {
-    src: '/birthday_party/image copy 3.png',
+    src: '/birthday_party/image copy 3.webp',
     title: 'Interactive Games & Activities',
     caption: 'Dedicated party hosts engaging little ones in music, dance, and crafts',
     tag: 'Entertainment'

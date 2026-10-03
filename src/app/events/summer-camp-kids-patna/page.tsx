@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ChevronRight,
   Sun,
@@ -152,11 +153,13 @@ export default async function SummerCampKidsPatnaPage() {
             <div className="lg:col-span-5 relative">
               <div className="relative mx-auto max-w-md rounded-3xl overflow-hidden p-2.5 bg-gradient-to-tr from-orange-400 via-pink-400 to-rose-400 shadow-2xl shadow-orange-500/20">
                 <div className="relative rounded-2xl overflow-hidden aspect-[4/3] sm:aspect-[1/1] bg-white">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={activity.hero_image}
+                  <Image
+                    src={activity.hero_image || '/summercamp.webp'}
                     alt={activity.h1}
-                    className="w-full h-full object-cover"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 550px"
+                    className="object-cover"
                   />
 
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent flex flex-col justify-end p-5 text-white">

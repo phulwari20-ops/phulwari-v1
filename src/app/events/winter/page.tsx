@@ -29,8 +29,8 @@ import {
 } from 'lucide-react';
 
 const winterImages = [
-  { src: '/winter_camp/image.png', alt: 'Winter Carnival and Kids Activities at Phulwari Patna' },
-  { src: '/winter_camp/image copy.png', alt: 'Creative Winter Craft and Fun Activities' },
+  { src: '/winter_camp/image.webp', alt: 'Winter Carnival and Kids Activities at Phulwari Patna' },
+  { src: '/winter_camp/image copy.webp', alt: 'Creative Winter Craft and Fun Activities' },
   { src: '/wintercamp.webp', alt: 'Winter Camp Celebration at Phulwari' },
 ];
 
@@ -420,14 +420,16 @@ export default function WinterEventsPage() {
               <div className="lg:col-span-5 space-y-4">
                 <div className="relative mx-auto max-w-md rounded-3xl overflow-hidden p-2.5 bg-gradient-to-tr from-cyan-400 via-blue-500 to-pink-500 shadow-2xl shadow-blue-500/20">
                   <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-slate-900">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={winterImages[activeImgIdx].src}
                       alt={winterImages[activeImgIdx].alt}
-                      className="w-full h-full object-cover transition-all duration-500"
+                      fill
+                      priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 550px"
+                      className="object-cover transition-all duration-500"
                     />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex flex-col justify-end p-5 text-white">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex flex-col justify-end p-5 text-white pointer-events-none">
                       <span className="text-xs uppercase font-extrabold tracking-wider text-cyan-300 flex items-center gap-1">
                         <Snowflake className="w-3.5 h-3.5" /> Phulwari Winter Showcase
                       </span>
@@ -449,8 +451,13 @@ export default function WinterEventsPage() {
                         activeImgIdx === idx ? 'border-pink-500 scale-105 shadow-md ring-2 ring-pink-400/30' : 'border-slate-200 opacity-70 hover:opacity-100'
                       }`}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img.src} alt={img.alt} className="w-full h-full object-cover" />
+                      <Image
+                        src={img.src}
+                        alt={img.alt}
+                        fill
+                        sizes="100px"
+                        className="object-cover"
+                      />
                     </button>
                   ))}
                 </div>

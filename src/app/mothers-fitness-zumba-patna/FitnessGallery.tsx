@@ -6,49 +6,49 @@ import { Dumbbell, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 const fitnessImages = [
   {
-    src: '/mother_fitness_program/image.png',
+    src: '/mother_fitness_program/image.webp',
     title: 'Energizing Zumba & Dance Cardio',
     caption: 'High-energy beats, calorie burn, and joyful moves with fellow Patna moms',
     tag: 'Zumba Cardio'
   },
   {
-    src: '/mother_fitness_program/image copy.png',
+    src: '/mother_fitness_program/image copy.webp',
     title: 'Postnatal Core & Pelvic Floor Yoga',
     caption: 'Gentle rehab techniques designed to heal diastasis recti and rebuild core strength',
     tag: 'Postnatal Yoga'
   },
   {
-    src: '/mother_fitness_program/image copy 2.png',
+    src: '/mother_fitness_program/image copy 2.webp',
     title: 'Functional Mom-Strength Training',
     caption: 'Guided dumbbell and resistance workouts for posture and back pain relief',
     tag: 'Strength & Tone'
   },
   {
-    src: '/mother_fitness_program/image copy 3.png',
+    src: '/mother_fitness_program/image copy 3.webp',
     title: 'Supportive Community of Moms',
     caption: 'Workout alongside friendly mothers in a warm, judgment-free environment',
     tag: 'Mom Tribe'
   },
   {
-    src: '/mother_fitness_program/image copy 4.png',
+    src: '/mother_fitness_program/image copy 4.webp',
     title: 'Breathwork & Guided Stretching',
     caption: 'Relaxing cooldown sequences to relieve neck, shoulder, and lower back tension',
     tag: 'Holistic Wellness'
   },
   {
-    src: '/mother_fitness_program/image copy 5.png',
+    src: '/mother_fitness_program/image copy 5.webp',
     title: 'Aerobics & Stamina Building',
     caption: 'Boost everyday energy levels to keep up with active toddlers',
     tag: 'Aerobics'
   },
   {
-    src: '/mother_fitness_program/image copy 6.png',
+    src: '/mother_fitness_program/image copy 6.webp',
     title: 'Posture Correction & Flexibility',
     caption: 'Targeted exercises for nursing mothers and postpartum body recovery',
     tag: 'Flexibility'
   },
   {
-    src: '/mother_fitness_program/image copy 7.png',
+    src: '/mother_fitness_program/image copy 7.webp',
     title: 'Personalized Attention from Trainers',
     caption: 'Certified female coaches adjusting routines for each mother’s fitness level',
     tag: 'Expert Guidance'

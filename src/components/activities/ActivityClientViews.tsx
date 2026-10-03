@@ -53,14 +53,13 @@ export function ActivityGallery({ images, title, accentColor }: GalleryProps) {
       {/* Featured Big Image Card */}
       <div className="relative w-full min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] aspect-[16/10] sm:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/70 border border-slate-200 bg-slate-900 group">
         {/* Ambient Blur Backdrop to fill any wide or narrow aspect ratios */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
           <Image
             src={images[selectedIdx]}
-            alt="Ambient background blur"
+            alt=""
             fill
-            sizes="800px"
+            sizes="100px"
             className="object-cover blur-2xl opacity-40 scale-110"
-            aria-hidden="true"
           />
         </div>
 

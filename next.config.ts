@@ -61,7 +61,12 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'api.dicebear.com' },
       { protocol: 'https', hostname: '*.r2.dev' },
       { protocol: 'https', hostname: '*.r2.cloudflarestorage.com' },
+      { protocol: 'https', hostname: '98d203bfa51dd119ae438c70538c5f98.r2.cloudflarestorage.com' },
+      { protocol: 'https', hostname: 'media.phulwari.co.in' },
+      { protocol: 'https', hostname: '*.phulwari.co.in' },
     ],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
 

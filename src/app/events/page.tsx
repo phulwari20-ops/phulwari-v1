@@ -308,26 +308,39 @@ export default function EventsHubPage() {
                   }`}
                 >
                   {/* Left/Right Visual Banner */}
-                  <div className="lg:w-1/2 relative min-h-[300px] sm:min-h-[360px] lg:min-h-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <img
-                      src={event.image}
+                  <div className="lg:w-1/2 relative w-full aspect-[16/10] sm:aspect-[16/9] lg:aspect-auto lg:h-auto min-h-[240px] sm:min-h-[300px] lg:min-h-full bg-slate-900 overflow-hidden">
+                    {/* Ambient background blur to prevent blank voids */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+                      <Image
+                        src={event.image || '/summercamp.webp'}
+                        alt=""
+                        fill
+                        sizes="400px"
+                        className="object-cover blur-2xl opacity-40 scale-110"
+                      />
+                    </div>
+
+                    {/* Main Banner Image with full coverage and smooth hover */}
+                    <Image
+                      src={event.image || '/summercamp.webp'}
                       alt={event.title}
-                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/logo.png';
-                      }}
+                      fill
+                      priority={index === 0}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                      className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent lg:hidden" />
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent pointer-events-none" />
                     
                     {event.popular && (
-                      <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500 text-slate-950 font-black text-xs shadow-lg uppercase tracking-wider">
+                      <div className="absolute top-4 left-4 z-10 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500 text-slate-950 font-black text-xs shadow-lg uppercase tracking-wider">
                         <Flame className="w-3.5 h-3.5 fill-current" />
                         <span>Most Popular</span>
                       </div>
                     )}
 
-                    <div className="absolute bottom-4 left-4 right-4 lg:hidden text-white">
-                      <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-white/20 backdrop-blur-md">
+                    <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between text-white">
+                      <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-lg bg-black/50 backdrop-blur-md border border-white/20 shadow-sm">
                         {event.season}
                       </span>
                     </div>

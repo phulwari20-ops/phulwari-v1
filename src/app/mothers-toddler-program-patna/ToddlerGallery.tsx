@@ -6,13 +6,13 @@ import { Baby, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 const toddlerImages = [
   {
-    src: '/mother_and_toddler_program/image.png',
+    src: '/mother_and_toddler_program/image.webp',
     title: 'Sensory Play & Musical Rhyme Circle',
     caption: 'Mothers and toddlers exploring textures, music, and colorful learning tools together',
     tag: 'Sensory & Music'
   },
   {
-    src: '/mother_and_toddler_program/image copy.png',
+    src: '/mother_and_toddler_program/image copy.webp',
     title: 'Safe Soft-Play & Motor Coordination',
     caption: 'Crawlers and early walkers developing balance, motor skills, and social confidence',
     tag: 'Gross Motor Skills'

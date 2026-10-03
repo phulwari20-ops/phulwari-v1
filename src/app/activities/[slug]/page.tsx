@@ -47,7 +47,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const canonicalUrl = `https://www.phulwari.co.in/activities/${activity.slug}`;
+  const canonicalUrl = activity.slug === 'yoga-classes-patna'
+    ? 'https://www.phulwari.co.in/yoga-classes-patna'
+    : `https://www.phulwari.co.in/activities/${activity.slug}`;
 
   return {
     title: activity.title_tag,
@@ -91,6 +93,11 @@ export default async function ActivityDynamicPage({ params }: PageProps) {
 
   if (!activity) {
     notFound();
+  }
+
+  // If yoga-classes-patna is accessed via /activities/yoga-classes-patna, redirect to primary canonical route
+  if (slug.toLowerCase() === 'yoga-classes-patna') {
+    redirect('/yoga-classes-patna');
   }
 
   // Redirect alias to canonical slug if requested slug is an alias

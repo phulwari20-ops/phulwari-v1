@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import {
   X,
   ChevronDown,
@@ -72,14 +73,13 @@ export function SummerCampClientView({
                 onClick={() => setSelectedImage(src)}
                 className="group relative rounded-3xl overflow-hidden aspect-[4/3] bg-gray-100 border border-orange-100 shadow-xs hover:shadow-xl transition-all duration-300 text-left cursor-pointer focus:outline-none"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={src}
                   alt={`${title} photo ${idx + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  onError={(e: any) => {
-                    e.target.src = '/phulwari_logo.webp';
-                  }}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  priority={idx < 3}
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-70 group-hover:opacity-90 transition-opacity" />
                 <div className="absolute bottom-0 inset-x-0 p-5 text-white flex items-center justify-between">
@@ -118,11 +118,13 @@ export function SummerCampClientView({
             </button>
 
             <div className="relative aspect-[16/10] bg-black flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={selectedImage}
                 alt="Enlarged camp photo"
-                className="w-full h-full object-contain"
+                fill
+                priority
+                sizes="(max-width: 1200px) 100vw, 1200px"
+                className="object-contain"
               />
             </div>
 
