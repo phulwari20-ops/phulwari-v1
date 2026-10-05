@@ -139,6 +139,31 @@ const nextConfig: NextConfig = {
         destination: '/events/winter',
         permanent: true,
       },
+      {
+        source: '/activities/yoga-classes-patna',
+        destination: '/yoga-classes-patna',
+        permanent: true,
+      },
+      {
+        source: '/mothers/fitness',
+        destination: '/mothers-fitness-zumba-patna',
+        permanent: true,
+      },
+      {
+        source: '/mothers/toddler-program',
+        destination: '/mothers-toddler-program-patna',
+        permanent: true,
+      },
+      {
+        source: '/activities/mother-fitness-program',
+        destination: '/mothers-fitness-zumba-patna',
+        permanent: true,
+      },
+      {
+        source: '/activities/mother-toddler-program',
+        destination: '/mothers-toddler-program-patna',
+        permanent: true,
+      },
       // These segments exist only as layout fragments reused by the homepage;
       // they are not pages and must not be linkable or indexable.
       { source: '/footer', destination: '/', permanent: true },

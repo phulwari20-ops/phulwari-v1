@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Metadata } from 'next';
@@ -27,6 +27,7 @@ import { ActivityVideoGallery } from '@/components/activities/ActivityVideoGalle
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  isCanonicalRoute?: boolean;
 }
 
 export const dynamicParams = true;
@@ -87,7 +88,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function ActivityDynamicPage({ params }: PageProps) {
+export default async function ActivityDynamicPage({ params, isCanonicalRoute = false }: PageProps) {
   const { slug } = await params;
   const activity = await getActivityBySlug(slug);
 
@@ -95,14 +96,14 @@ export default async function ActivityDynamicPage({ params }: PageProps) {
     notFound();
   }
 
-  // If yoga-classes-patna is accessed via /activities/yoga-classes-patna, redirect to primary canonical route
-  if (slug.toLowerCase() === 'yoga-classes-patna') {
-    redirect('/yoga-classes-patna');
+  // If yoga-classes-patna is accessed via /activities/yoga-classes-patna, permanently redirect to primary canonical route
+  if (!isCanonicalRoute && slug.toLowerCase() === 'yoga-classes-patna') {
+    permanentRedirect('/yoga-classes-patna');
   }
 
   // Redirect alias to canonical slug if requested slug is an alias
   if (activity.slug.toLowerCase() !== slug.toLowerCase()) {
-    redirect(`/activities/${activity.slug}`);
+    permanentRedirect(`/activities/${activity.slug}`);
   }
 
   const color = activity.color || '#FF4D8D';

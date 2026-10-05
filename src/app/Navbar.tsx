@@ -109,14 +109,14 @@ const defaultNavItems: NavItem[] = [
   { label: 'FAQ', href: '/faq', accent: '#8B5CF6', accentBg: '#EFE7FE', icon: HelpCircle },
   {
     label: 'Programs for Mothers',
-    href: '/mothers',
+    href: '/mothers-toddler-program-patna',
     accent: '#8B5CF6',
     accentBg: '#EFE7FE',
     icon: Dumbbell,
     subpages: [
-      { href: '/activities/mother-toddler-program', label: 'Mother & Toddler Program',  icon: Heart,    color: '#FF4D8D', bg: '#FFE6EF' },
-      { href: '/activities/mother-fitness-program', label: 'Mother Fitness Program',    icon: Dumbbell, color: '#34B36B', bg: '#E3F7EA' },
-      { href: '/mothers',                           label: 'All Mother Programs',       icon: Baby,     color: '#8B5CF6', bg: '#EFE7FE' },
+      { href: '/yoga-classes-patna',            label: 'Yoga & Wellness',          icon: Leaf,     color: '#8B5CF6', bg: '#EFE7FE' },
+      { href: '/mothers-toddler-program-patna', label: 'Mother & Toddler Program', icon: Heart,    color: '#FF4D8D', bg: '#FFE6EF' },
+      { href: '/mothers-fitness-zumba-patna',   label: 'Mother Fitness Program',   icon: Dumbbell, color: '#34B36B', bg: '#E3F7EA' },
     ],
   },
   {
@@ -245,6 +245,10 @@ const Navbar: React.FC = () => {
             let href = `/activities/${act.slug}`;
             if (act.slug === 'yoga-classes-patna') {
               href = '/yoga-classes-patna';
+            } else if (act.slug === 'mother-toddler-program' || slugLower.includes('toddler')) {
+              href = '/mothers-toddler-program-patna';
+            } else if (act.slug === 'mother-fitness-program' || slugLower.includes('fitness')) {
+              href = '/mothers-fitness-zumba-patna';
             } else if (act.slug === 'winter-camp' || act.slug === 'winter' || slugLower.includes('winter')) {
               href = '/events/winter';
             } else if (act.slug === 'summer-camp-kids-patna' || act.slug === 'summer-camp' || slugLower.includes('summer')) {
@@ -306,16 +310,21 @@ const Navbar: React.FC = () => {
             }
           ];
 
-          // Keep dedicated overview page for Mother Programs
-          if (!motherPrograms.some(m => m.href === '/mothers')) {
-            motherPrograms.push({
-              href: '/mothers',
-              label: 'All Mother Programs',
-              icon: Baby,
-              color: '#8B5CF6',
-              bg: '#EFE7FE'
-            });
-          }
+          // Always ensure core mother programs are present: Yoga, Mother & Toddler, Mother Fitness
+          const coreMotherList: SubItem[] = [
+            { href: '/yoga-classes-patna', label: 'Yoga & Wellness', icon: Leaf, color: '#8B5CF6', bg: '#EFE7FE' },
+            { href: '/mothers-toddler-program-patna', label: 'Mother & Toddler Program', icon: Heart, color: '#FF4D8D', bg: '#FFE6EF' },
+            { href: '/mothers-fitness-zumba-patna', label: 'Mother Fitness Program', icon: Dumbbell, color: '#34B36B', bg: '#E3F7EA' },
+          ];
+
+          const dynamicMotherFiltered = motherPrograms.filter(m => 
+            !['/yoga-classes-patna', '/mothers-toddler-program-patna', '/mothers-fitness-zumba-patna', '/mothers'].includes(m.href)
+          );
+
+          const finalMotherPrograms: SubItem[] = [
+            ...coreMotherList,
+            ...dynamicMotherFiltered,
+          ];
 
           setNavItems(prev => prev.map(item => {
             if (item.label === 'Activities' && childActivities.length > 0) {

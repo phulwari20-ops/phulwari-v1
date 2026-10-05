@@ -24,5 +24,10 @@ export async function generateMetadata() {
 }
 
 export default async function YogaClassesPatnaPage() {
-  return <ActivityDynamicPage params={Promise.resolve({ slug: 'yoga-classes-patna' })} />;
+  return (
+    <ActivityDynamicPage
+      params={Promise.resolve({ slug: 'yoga-classes-patna' })}
+      isCanonicalRoute={true}
+    />
+  );
 }

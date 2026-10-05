@@ -47,7 +47,7 @@ const quickLinks: LinkItem[] = [
   { label: 'Home',                   href: '/' },
   { label: 'About Us',               href: '/about' },
   { label: 'Activities',             href: '/activities' },
-  { label: 'Programs for Mothers',   href: '/mothers' },
+  { label: 'Programs for Mothers',   href: '/mothers-toddler-program-patna' },
   { label: 'Camps & Events Hub',     href: '/events' },
   { label: 'Birthday Parties',       href: '/kids-and-child-birthday-party' },
   { label: 'Summer Camp',            href: '/events/summer-camp-kids-patna' },
