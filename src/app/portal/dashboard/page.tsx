@@ -488,10 +488,12 @@ export default function StudentDashboardPage() {
   }).length
 
   // Both present and absent sessions count towards consumed classes
-  const consumedFromAttendance = presentCount + absentCount
+  // Consumed classes and remaining classes aligned with ERP renewal balance
   const totalClasses = Number(student.classes_total || 12)
-  const consumedClasses = Math.max(Number(student.classes_consumed || 0), consumedFromAttendance)
-  const remainingClasses = Math.max(0, totalClasses - consumedClasses)
+  const consumedClasses = student.classes_consumed !== undefined && student.classes_consumed !== null
+    ? Number(student.classes_consumed)
+    : consumedFromAttendance
+  const remainingClasses = totalClasses - consumedClasses
 
   const hasAttendanceRecords = validSessions.length > 0
   const calculatedAttendanceRate = hasAttendanceRecords 

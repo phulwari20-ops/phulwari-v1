@@ -36,6 +36,8 @@ import {
   Shield,
   Video,
   Puzzle,
+  ExternalLink,
+  Heart,
 } from 'lucide-react';
 
 interface LinkItem {
@@ -297,16 +299,89 @@ const Footer: React.FC = () => {
         .footer-action-btn:hover { transform:translateY(-2px); }
         .footer-action-btn svg { width:15px; height:15px; stroke:#ffffff; stroke-width:2.4; }
 
-        .footer-bottom-bar { border-top:1px solid rgba(255,255,255,.08); padding:1.25rem 0 1.75rem; text-align:center; }
-        .footer-bottom-text { font-weight:600; font-size:.78rem; color:#9991B3; line-height:1.6; }
-        .footer-bottom-text strong { color:#C7C0DC; font-weight:700; }
-        .footer-bottom-links { display:flex; justify-content:center; gap:1.25rem; margin-top:.65rem; flex-wrap:wrap; }
-        .footer-bottom-links a { font-size:.76rem; font-weight:700; color:#7A7393; text-decoration:none; transition:color .15s ease; }
+        .footer-bottom-bar { border-top:1px solid rgba(255,255,255,.08); padding:1.5rem 0 2rem; text-align:center; }
+        .footer-bottom-text { font-weight:600; font-size:.8rem; color:#A8A0C2; line-height:1.6; }
+        .footer-bottom-text strong { color:#E4E0F0; font-weight:700; }
+        .footer-bottom-links { display:flex; justify-content:center; gap:1.25rem; margin-top:.75rem; flex-wrap:wrap; }
+        .footer-bottom-links a { font-size:.78rem; font-weight:700; color:#8C85A3; text-decoration:none; transition:color .15s ease; }
         .footer-bottom-links a:hover { color:#FFD166; }
         .footer-bottom-sep { color:#4A4360; }
-        .footer-credit { font-weight:600; font-size:.78rem; color:#9991B3; margin-top:.4rem; }
-        .footer-credit a { color:#FFD166; font-weight:700; text-decoration:none; }
-        .footer-credit a:hover { text-decoration:underline; }
+        
+        /* Mobile Sticky Action Bar Protection */
+        @media(max-width:768px){
+          .footer-shell {
+            padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important;
+          }
+          .footer-bottom-bar {
+            padding-bottom: 2.25rem;
+          }
+        }
+
+        /* Enhanced Developer Branding Badge */
+        .footer-credit-container {
+          margin-top: 1.25rem;
+          display: flex;
+          justify-content: center;
+          padding: 0 0.5rem;
+        }
+        .footer-credit-pill {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: .5rem;
+          padding: .6rem 1.25rem;
+          background: linear-gradient(135deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.03) 100%);
+          border: 1px solid rgba(255,209,102,.35);
+          border-radius: 9999px;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 6px 20px rgba(0,0,0,.25);
+          transition: all .25s ease;
+          text-decoration: none;
+        }
+        .footer-credit-pill:hover {
+          background: linear-gradient(135deg, rgba(255,255,255,.14) 0%, rgba(255,209,102,.1) 100%);
+          border-color: #FFD166;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(255,209,102,.25);
+        }
+        .footer-credit-intro {
+          font-weight: 600;
+          font-size: .82rem;
+          color: #DCD7EB;
+          display: inline-flex;
+          align-items: center;
+          gap: .35rem;
+        }
+        .footer-heart-beat {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: #FF4D8D;
+          animation: pulseHeart 1.6s ease-in-out infinite;
+        }
+        @keyframes pulseHeart {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.3); }
+        }
+        .footer-agency-brand {
+          font-family: 'Baloo 2', sans-serif;
+          font-weight: 800;
+          font-size: .92rem;
+          color: #FFD166;
+          display: inline-flex;
+          align-items: center;
+          gap: .35rem;
+          padding: .2rem .6rem;
+          background: rgba(255,209,102,.15);
+          border-radius: 9999px;
+          letter-spacing: .01em;
+          transition: all .15s ease;
+        }
+        .footer-credit-pill:hover .footer-agency-brand {
+          color: #ffffff;
+          background: #FF4D8D;
+        }
 
         @media(min-width:640px){ .footer-brand-name { font-size:1.45rem; } }
       `}</style>
@@ -491,12 +566,24 @@ const Footer: React.FC = () => {
               <span className="footer-bottom-sep">·</span>
               <Link href="/legal/privacy">Privacy Policy</Link>
             </div>
-            <p className="footer-credit">
-              Website designed &amp; developed by{' '}
-              <a href="https://www.sabkasaathidigitalservices.com/" target="_blank" rel="noopener noreferrer">
-                Sabka Saathi Digital Services
+
+            <div className="footer-credit-container">
+              <a
+                href="https://www.sabkasaathidigitalservices.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-credit-pill"
+                title="Visit Sabka Saathi Digital Services"
+              >
+                <span className="footer-credit-intro">
+                  Website designed &amp; developed with <span className="footer-heart-beat">❤️</span> by
+                </span>
+                <span className="footer-agency-brand">
+                  <span>Sabka Saathi Digital Services</span>
+                  <ExternalLink style={{ width: 12, height: 12, strokeWidth: 2.5 }} />
+                </span>
               </a>
-            </p>
+            </div>
           </div>
 
         </div>
