@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -19,11 +17,19 @@ export async function GET() {
       console.error('[api/batches] Error fetching schedules:', schErr);
     }
 
-    return NextResponse.json({
-      success: !batchErr,
-      data: batches || [],
-      schedules: schedules || [],
-    });
+    return NextResponse.json(
+      {
+        success: !batchErr,
+        data: batches || [],
+        schedules: schedules || [],
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=120, s-maxage=3600, stale-while-revalidate=86400',
+          'CDN-Cache-Control': 'public, max-age=3600',
+        },
+      }
+    );
   } catch (err: any) {
     console.error('[api/batches] Server exception:', err);
     return NextResponse.json(

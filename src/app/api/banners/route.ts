@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -29,10 +27,18 @@ export async function GET(req: Request) {
       return true;
     });
 
-    return NextResponse.json({
-      success: true,
-      data: activeList,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: activeList,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=120, s-maxage=1800, stale-while-revalidate=86400',
+          'CDN-Cache-Control': 'public, max-age=1800',
+        },
+      }
+    );
   } catch (err: any) {
     console.error('[api/banners] Server exception:', err);
     return NextResponse.json({ success: false, data: [] }, { status: 500 });

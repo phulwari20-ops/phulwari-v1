@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Sparkles, ArrowRight, X } from 'lucide-react'
 
 export interface BannerItem {
@@ -33,27 +33,29 @@ interface DynamicBannersProps {
 export default function DynamicBanners({ position, className = '' }: DynamicBannersProps) {
   const [banners, setBanners] = useState<BannerItem[]>([])
   const [closedPopupIds, setClosedPopupIds] = useState<Set<string>>(new Set())
+  const recordedImpressionIds = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     fetchBanners()
-    const interval = setInterval(fetchBanners, 3000)
-    return () => clearInterval(interval)
   }, [position])
 
   const fetchBanners = async () => {
     try {
-      const res = await fetch(`/api/banners?position=${encodeURIComponent(position)}`, { cache: 'no-store' })
+      const res = await fetch(`/api/banners?position=${encodeURIComponent(position)}`)
       if (res.ok) {
         const json = await res.json()
         if (json.success && Array.isArray(json.data)) {
           setBanners(json.data)
           if (json.data.length > 0) {
             json.data.forEach((b: BannerItem) => {
-              fetch('/api/banners', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'impression', id: b.id }),
-              }).catch(() => {})
+              if (!recordedImpressionIds.current.has(b.id)) {
+                recordedImpressionIds.current.add(b.id)
+                fetch('/api/banners', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'impression', id: b.id }),
+                }).catch(() => {})
+              }
             })
           }
         }

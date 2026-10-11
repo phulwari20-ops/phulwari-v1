@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
-export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -26,7 +25,15 @@ export async function GET() {
       }
     });
 
-    return NextResponse.json({ success: true, data: uniqueReviews });
+    return NextResponse.json(
+      { success: true, data: uniqueReviews },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=120, s-maxage=3600, stale-while-revalidate=86400',
+          'CDN-Cache-Control': 'public, max-age=3600',
+        },
+      }
+    );
   } catch (err: any) {
     console.error('[api/reviews] Server exception:', err);
     return NextResponse.json({ success: false, data: [] }, { status: 500 });

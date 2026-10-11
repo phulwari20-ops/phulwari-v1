@@ -17,7 +17,12 @@ export async function GET(request: Request) {
 
       if (error) throw error;
       if (!data) return NextResponse.json({ error: 'Activity not found' }, { status: 404 });
-      return NextResponse.json(data);
+      return NextResponse.json(data, {
+        headers: {
+          'Cache-Control': 'public, max-age=120, s-maxage=3600, stale-while-revalidate=86400',
+          'CDN-Cache-Control': 'public, max-age=3600',
+        },
+      });
     }
 
     const { data, error } = await supabase
@@ -27,7 +32,12 @@ export async function GET(request: Request) {
       .order('order_index', { ascending: true });
 
     if (error) throw error;
-    return NextResponse.json(data || []);
+    return NextResponse.json(data || [], {
+      headers: {
+        'Cache-Control': 'public, max-age=120, s-maxage=3600, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'public, max-age=3600',
+      },
+    });
   } catch (err: any) {
     console.error('API /api/activities GET error:', err);
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });

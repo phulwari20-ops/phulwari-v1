@@ -258,10 +258,7 @@ export default function FAQPage() {
     };
     window.addEventListener('message', handleMessage);
 
-    // Polling fallback every 3s to guarantee freshness
-    const interval = setInterval(fetchFaq, 3000);
     return () => {
-      clearInterval(interval);
       window.removeEventListener('message', handleMessage);
       if (channel) {
         try {

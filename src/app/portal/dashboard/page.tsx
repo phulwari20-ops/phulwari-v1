@@ -628,7 +628,7 @@ export default function StudentDashboardPage() {
               </span>
             </div>
             <p style={{ fontSize: '11px', color: '#64748B', margin: '4px 0 0 0' }}>
-              {consumedClasses} classes consumed ({presentCount} present{absentCount > 0 ? `, ${absentCount} absent` : ''})
+              {consumedClasses < 0 ? `0 classes consumed (${Math.abs(consumedClasses)} extra carried forward)` : `${consumedClasses} classes consumed`} ({presentCount} present{absentCount > 0 ? `, ${absentCount} absent` : ''})
             </p>
           </div>
 

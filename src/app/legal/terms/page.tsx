@@ -176,10 +176,7 @@ export default function TermsPage() {
     };
     window.addEventListener('message', handleMessage);
 
-    // 3s polling fallback for instant refresh
-    const interval = setInterval(fetchTerms, 3000);
     return () => {
-      clearInterval(interval);
       window.removeEventListener('message', handleMessage);
       if (channel) {
         try {

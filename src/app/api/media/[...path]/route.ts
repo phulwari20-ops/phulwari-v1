@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { S3Client, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 
-export const dynamic = 'force-dynamic';
-
 function getR2Client() {
   const accountId =
     process.env.R2_ACCOUNT_ID ||
@@ -56,6 +54,19 @@ export async function GET(
     }
 
     const key = pathSegments.map((s) => decodeURIComponent(s)).join('/');
+    
+    // If public domain (e.g. Cloudflare custom domain or public bucket) is configured,
+    // redirect directly to Cloudflare CDN with zero Vercel compute transfer!
+    const publicDomain = process.env.R2_PUBLIC_DOMAIN || process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN;
+    if (publicDomain) {
+      return NextResponse.redirect(`${publicDomain.replace(/\/$/, '')}/${key}`, {
+        status: 307,
+        headers: {
+          'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
+        },
+      });
+    }
+
     const { client, bucketName } = getR2Client();
 
     const ext = key.split('.').pop()?.toLowerCase() || '';
@@ -88,7 +99,9 @@ export async function GET(
     const headers = new Headers();
     headers.set('Content-Type', response.ContentType || defaultMime);
     headers.set('Accept-Ranges', 'bytes');
-    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    headers.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable');
+    headers.set('CDN-Cache-Control', 'public, max-age=31536000, immutable');
+    headers.set('Vercel-CDN-Cache-Control', 'public, max-age=31536000, immutable');
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
 
@@ -139,7 +152,9 @@ export async function HEAD(
     const headers = new Headers();
     headers.set('Content-Type', response.ContentType || defaultMime);
     headers.set('Accept-Ranges', 'bytes');
-    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    headers.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable');
+    headers.set('CDN-Cache-Control', 'public, max-age=31536000, immutable');
+    headers.set('Vercel-CDN-Cache-Control', 'public, max-age=31536000, immutable');
     headers.set('Access-Control-Allow-Origin', '*');
     if (response.ContentLength !== undefined) {
       headers.set('Content-Length', response.ContentLength.toString());

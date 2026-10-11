@@ -172,10 +172,7 @@ export default function PrivacyPage() {
     };
     window.addEventListener('message', handleMessage);
 
-    // 3s polling fallback for instant refresh
-    const interval = setInterval(fetchPrivacy, 3000);
     return () => {
-      clearInterval(interval);
       window.removeEventListener('message', handleMessage);
       if (channel) {
         try {
