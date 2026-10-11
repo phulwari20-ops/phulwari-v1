@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseUrl, getSupabaseKey } from '@/lib/supabase/env';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET() {
+export async function GET(request: Request) {
   let dbItems: any[] = [];
   try {
     const supabaseUrl = getSupabaseUrl().replace(/\/+$/, '');
@@ -14,7 +12,7 @@ export async function GET() {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`,
       },
-      cache: 'no-store'
+      next: { revalidate: 1800 },
     });
     if (res.ok) {
       const data = await res.json();
@@ -27,13 +25,31 @@ export async function GET() {
     console.error('Error in /api/gallery GET:', err);
   }
 
+  const { searchParams } = new URL(request.url);
+  const pageParam = searchParams.get('page');
+  const limitParam = searchParams.get('limit');
+  const allParam = searchParams.get('all');
+
+  const page = Math.max(1, parseInt(pageParam || '1', 10));
+  const limit = Math.max(1, Math.min(50, parseInt(limitParam || '12', 10)));
+  const total = dbItems.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const startIdx = (page - 1) * limit;
+  const paged = allParam === 'true' ? dbItems : dbItems.slice(startIdx, startIdx + limit);
 
   return NextResponse.json({
     success: true,
-    count: dbItems.length,
-    data: dbItems
+    page: allParam === 'true' ? 1 : page,
+    limit: allParam === 'true' ? total : limit,
+    total,
+    totalPages: allParam === 'true' ? 1 : totalPages,
+    hasMore: allParam === 'true' ? false : page < totalPages,
+    data: paged,
   }, {
     headers: {
+      'Cache-Control': 'public, max-age=120, s-maxage=3600, stale-while-revalidate=86400',
+      'CDN-Cache-Control': 'public, max-age=3600',
+      'Vercel-CDN-Cache-Control': 'public, max-age=3600',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',

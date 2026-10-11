@@ -35,6 +35,27 @@ const galleryImages = [
 export default function BirthdayGallery() {
   const [viewMode, setViewMode] = useState<'photos' | 'video'>('photos')
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [backendVideos, setBackendVideos] = useState<any[]>([])
+  const [selectedVideoIdx, setSelectedVideoIdx] = useState(0)
+
+  React.useEffect(() => {
+    async function loadBackendVideos() {
+      try {
+        const res = await fetch('/api/videos?category=birthday&limit=4')
+        if (res.ok) {
+          const json = await res.json()
+          if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+            setBackendVideos(json.data)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load birthday videos from backend:', err)
+      }
+    }
+    loadBackendVideos()
+  }, [])
+
+  const currentVideo = backendVideos[selectedVideoIdx] || null
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))
@@ -110,17 +131,44 @@ export default function BirthdayGallery() {
       </div>
 
       {viewMode === 'video' ? (
-        <div className="space-y-3">
-          <ActivityVideoPlayer
-            src="/videos/birthday_party.mp4"
-            poster="/birthday_party/image.png"
-            title="Real Birthday Party Celebrations at Phulwari Activity Centre"
-            accentColor="#FF4D8D"
-          />
-          <p className="text-xs sm:text-sm text-slate-600 font-medium text-center">
-            Watch real footage of kids and families celebrating joyful birthdays at Phulwari Centre, Kidwaipuri, Patna.
-          </p>
-        </div>
+        currentVideo ? (
+          <div className="space-y-4">
+            <ActivityVideoPlayer
+              src={currentVideo.url}
+              poster={currentVideo.poster}
+              title={currentVideo.title}
+              accentColor="#FF4D8D"
+            />
+            <p className="text-xs sm:text-sm text-slate-600 font-medium text-center max-w-2xl mx-auto">
+              {currentVideo.description || 'Watch real footage of kids and families celebrating joyful birthdays at Phulwari Centre, Kidwaipuri, Patna.'}
+            </p>
+
+            {backendVideos.length > 1 && (
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                {backendVideos.map((vid, idx) => (
+                  <button
+                    key={vid.id || idx}
+                    type="button"
+                    onClick={() => setSelectedVideoIdx(idx)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
+                      selectedVideoIdx === idx
+                        ? 'bg-pink-600 text-white shadow-md'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    <Play className="w-3 h-3 fill-current" />
+                    <span>Video {idx + 1}: {vid.title.slice(0, 24)}...</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="w-full aspect-video rounded-3xl bg-slate-900/95 flex flex-col items-center justify-center text-slate-300 gap-3 border border-pink-100 p-6">
+            <Video className="w-10 h-10 text-pink-400 animate-pulse" />
+            <p className="text-sm font-bold">Loading real celebration videos from backend...</p>
+          </div>
+        )
       ) : (
         <>
           {/* Main Feature Image Display */}
