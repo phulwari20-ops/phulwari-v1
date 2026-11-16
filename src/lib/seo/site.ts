@@ -55,8 +55,11 @@ export const OPENING_HOURS = [
     label: 'Mother & Toddler Program',
   },
   {
-    dayOfWeek: ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-    opens: '18:30',
+    // Phulwari Premium Circle runs 5:00 PM onwards every day; Phulwari Core
+    // (6:30 PM, Wed–Sun) falls inside this window. Keep in sync with the
+    // "Working Hours" list on src/app/contact/page.tsx.
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    opens: '17:00',
     closes: '21:00',
     label: 'Evening activity batches',
   },
