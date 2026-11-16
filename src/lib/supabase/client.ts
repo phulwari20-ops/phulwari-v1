@@ -1,8 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { getSupabaseKey, getSupabaseUrl } from './env'
 
-let directFetchFailedRecently = false;
-
 function createResilientFetch() {
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const urlStr = typeof input === 'string' ? input : input instanceof URL ? input.toString() : (input as Request).url;
