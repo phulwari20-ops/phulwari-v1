@@ -73,7 +73,7 @@ export const OG_IMAGE = {
 export const LOGO_PATH = '/phulwari_logo.webp'
 
 export const VERIFICATION = {
-  google: '', // Left empty so no meta tag is emitted
+  google: 'EFluuGoXog-o6hgirGHBoC97OB1zKOcoaMuLeMXte_0',
 } as const;
 
 export const GA_MEASUREMENT_ID = ''; // Left empty to prevent loading script
